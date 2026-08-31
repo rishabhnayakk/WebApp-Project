@@ -1,0 +1,62 @@
+[
+  {
+    "id": "rev-101",
+    "productId": "aero-ceramax-pro",
+    "customerName": "Marcus Sterling",
+    "role": "Chief Engineer, NovaAero Dynamics",
+    "rating": 5,
+    "verifiedPurchase": true,
+    "date": "2026-08-24T14:30:00Z",
+    "title": "Unrivaled 12-micron uniform ceramic matrix with zero orange peel",
+    "comment": "The CERAMAX 9H aerosol shield delivered an exact 12-micron uniform ceramic matrix across our carbon-fiber winglet fairings. The 360° inversion valve allowed inverted coating inside tight avionics bays without any sputter or pressure drop. Outstanding chemical resistance against Skydrol hydraulic fluid.",
+    "helpfulCount": 42
+  },
+  {
+    "id": "rev-102",
+    "productId": "aero-ceramax-pro",
+    "customerName": "Elena Rostova",
+    "role": "Lead Detailer, HyperSonic Pro",
+    "rating": 5,
+    "verifiedPurchase": true,
+    "date": "2026-08-18T09:15:00Z",
+    "title": "True professional ceramic coat in a convenient aerosol",
+    "comment": "Eliminates the tedious applicator wipe-on process for intricate wheels and engine bays. Water contact angle measured at 118 degrees immediately after a 4-hour cure. Customers are stunned by the deep gloss depth.",
+    "helpfulCount": 28
+  },
+  {
+    "id": "rev-103",
+    "productId": "aero-dielectric-max",
+    "customerName": "David K. Vance",
+    "role": "Senior Avionics Technician",
+    "rating": 5,
+    "verifiedPurchase": true,
+    "date": "2026-08-20T11:45:00Z",
+    "title": "Safe on energized 28V DC busbars with instant flash dry",
+    "comment": "VOLTX contact cleaner leaves absolutely zero ionic residue or white haze. We tested dielectric breakdown up to 35kV without arcing. The pinpoint straw reaches deep into sub-miniature D-connectors.",
+    "helpfulCount": 35
+  },
+  {
+    "id": "rev-104",
+    "productId": "aero-thermo-shield",
+    "customerName": "Dominic Russo",
+    "role": "Master Fabricator, Rosso Corsa Performance",
+    "rating": 5,
+    "verifiedPurchase": true,
+    "date": "2026-08-15T16:20:00Z",
+    "title": "Withstood 40 dyno heat cycles at 950°C without spalling",
+    "comment": "PYROGUARD 1200°C ceramic enamel is by far the highest quality aerosol coating we have ever tested on turbo manifolds. After 40 heat cycles on the dyno, the finish remains deep, unblemished, and zero flaking.",
+    "helpfulCount": 19
+  },
+  {
+    "id": "rev-105",
+    "productId": "aero-fog-pure",
+    "customerName": "Dr. Evelyn Chen",
+    "role": "Sterile Systems Director, Apex BioTech Labs",
+    "rating": 5,
+    "verifiedPurchase": true,
+    "date": "2026-08-22T08:50:00Z",
+    "title": "Total-release dry fog cuts cleanroom turnover by 65%",
+    "comment": "VAPOR-PURE total-release foggers cut our cleanroom decontamination turnaround time by 65%. The 5-micron dry mist leaves zero liquid residue on our sensitive optical spectrometers while achieving proven 6-log pathogen inactivation.",
+    "helpfulCount": 51
+  }
+]

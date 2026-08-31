@@ -1,0 +1,120 @@
+[
+  {
+    "id": "audit-1788203985715-yzr3",
+    "eventType": "RATE_LIMIT_EXCEEDED",
+    "details": {
+      "ip": "::1",
+      "path": "/login",
+      "count": 12
+    },
+    "timestamp": "2026-08-31T19:19:45.715Z"
+  },
+  {
+    "id": "audit-1788203985709-82d5",
+    "eventType": "RATE_LIMIT_EXCEEDED",
+    "details": {
+      "ip": "::1",
+      "path": "/login",
+      "count": 11
+    },
+    "timestamp": "2026-08-31T19:19:45.709Z"
+  },
+  {
+    "id": "audit-1788203985703-ran9",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.703Z"
+  },
+  {
+    "id": "audit-1788203985696-v3zz",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.696Z"
+  },
+  {
+    "id": "audit-1788203985687-mqcn",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.687Z"
+  },
+  {
+    "id": "audit-1788203985681-9qzy",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.681Z"
+  },
+  {
+    "id": "audit-1788203985675-dzat",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.675Z"
+  },
+  {
+    "id": "audit-1788203985668-69pu",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.668Z"
+  },
+  {
+    "id": "audit-1788203985661-h3mi",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.661Z"
+  },
+  {
+    "id": "audit-1788203985654-hoxu",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.654Z"
+  },
+  {
+    "id": "audit-1788203985647-whod",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.647Z"
+  },
+  {
+    "id": "audit-1788203985638-su1r",
+    "eventType": "LOGIN_FAILED",
+    "details": {
+      "email": "test@fail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-08-31T19:19:45.638Z"
+  },
+  {
+    "id": "audit-1788203980466-gm8y",
+    "eventType": "PASSWORD_RESET_REQUESTED",
+    "details": {
+      "email": "m.sterling@novaaero.com"
+    },
+    "timestamp": "2026-08-31T19:19:40.466Z"
+  }
+]

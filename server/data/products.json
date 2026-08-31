@@ -1,0 +1,421 @@
+[
+  {
+    "id": "aero-ceramax-pro",
+    "name": "CERAMAX™ 9H Nano-Ceramic Aerosol Clear Coat",
+    "slug": "ceramax-9h-nano-ceramic-aerosol",
+    "tagline": "Aerospace-Grade Hydrophobic Ceramic Clear Coat Shield",
+    "category": "Automotive & Marine",
+    "price": 49.99,
+    "comparePrice": 64.99,
+    "sku": "AERO-CRM-500",
+    "volume": "500ml (16.9 fl oz)",
+    "availableSizes": ["300ml", "500ml", "650ml Jumbo"],
+    "rating": 4.9,
+    "reviewCount": 184,
+    "inStock": true,
+    "stockCount": 420,
+    "lowStockThreshold": 50,
+    "badge": "Best Seller",
+    "color": "#0284c7",
+    "image": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=800&q=80",
+    "propellant": "Eco-HFO 1234ze (Ultra Low GWP < 1)",
+    "nozzle": "360° Variable Fan Atomizer",
+    "pressureBar": 7.4,
+    "optimalDistance": "20 - 25 cm (8 - 10 in)",
+    "dryTime": "12 min touch / 4 hrs full cure",
+    "voc": "< 2.8% CARB 2026 Compliant",
+    "flammability": "Class 1 Aerosol (Non-Chlorinated)",
+    "description": "Engineered with ultra-pure SiO2 nano-particles suspended in an eco-friendly propellant matrix. CERAMAX™ forms an ultra-dense 9H diamond-hard hydrophobic barrier that repels UV rays, acid rain, road salts, brake dust, and industrial fallout for up to 24 months. Features a true 360-degree all-angle ball valve for effortless application in tight chassis recesses.",
+    "features": [
+      "9H Diamond Hardness Scratch & Mar Resistance",
+      "118° Superhydrophobic Water Contact Angle",
+      "True 360° All-Angle Inversion Valve Technology",
+      "Self-Leveling Zero Orange-Peel Optical Clarity",
+      "UV-A & UV-B Radiation Blocking Inhibitors"
+    ],
+    "specifications": {
+      "Base Resin": "Polymerized Silazane & SiO2 Nano-Matrix",
+      "Coverage": "Up to 35 sq. ft. (3.25 m²) per 500ml canister",
+      "Operating Temp": "-40°C to +300°C (-40°F to +572°F)",
+      "Flash Point": "-18°C (0°F) Closed Cup",
+      "Viscosity": "8.5 cSt @ 20°C"
+    },
+    "sds": {
+      "unNumber": "UN1950 (Aerosols, Flammable, 2.1)",
+      "casNumber": "Proprietary Silane Hybrid Blend",
+      "storageTemp": "10°C to 35°C (50°F to 95°F) - Keep away from heat",
+      "ppe": "Chemical splash goggles, nitrile gloves, organic vapor respirator in enclosed spaces",
+      "shelfLife": "36 Months from cleanroom fill date"
+    },
+    "usageGuide": [
+      "Decontaminate, polish, and degrease surface with isopropyl alcohol wipe.",
+      "Shake canister vigorously for 60 seconds until internal mixing ball rattles freely.",
+      "Maintain a steady 20-25 cm distance; apply 2 light, uniform cross-hatch coats with 50% pass overlap.",
+      "Allow 10 minutes flash time between coats. Fully cures in 4 hours at 22°C (72°F)."
+    ]
+  },
+  {
+    "id": "aero-dielectric-max",
+    "name": "VOLTX™ Ultra-Dielectric Precision Contact Cleaner",
+    "slug": "voltx-dielectric-precision-cleaner",
+    "tagline": "Zero-Residue High-Voltage Electronics & PCB Flush",
+    "category": "Electronics & Precision",
+    "price": 28.50,
+    "comparePrice": 34.00,
+    "sku": "AERO-VTX-400",
+    "volume": "400ml (13.5 fl oz)",
+    "availableSizes": ["200ml", "400ml"],
+    "rating": 4.8,
+    "reviewCount": 96,
+    "inStock": true,
+    "stockCount": 280,
+    "lowStockThreshold": 40,
+    "badge": "Industrial Standard",
+    "color": "#e11d48",
+    "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+    "propellant": "Compressed Purified Nitrogen (100% Non-Flammable)",
+    "nozzle": "Dual-Action Pinpoint Capillary Straw + Blast Fan",
+    "pressureBar": 8.1,
+    "optimalDistance": "10 - 15 cm (4 - 6 in)",
+    "dryTime": "Flash Evaporation (< 3 seconds)",
+    "voc": "0% VOC Non-Conductive",
+    "flammability": "Non-Flammable (Dielectric Strength 35,000V)",
+    "description": "High-purity electronic contact cleaner formulated to rapidly flush flux residue, silicone oils, grease, carbon tracking, and microscopic particulate from energized avionics, circuit boards, relays, switches, and edge connectors without leaving any conductive film or moisture.",
+    "features": [
+      "Dielectric Breakdown Rating up to 35kV (Safe on live circuits)",
+      "100% Safe on Sensitive Polycarbonates, ABS, & Elastomers",
+      "Instantaneous Flash Evaporation with Zero Residue",
+      "Detachable Pinpoint Micro-Straw for Micro-Crevices"
+    ],
+    "specifications": {
+      "Base Chemistry": "Hydrofluoroether / Purified Solvent Matrix",
+      "Dielectric Strength": "35.2 kV/mm (ASTM D877)",
+      "Evaporation Rate": "> 1 (Fast, dry within 3 sec)",
+      "Surface Tension": "13.6 dynes/cm"
+    },
+    "sds": {
+      "unNumber": "UN1950 (Aerosols, Non-Flammable, 2.2)",
+      "casNumber": "HFC-43-10mee / Purified Halocarbon",
+      "storageTemp": "5°C to 45°C (41°F to 113°F)",
+      "ppe": "Standard safety glasses",
+      "shelfLife": "48 Months"
+    },
+    "usageGuide": [
+      "Attach pinpoint extension straw into nozzle orifice for micro-components.",
+      "Discharge short 1-2 second bursts directly onto contacts to dislodge contaminants.",
+      "Allow 5 seconds for complete flash evaporation before re-energizing enclosure."
+    ]
+  },
+  {
+    "id": "aero-thermo-shield",
+    "name": "PYROGUARD™ 1200°C Thermal Ceramic Enamel",
+    "slug": "pyroguard-thermal-ceramic-enamel",
+    "tagline": "Extreme High-Temperature Exhaust & Header Coating",
+    "category": "Industrial & Coatings",
+    "price": 36.00,
+    "comparePrice": 45.00,
+    "sku": "AERO-PYR-450",
+    "volume": "450ml (15.2 fl oz)",
+    "availableSizes": ["450ml", "650ml Jumbo"],
+    "rating": 4.9,
+    "reviewCount": 142,
+    "inStock": true,
+    "stockCount": 310,
+    "lowStockThreshold": 45,
+    "badge": "Heavy Duty",
+    "color": "#d97706",
+    "image": "https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=800&q=80",
+    "propellant": "Hydrocarbon A-70 High Stability Blend",
+    "nozzle": "Heavy-Solid High Output Fan Atomizer",
+    "pressureBar": 6.8,
+    "optimalDistance": "25 - 30 cm (10 - 12 in)",
+    "dryTime": "30 min touch / Heat cured at 200°C",
+    "voc": "< 3.9% Low-HAP Compliant",
+    "flammability": "Class 1 Flammable Aerosol",
+    "description": "Formulated with ceramic-boron micro-resins engineered to withstand direct continuous thermal exposure up to 1,200°C (2,192°F). Thermal shock resistant against rapid cold quenching; ideal for turbo housings, headers, brake calipers, industrial furnaces, and boiler pipes.",
+    "features": [
+      "Withstands Thermal Spikes up to 1,200°C (2,192°F)",
+      "Corrosion-Proof Salt Spray Rating > 1,000 Hours",
+      "Chemically Inert to Gasoline, Synthetic Oils, and Brake Fluid",
+      "Thermal Shock Proof (No cracking during rapid water quench)"
+    ],
+    "specifications": {
+      "Resin Matrix": "Silicone-Modified Ceramic Copolymer",
+      "Gloss Level": "Satin Matte Charcoal (15-20 GU)",
+      "Heat Tolerance": "Continuous 1000°C / Peak 1200°C",
+      "Coverage": "28 sq. ft. per 450ml can"
+    },
+    "sds": {
+      "unNumber": "UN1950 (Aerosols, Flammable, 2.1)",
+      "casNumber": "Ceramic Silicate Polymer / Xylene Blend",
+      "storageTemp": "15°C to 30°C (59°F to 86°F)",
+      "ppe": "Organic vapor respirator & protective eyewear",
+      "shelfLife": "24 Months"
+    },
+    "usageGuide": [
+      "Sand bare metal with 320-grit paper and degrease thoroughly.",
+      "Apply 3 light, uniform coats allowing 15 minutes flash time between coats.",
+      "Final cure occurs during first operational heat cycle (200°C for 45 minutes)."
+    ]
+  },
+  {
+    "id": "aero-syn-lube",
+    "name": "TRIBO-SYNTH™ Graphene Micro-Film Lubricant",
+    "slug": "tribo-synth-graphene-micro-film",
+    "tagline": "Frictionless Extreme-Pressure Anti-Seize Penetrating Spray",
+    "category": "Industrial & Coatings",
+    "price": 24.99,
+    "comparePrice": 32.00,
+    "sku": "AERO-TRB-500",
+    "volume": "500ml (16.9 fl oz)",
+    "availableSizes": ["300ml", "500ml"],
+    "rating": 4.9,
+    "reviewCount": 210,
+    "inStock": true,
+    "stockCount": 510,
+    "lowStockThreshold": 60,
+    "badge": "Popular",
+    "color": "#059669",
+    "image": "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80",
+    "propellant": "Eco-Propellant Dual Jet Matrix",
+    "nozzle": "Smart-Straw 2-Way Flip Nozzle (Wide / Stream)",
+    "pressureBar": 7.0,
+    "optimalDistance": "15 - 20 cm (6 - 8 in)",
+    "dryTime": "Leaves non-tacky micron dry film in 2 min",
+    "voc": "< 1.5% Eco-Safe",
+    "flammability": "Flammable Gas Aerosol",
+    "description": "Infused with mono-layer graphene platelets that bond into microscopic surface asperities. Reduces coefficient of friction down to 0.02 under extreme loads up to 450,000 PSI without attracting dust, sand, or airborne debris.",
+    "features": [
+      "82% Friction Reduction vs Traditional Mineral Oils",
+      "Operating Range -60°C to +480°C (-76°F to +896°F)",
+      "Repels Moisture, Acid Fumes, and Galvanic Oxidation",
+      "Non-Gumming Dry Boundary Film"
+    ],
+    "specifications": {
+      "Active Chemistry": "Graphene Nanoplatelets + Synthetic Ester",
+      "Friction Coeff": "0.02 (Four Ball Wear Test ASTM D4172)",
+      "Load Capacity": "> 450,000 PSI",
+      "Dielectric Constant": "2.1 @ 1MHz"
+    },
+    "sds": {
+      "unNumber": "UN1950 (Aerosols, Flammable, 2.1)",
+      "casNumber": "Graphene / Synthetic Hydrocarbon Blend",
+      "storageTemp": "5°C to 35°C (41°F to 95°F)",
+      "ppe": "General shop gloves",
+      "shelfLife": "60 Months"
+    },
+    "usageGuide": [
+      "Flip straw UP for precision hinge pins, cable sleeves, and lock cylinders.",
+      "Flip straw DOWN for broad coverage over wire ropes, conveyor tracks, and gears."
+    ]
+  },
+  {
+    "id": "aero-fog-pure",
+    "name": "VAPOR-PURE™ Hospital-Grade Micro-Mist Fogger",
+    "slug": "vapor-pure-micro-mist-fogger",
+    "tagline": "Total-Release Antimicrobial Airborne & Surface Sanitizer",
+    "category": "Sanitization & Medical",
+    "price": 19.99,
+    "comparePrice": 25.00,
+    "sku": "AERO-VPR-300",
+    "volume": "300ml (10.1 fl oz)",
+    "availableSizes": ["300ml", "500ml"],
+    "rating": 4.9,
+    "reviewCount": 320,
+    "inStock": true,
+    "stockCount": 650,
+    "lowStockThreshold": 80,
+    "badge": "EPA Registered",
+    "color": "#7c3aed",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80",
+    "propellant": "Medical Grade Nitrogen + Purified Propellant",
+    "nozzle": "Locking 360° Total-Release Aerosol Valve",
+    "pressureBar": 6.2,
+    "optimalDistance": "Central Room Placement (Up to 100m³ / 3,500 cu. ft.)",
+    "dryTime": "15 min discharge / 2 hr re-entry",
+    "voc": "0% VOC Chlorine-Free",
+    "flammability": "Non-Flammable Aqueous Aerosol",
+    "description": "Locking total-release aerosol cannister that dispenses an ultra-fine 5-micron dry mist cloud. Penetrates HVAC vents, fabrics, medical upholstery, and microscopic crevices, achieving certified 6-log (99.9999%) kill rate of viruses, bacteria, and mold spores without wetting surfaces.",
+    "features": [
+      "EPA-Registered 6-Log (99.9999%) Pathogen Inactivation",
+      "Ultra-Fine 5-Micron Dry Fog Leaves No Wet Residue or Film",
+      "Neutralizes Biofilm, Mildew, and Organic Odors",
+      "Single Can Covers up to 3,500 Cubic Feet (100 m³)"
+    ],
+    "specifications": {
+      "Active Ingredient": "Dual Quaternary Ammonium Complex & Hypochlorous Precursor",
+      "Droplet Micron Size": "5.0 µm Mass Median Aerodynamic Diameter",
+      "Registration": "EPA Reg. #89210-4 / CE Class I Medical",
+      "Discharge Duration": "4.5 Minutes Continuous Total Release"
+    },
+    "sds": {
+      "unNumber": "UN1950 (Aerosols, Non-Toxic, 2.2)",
+      "casNumber": "Quat-Ammonium Aqueous Formulation",
+      "storageTemp": "15°C to 28°C (59°F to 82°F)",
+      "ppe": "Vacate area immediately upon latch activation",
+      "shelfLife": "24 Months"
+    },
+    "usageGuide": [
+      "Place canister upright in the center of the treatment space on an elevated surface.",
+      "Shut off HVAC circulation and seal exterior windows.",
+      "Depress actuator until the latch clicks into locked position, then vacate immediately.",
+      "Allow 2 hours dwell time before re-entering and ventilating."
+    ]
+  },
+  {
+    "id": "aero-chroma-shift",
+    "name": "SPECTRUM-X™ Prism-Shift Holographic Coating",
+    "slug": "spectrum-x-prism-shift-coating",
+    "tagline": "Multi-Angle Color-Shifting Acrylic Specialty Aerosol",
+    "category": "Art & Specialty",
+    "price": 42.00,
+    "comparePrice": 52.00,
+    "sku": "AERO-SPC-400",
+    "volume": "400ml (13.5 fl oz)",
+    "availableSizes": ["400ml"],
+    "rating": 4.8,
+    "reviewCount": 115,
+    "inStock": true,
+    "stockCount": 190,
+    "lowStockThreshold": 30,
+    "badge": "Creative Pro",
+    "color": "#db2777",
+    "image": "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80",
+    "propellant": "Low-Pressure Custom Art Gas Blend",
+    "nozzle": "Interchangeable Ultra-Soft Skinny & Calligraphy Cap",
+    "pressureBar": 6.5,
+    "optimalDistance": "15 - 20 cm (6 - 8 in)",
+    "dryTime": "8 min touch / 24 hrs full cure",
+    "voc": "< 3.0% Low-Odor Formulation",
+    "flammability": "Flammable Aerosol Class 2",
+    "description": "Formulated with micro-encapsulated liquid crystals and interference mica that shifts dynamically between electric cyan, ultraviolet violet, and blazing gold depending on viewing angle and illumination. Designed for architectural models, automotive customization, and specialty art.",
+    "features": [
+      "4-Axis Dynamic Color Optical Interference Shift",
+      "Optimized for High-Gloss Black Base Coat Surfaces",
+      "Ultra-Low Pressure Valve for Precise Feathering & Line Control",
+      "UV-Resistant Non-Yellowing Acrylic Matrix"
+    ],
+    "specifications": {
+      "Binder": "Optically Clear Acrylic Copolymer",
+      "Pigment": "Synthetic Fluorophlogopite Crystals (10-60µm)",
+      "Coverage": "20 sq. ft. per 400ml can",
+      "Finish": "Semi-Gloss Prismatic Interference"
+    },
+    "sds": {
+      "unNumber": "UN1950 (Aerosols, Flammable, 2.1)",
+      "casNumber": "Acrylic Resin / Interference Mica Dispersion",
+      "storageTemp": "10°C to 30°C (50°F to 86°F)",
+      "ppe": "Dust/mist respirator mask and eye protection",
+      "shelfLife": "36 Months"
+    },
+    "usageGuide": [
+      "Apply over a deep gloss black primer base for maximum chroma vibrancy.",
+      "Keep stroke speed uniform; spray 2-3 light dusting coats.",
+      "Seal with 2K gloss aerosol clear coat for maximum optical depth."
+    ]
+  },
+  {
+    "id": "aero-corrosion-guard",
+    "name": "MARINEX™ Cavity Wax & Salt-Shield Aerosol",
+    "slug": "marinex-cavity-wax-salt-shield",
+    "tagline": "Self-Healing Marine-Grade Rust Inhibitor with 360° Probe",
+    "category": "Automotive & Marine",
+    "price": 32.50,
+    "comparePrice": 39.00,
+    "sku": "AERO-MRX-500",
+    "volume": "500ml (16.9 fl oz)",
+    "availableSizes": ["500ml"],
+    "rating": 4.9,
+    "reviewCount": 88,
+    "inStock": true,
+    "stockCount": 240,
+    "lowStockThreshold": 35,
+    "badge": "Marine Certified",
+    "color": "#0284c7",
+    "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
+    "propellant": "Eco-HFO 1234ze Propellant",
+    "nozzle": "Includes 60cm Flexible 360° Cavity Probe Wand",
+    "pressureBar": 7.2,
+    "optimalDistance": "Probe insertion into frame rails & door sills",
+    "dryTime": "Tack-free flexible wax in 45 min",
+    "voc": "< 2.0% Low VOC",
+    "flammability": "Flammable Aerosol",
+    "description": "Heavy-duty thixotropic wax barrier designed to creep into internal seams, frame rails, subframes, and marine hull cavities. Displaces standing moisture and self-heals over scratch marks, preventing galvanic rust and ocean salt corrosion for 5+ years.",
+    "features": [
+      "Includes 60cm (24-inch) 360° Multi-Port Extension Wand",
+      "Self-Healing Micro-Crystalline Wax Film",
+      "Passes 3,000-Hour ASTM B117 Salt Fog Corrosion Test",
+      "Creeps into Seams up to 50mm via Capillary Action"
+    ],
+    "specifications": {
+      "Wax Film Thickness": "40-60 Microns Dry",
+      "Temperature Range": "-40°C to +120°C",
+      "Salt Fog Test": "3,000+ Hours (ASTM B117)",
+      "Dielectric Strength": "18 kV/mm"
+    },
+    "sds": {
+      "unNumber": "UN1950 (Aerosols, Flammable, 2.1)",
+      "casNumber": "Microcrystalline Hydrocarbon Wax Complex",
+      "storageTemp": "10°C to 35°C",
+      "ppe": "Safety glasses and protective gloves",
+      "shelfLife": "60 Months"
+    },
+    "usageGuide": [
+      "Insert the 60cm multi-port probe wand through drain holes or access plugs.",
+      "Depress actuator while steadily withdrawing wand at 10 cm per second.",
+      "Wipe off excess mist from outer painted panels with wax solvent."
+    ]
+  },
+  {
+    "id": "aero-flux-remover",
+    "name": "CIRCUIT-SHIELD™ Ultra-Pure Flux & Defluxer Spray",
+    "slug": "circuit-shield-flux-defluxer",
+    "tagline": "Non-Chlorinated Defluxer for SMT & Through-Hole Rework",
+    "category": "Electronics & Precision",
+    "price": 26.00,
+    "comparePrice": 31.00,
+    "sku": "AERO-FLX-400",
+    "volume": "400ml (13.5 fl oz)",
+    "availableSizes": ["400ml"],
+    "rating": 4.8,
+    "reviewCount": 72,
+    "inStock": true,
+    "stockCount": 340,
+    "lowStockThreshold": 45,
+    "badge": "SMT Grade",
+    "color": "#e11d48",
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+    "propellant": "Compressed Purified Nitrogen",
+    "nozzle": "Scrubber Brush Actuator Attachment",
+    "pressureBar": 7.8,
+    "optimalDistance": "Direct surface contact with brush head",
+    "dryTime": "Evaporates in 10 seconds",
+    "voc": "< 1.0% Low VOC",
+    "flammability": "Non-Flammable",
+    "description": "Precision solvent defluxer with an integrated anti-static horsehair brush nozzle. Dissolves Rosin (R, RMA, RA), No-Clean, and lead-free solder flux residues from high-density circuit assemblies without leaving white ionic salt stains.",
+    "features": [
+      "Includes ESD-Safe Anti-Static Bristle Brush Nozzle",
+      "Leaves Zero White Powder or Ionic Halide Residues",
+      "Safe on Sensitive SMT Plastics, Solder Masks, and Markings",
+      "Non-Ozone Depleting (Zero ODP)"
+    ],
+    "specifications": {
+      "Evaporation Rate": "Fast (< 10 sec)",
+      "Residue Level": "< 1 PPM Non-Volatile Residue",
+      "Dielectric Strength": "28 kV",
+      "Flash Point": "None (TCC)"
+    },
+    "sds": {
+      "unNumber": "UN1950 (Aerosols, Non-Flammable, 2.2)",
+      "casNumber": "High Purity Fluorinated Solvent",
+      "storageTemp": "5°C to 40°C",
+      "ppe": "Safety goggles",
+      "shelfLife": "48 Months"
+    },
+    "usageGuide": [
+      "Snap the ESD-safe brush adapter onto the nozzle.",
+      "Depress actuator lightly while scrubbing flux residue around solder joints.",
+      "Flush area with a final short burst to rinse dislodged flux away."
+    ]
+  }
+]
