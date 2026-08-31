@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Operations & Content Manager | Aerosol Webapp</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <!-- ADMIN LOGIN GATE SCREEN -->
+  <div id="admin-login-screen" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--color-bg);">
+    <div style="width: 100%; max-width: 420px; background: var(--color-card-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 36px 32px; box-shadow: var(--shadow-overlay);">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <div style="font-size: 32px; margin-bottom: 8px;">🛡️</div>
+        <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-muted);">Aerosol Webapp</div>
+        <h1 style="font-size: 20px; font-weight: 700; color: var(--color-text); margin-top: 4px;">Admin Portal Access</h1>
+        <p style="font-size: 13px; color: var(--color-text-muted); margin-top: 6px;">Sign in with your administrator ID & password to manage catalog, MongoDB Atlas, and storefront copy.</p>
+      </div>
+
+      <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+        <div style="margin-bottom: 16px;">
+          <label class="label">Admin ID or Email</label>
+          <input type="text" id="login-admin-id" class="input input-lg" placeholder="admin" required autocomplete="username" value="admin">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label class="label">Password</label>
+          <input type="password" id="login-admin-password" class="input input-lg" placeholder="••••••••" required autocomplete="current-password" value="admin123">
+        </div>
+
+        <div id="login-error-msg" style="display: none; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: var(--color-error); background: var(--color-error-bg); border: 1px solid #fca5a5; border-radius: var(--radius-sm);"></div>
+
+        <button type="submit" id="login-submit-btn" class="btn btn-inverted btn-lg btn-full" style="margin-bottom: 16px;">
+          Sign In to Admin Panel →
+        </button>
+
+        <div style="padding: 12px 14px; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">
+          <strong>Default Admin Credentials:</strong><br>
+          Admin ID: <code style="font-family: var(--font-mono); color: var(--color-text);">admin</code> &nbsp;|&nbsp; Password: <code style="font-family: var(--font-mono); color: var(--color-text);">admin123</code>
+        </div>
+      </form>
+
+      <div style="margin-top: 24px; text-align: center;">
+        <a href="/index.html" style="font-size: 12px; color: var(--color-text-muted); text-decoration: underline;">← Return to Public Storefront</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTHENTICATED ADMIN DASHBOARD -->
+  <div id="admin-dashboard-app" style="display: none; min-height: 100vh; flex-direction: column;">
+    <header class="site-header">
+      <div class="container header-inner">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <a href="/index.html" class="header-logo" aria-label="Aerosol Webapp Home">
+            <span>Aerosol Webapp</span>
+          </a>
+          <span style="font-size: 10px; padding: 2px 8px; background: var(--color-bg-muted); border-radius: var(--radius-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-secondary);">
+            Admin Console
+          </span>
+          <span id="db-status-pill" style="font-size: 10px; padding: 2px 8px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-xs); font-weight: 600; color: #059669;">
+            🍃 Atlas Ready
+          </span>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn btn-inverted btn-sm" onclick="openAddProductModal()">
+            + Add Formulation
+          </button>
+          <a href="/index.html" class="btn btn-neutral btn-sm" target="_blank">
+            Live Storefront ↗
+          </a>
+          <button class="btn btn-ghost btn-sm" onclick="handleAdminLogout()" title="Sign Out">
+            Sign Out ⎋
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex: 1;">
+      <div class="section-border-b">
+        <div class="container" style="padding-top: 32px; padding-bottom: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <span class="section-label">Authenticated Console</span>
+              <h1 class="text-h2">Store & Catalog Operations</h1>
+              <p style="font-size: 13px; color: var(--color-text-muted); margin-top: 4px;">
+                Manage projects, descriptions, orders, and MongoDB Atlas database connection.
+              </p>
+            </div>
+            <div style="font-size: 12px; color: var(--color-text-muted);">
+              Signed in as: <strong id="admin-user-display" style="color: var(--color-text);">admin</strong>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0; border-top: 1px solid var(--color-border); overflow-x: auto;">
+            <button class="admin-tab-btn" id="tab-btn-products" onclick="switchAdminTab('products')">
+              📦 Products & Formulations (<span id="tab-count-products">0</span>)
+            </button>
+            <button class="admin-tab-btn" id="tab-btn-settings" onclick="switchAdminTab('settings')">
+              ⚙️ Web App Descriptions & Content
+            </button>
+            <button class="admin-tab-btn" id="tab-btn-database" onclick="switchAdminTab('database')">
+              🍃 MongoDB Atlas
+            </button>
+            <button class="admin-tab-btn" id="tab-btn-orders" onclick="switchAdminTab('orders')">
+              📋 HazMat Orders (<span id="tab-count-orders">4</span>)
+            </button>
+            <button class="admin-tab-btn" id="tab-btn-kpis" onclick="switchAdminTab('kpis')">
+              📊 Telemetry & KPIs
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: PRODUCTS CRUD -->
+      <div id="panel-products" class="container admin-panel" style="padding-top: 32px; padding-bottom: 80px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 260px;">
+            <input type="text" id="admin-product-search" class="input" placeholder="Search formulations, SKUs, or categories..." oninput="filterAdminProducts()" style="max-width: 380px; font-size: 13px;">
+            <select id="admin-category-filter" class="input select" onchange="filterAdminProducts()" style="max-width: 220px; font-size: 13px;">
+              <option value="All">All Categories</option>
+              <option value="Automotive & Marine">Automotive & Marine</option>
+              <option value="Electronics & Precision">Electronics & Precision</option>
+              <option value="Industrial & Coatings">Industrial & Coatings</option>
+              <option value="Sanitization & Medical">Sanitization & Medical</option>
+              <option value="Art & Specialty">Art & Specialty</option>
+            </select>
+          </div>
+
+          <button class="btn btn-inverted btn-sm" onclick="openAddProductModal()">
+            + Add New Product
+          </button>
+        </div>
+
+        <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto; background: var(--color-card-bg); box-shadow: var(--shadow-card);">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+            <thead>
+              <tr style="background: var(--color-bg-subtle); border-bottom: 1px solid var(--color-border);">
+                <th style="padding: 12px 16px; font-weight: 600; width: 64px;">Preview</th>
+                <th style="padding: 12px 16px; font-weight: 600;">Product Name & SKU</th>
+                <th style="padding: 12px 16px; font-weight: 600;">Category</th>
+                <th style="padding: 12px 16px; font-weight: 600;">Price</th>
+                <th style="padding: 12px 16px; font-weight: 600;">Stock</th>
+                <th style="padding: 12px 16px; font-weight: 600; text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-products-table-body">
+              <tr>
+                <td colspan="6" style="padding: 40px; text-align: center; color: var(--color-text-muted);">
+                  Loading formulations...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: WEB APP SETTINGS & DESCRIPTIONS -->
+      <div id="panel-settings" class="container admin-panel" style="padding-top: 32px; padding-bottom: 80px; display: none;">
+        <div style="max-width: 840px;">
+          <div style="background: var(--color-card-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 32px; box-shadow: var(--shadow-card); margin-bottom: 24px;">
+            <h2 style="font-size: 18px; font-weight: 600; color: var(--color-text); margin-bottom: 4px;">Storefront Copy & Brand Descriptions</h2>
+            <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 24px;">Edit the public headlines, hero statements, and descriptions across the web app.</p>
+
+            <form id="settings-form" onsubmit="saveAppSettings(event)">
+              <div style="display: grid; gap: 20px;">
+                <div>
+                  <label class="label">Web App Brand Name</label>
+                  <input type="text" id="setting-appName" class="input" required>
+                </div>
+
+                <div>
+                  <label class="label">Hero Section Headline</label>
+                  <input type="text" id="setting-heroTitle" class="input" required>
+                </div>
+
+                <div>
+                  <label class="label">Hero Sub-Description</label>
+                  <textarea id="setting-heroDescription" class="input" rows="3" required style="resize: vertical;"></textarea>
+                </div>
+
+                <div>
+                  <label class="label">Editorial Brand Statement Quote</label>
+                  <textarea id="setting-brandStatement" class="input" rows="2" required style="resize: vertical;"></textarea>
+                </div>
+
+                <div>
+                  <label class="label">Announcement & Compliance Top Banner</label>
+                  <input type="text" id="setting-announcementBanner" class="input" required>
+                </div>
+
+                <div>
+                  <label class="label">Footer Brand Summary</label>
+                  <textarea id="setting-footerDescription" class="input" rows="2" required style="resize: vertical;"></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div>
+                    <label class="label">Support Email</label>
+                    <input type="email" id="setting-contactEmail" class="input" required>
+                  </div>
+                  <div>
+                    <label class="label">Hotline Phone</label>
+                    <input type="text" id="setting-contactPhone" class="input" required>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="label">Cleanroom Facility Address</label>
+                  <input type="text" id="setting-address" class="input" required>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
+                  <button type="submit" class="btn btn-inverted btn-md">
+                    Save Changes & Publish Live
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: MONGODB ATLAS CONFIGURATION -->
+      <div id="panel-database" class="container admin-panel" style="padding-top: 32px; padding-bottom: 80px; display: none;">
+        <div style="max-width: 840px;">
+          <div style="background: var(--color-card-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 32px; box-shadow: var(--shadow-card); margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div>
+                <h2 style="font-size: 18px; font-weight: 600; color: var(--color-text);">MongoDB Atlas Database Integration</h2>
+                <p style="font-size: 13px; color: var(--color-text-muted); margin-top: 2px;">Connect your cloud MongoDB Atlas cluster to store products, accounts, and orders.</p>
+              </div>
+              <span id="atlas-status-badge" style="padding: 4px 12px; border-radius: var(--radius-full); font-size: 12px; font-weight: 600; background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669;">
+                ● Ready for URI
+              </span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 24px;">
+              <div>
+                <label class="label">MongoDB Atlas Connection URI</label>
+                <input type="text" id="atlas-uri-input" class="input" placeholder="mongodb+srv://<username>:<password>@cluster0.mongodb.net/aerosol_db?retryWrites=true&w=majority" style="font-family: var(--font-mono); font-size: 12px;">
+                <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 4px;">
+                  Example: <code style="font-family: var(--font-mono);">mongodb+srv://admin:pass@cluster.mongodb.net/aerosol_db</code>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn btn-inverted btn-md" onclick="testAndConnectAtlas()">
+                  Test & Connect MongoDB Atlas
+                </button>
+                <button class="btn btn-neutral btn-md" onclick="refreshAtlasStatus()">
+                  Refresh Status
+                </button>
+              </div>
+
+              <div id="atlas-connection-result" style="display: none; padding: 14px 16px; border-radius: var(--radius-sm); font-size: 13px;"></div>
+
+              <div style="border-top: 1px solid var(--color-border); padding-top: 20px; margin-top: 8px;">
+                <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Atlas Schema Architecture:</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 12px;">
+                  <div style="padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-subtle);">
+                    <strong>Collections:</strong>
+                    <ul style="margin-top: 6px; padding-left: 18px; color: var(--color-text-muted);">
+                      <li>products</li>
+                      <li>settings</li>
+                      <li>orders</li>
+                      <li>users</li>
+                    </ul>
+                  </div>
+                  <div style="padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-subtle);">
+                    <strong>Connection Fallback:</strong>
+                    <p style="margin-top: 6px; color: var(--color-text-muted);">When Atlas is connected, all CRUD operations stream directly to cloud collections with zero-downtime offline fallback.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: HAZMAT ORDERS -->
+      <div id="panel-orders" class="container admin-panel" style="padding-top: 32px; padding-bottom: 80px; display: none;">
+        <span class="section-label" style="margin-bottom: 12px;">Live Dispatch & Order Management</span>
+        <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto; background: var(--color-card-bg); box-shadow: var(--shadow-card);">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+            <thead>
+              <tr style="background: var(--color-bg-subtle); border-bottom: 1px solid var(--color-border);">
+                <th style="padding: 12px 16px; font-weight: 600;">Order ID</th>
+                <th style="padding: 12px 16px; font-weight: 600;">Customer</th>
+                <th style="padding: 12px 16px; font-weight: 600;">Items</th>
+                <th style="padding: 12px 16px; font-weight: 600;">Total</th>
+                <th style="padding: 12px 16px; font-weight: 600;">Dispatch Status</th>
+                <th style="padding: 12px 16px; font-weight: 600; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 5: KPIS & TELEMETRY -->
+      <div id="panel-kpis" class="container admin-panel" style="padding-top: 32px; padding-bottom: 80px; display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px;">
+          <div style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 20px; background: var(--color-card-bg); box-shadow: var(--shadow-card);">
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.08em;">30-Day Revenue</div>
+            <div style="font-size: 22px; font-weight: 700; color: var(--color-text); margin-top: 6px;">$148,920.00</div>
+            <div style="font-size: 11px; color: var(--color-success); margin-top: 4px;">↑ +14.2% vs last month</div>
+          </div>
+          <div style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 20px; background: var(--color-card-bg); box-shadow: var(--shadow-card);">
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.08em;">Active Dispatch Orders</div>
+            <div style="font-size: 22px; font-weight: 700; color: var(--color-text); margin-top: 6px;">42 Orders</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 4px;">All DOT UN1950 Ground</div>
+          </div>
+          <div style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 20px; background: var(--color-card-bg); box-shadow: var(--shadow-card);">
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.08em;">Cleanroom Pressure</div>
+            <div style="font-size: 22px; font-weight: 700; color: var(--color-text); margin-top: 6px;">99.8% Normal</div>
+            <div style="font-size: 11px; color: var(--color-success); margin-top: 4px;">ISO Class 5 Validated</div>
+          </div>
+          <div style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 20px; background: var(--color-card-bg); box-shadow: var(--shadow-card);">
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.08em;">Total Canisters Stocked</div>
+            <div id="kpi-total-inventory" style="font-size: 22px; font-weight: 700; color: var(--color-text); margin-top: 6px;">1,420 Units</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 4px;">Across 5 Categories</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer style="border-top: 1px solid var(--color-border); background-color: var(--color-bg); margin-top: auto;">
+      <div class="container" style="padding: 20px 32px; font-size: 12px; color: var(--color-text-muted); text-align: center;">
+        © 2026 Aerosol Webapp Inc. · Operations & Administration Console
+      </div>
+    </footer>
+  </div>
+
+  <!-- PRODUCT CREATE / EDIT MODAL -->
+  <div id="product-modal" style="display: none;">
+    <div class="overlay" onclick="closeProductModal()"></div>
+    <div class="modal-center" style="z-index: 1000;">
+      <div class="modal-card" style="max-width: 680px; max-height: 90vh; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-subtle);">
+          <h3 id="modal-title" style="font-size: 16px; font-weight: 600; color: var(--color-text);">Add New Formulation Project</h3>
+          <button onclick="closeProductModal()" style="font-size: 16px; color: var(--color-text-muted); cursor: pointer;">✕</button>
+        </div>
+
+        <form id="product-form" onsubmit="handleProductFormSubmit(event)" style="padding: 24px; overflow-y: auto; flex: 1;">
+          <input type="hidden" id="prod-id">
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label class="label">Product Name *</label>
+              <input type="text" id="prod-name" class="input" placeholder="e.g. CERAMAX™ 9H Clear Coat" required>
+            </div>
+            <div>
+              <label class="label">SKU Identifier *</label>
+              <input type="text" id="prod-sku" class="input" placeholder="e.g. AERO-CRM-500" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label class="label">Category *</label>
+              <select id="prod-category" class="input select" required>
+                <option value="Automotive & Marine">Automotive & Marine</option>
+                <option value="Electronics & Precision">Electronics & Precision</option>
+                <option value="Industrial & Coatings">Industrial & Coatings</option>
+                <option value="Sanitization & Medical">Sanitization & Medical</option>
+                <option value="Art & Specialty">Art & Specialty</option>
+              </select>
+            </div>
+            <div>
+              <label class="label">Price ($ USD) *</label>
+              <input type="number" step="0.01" min="0" id="prod-price" class="input" placeholder="49.99" required>
+            </div>
+            <div>
+              <label class="label">Stock Count *</label>
+              <input type="number" min="0" id="prod-stockCount" class="input" placeholder="250" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label class="label">Volume / Size</label>
+              <input type="text" id="prod-volume" class="input" placeholder="500ml (16.9 fl oz)">
+            </div>
+            <div>
+              <label class="label">Canister Color Code</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="color" id="prod-color-picker" value="#0284c7" onchange="document.getElementById('prod-color').value = this.value" style="width: 36px; height: 36px; border: 1px solid var(--color-border); border-radius: var(--radius-xs); cursor: pointer;">
+                <input type="text" id="prod-color" class="input" value="#0284c7" onchange="document.getElementById('prod-color-picker').value = this.value">
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label class="label">Tagline (Summary)</label>
+            <input type="text" id="prod-tagline" class="input" placeholder="Aerospace-Grade Hydrophobic Shield">
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label class="label">Detailed Technical Description *</label>
+            <textarea id="prod-description" class="input" rows="3" placeholder="Engineered with ultra-pure suspended particles in an eco propellant matrix..." required style="resize: vertical;"></textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label class="label">Propellant Type</label>
+              <input type="text" id="prod-propellant" class="input" placeholder="Eco-HFO 1234ze (GWP < 1)">
+            </div>
+            <div>
+              <label class="label">UN HazMat Number</label>
+              <input type="text" id="prod-unNumber" class="input" placeholder="UN1950 (Aerosols, 2.1)">
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-border);">
+            <button type="button" class="btn btn-neutral btn-sm" onclick="closeProductModal()">Cancel</button>
+            <button type="submit" class="btn btn-inverted btn-sm" id="modal-submit-btn">Save Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <style>
+    .admin-tab-btn {
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      white-space: nowrap;
+      cursor: pointer;
+      background: none;
+      transition: all var(--transition-fast);
+    }
+    .admin-tab-btn.active {
+      color: var(--color-text);
+      font-weight: 600;
+      border-bottom: 2px solid var(--color-text);
+    }
+  </style>
+
+  <script src="/js/main.js"></script>
+  <script>
+    let adminProducts = [];
+    let currentAdminTab = 'products';
+
+    const INITIAL_ORDERS = [
+      { id: 'DNKL-99420', customer: 'Dr. Marcus Sterling (NovaAero)', items: '36 Units (Ceramax 9H)', total: 1000.51, status: 'In Transit' },
+      { id: 'DNKL-99419', customer: 'Elena Rostova (HyperSonic)', items: '6 Units (Voltx Dielectric)', total: 228.57, status: 'Delivered' },
+      { id: 'DNKL-99418', customer: 'Apex BioTech Cleanrooms', items: '12 Units (Vapor-Pure Fogger)', total: 539.88, status: 'Processing' },
+      { id: 'DNKL-99417', customer: 'Quantum Dynamics Aerospace', items: '24 Units (PyroGuard 1200)', total: 890.00, status: 'Dispatched' }
+    ];
+
+    function checkAdminAuth() {
+      const auth = sessionStorage.getItem('aerosol_admin_auth') || localStorage.getItem('aerosol_admin_auth');
+      const loginScreen = document.getElementById('admin-login-screen');
+      const dashboard = document.getElementById('admin-dashboard-app');
+
+      if (auth) {
+        try {
+          const user = JSON.parse(auth);
+          document.getElementById('admin-user-display').textContent = user.id || 'admin';
+          loginScreen.style.display = 'none';
+          dashboard.style.display = 'flex';
+          initAdminDashboard();
+        } catch (e) {
+          showLoginScreen();
+        }
+      } else {
+        showLoginScreen();
+      }
+    }
+
+    function showLoginScreen() {
+      document.getElementById('admin-login-screen').style.display = 'flex';
+      document.getElementById('admin-dashboard-app').style.display = 'none';
+    }
+
+    async function handleAdminLogin(e) {
+      e.preventDefault();
+      const adminId = document.getElementById('login-admin-id').value.trim();
+      const password = document.getElementById('login-admin-password').value.trim();
+      const errorMsg = document.getElementById('login-error-msg');
+      const submitBtn = document.getElementById('login-submit-btn');
+
+      errorMsg.style.display = 'none';
+      submitBtn.textContent = 'Verifying Credentials...';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch('/api/v1/auth/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminId, password })
+        });
+
+        const result = await res.json();
+        if (result.success && result.data) {
+          sessionStorage.setItem('aerosol_admin_auth', JSON.stringify(result.data));
+          localStorage.setItem('aerosol_admin_auth', JSON.stringify(result.data));
+          AerosolWebapp.showToast('Signed in successfully as Administrator.');
+          checkAdminAuth();
+        } else {
+          errorMsg.textContent = result.message || 'Invalid Admin ID or Password.';
+          errorMsg.style.display = 'block';
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        errorMsg.textContent = 'Server error connecting to authentication service.';
+        errorMsg.style.display = 'block';
+      } finally {
+        submitBtn.textContent = 'Sign In to Admin Panel →';
+        submitBtn.disabled = false;
+      }
+    }
+
+    function handleAdminLogout() {
+      sessionStorage.removeItem('aerosol_admin_auth');
+      localStorage.removeItem('aerosol_admin_auth');
+      AerosolWebapp.showToast('Signed out of Admin Console.');
+      checkAdminAuth();
+    }
+
+    async function initAdminDashboard() {
+      switchAdminTab('products');
+      await loadAdminProducts();
+      await loadAppSettings();
+      await refreshAtlasStatus();
+      renderAdminOrders();
+    }
+
+    function switchAdminTab(tab) {
+      currentAdminTab = tab;
+      document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.admin-panel').forEach(p => p.style.display = 'none');
+
+      const activeBtn = document.getElementById(`tab-btn-${tab}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const activePanel = document.getElementById(`panel-${tab}`);
+      if (activePanel) activePanel.style.display = 'block';
+    }
+
+    async function loadAdminProducts() {
+      try {
+        const res = await fetch('/api/v1/products');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          adminProducts = data.data;
+          document.getElementById('tab-count-products').textContent = adminProducts.length;
+          
+          const totalInventory = adminProducts.reduce((sum, p) => sum + (Number(p.stockCount) || 0), 0);
+          const kpiInv = document.getElementById('kpi-total-inventory');
+          if (kpiInv) kpiInv.textContent = `${totalInventory.toLocaleString()} Units`;
+
+          renderAdminProducts(adminProducts);
+        }
+      } catch (err) {
+        console.error('Failed to load products for admin:', err);
+      }
+    }
+
+    function renderAdminProducts(list) {
+      const tbody = document.getElementById('admin-products-table-body');
+      if (!tbody) return;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="padding: 48px 20px; text-align: center; color: var(--color-text-muted);">
+              No aerosol products found matching your search.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = list.map(p => `
+        <tr style="border-bottom: 1px solid var(--color-border); transition: background-color var(--transition-fast);" onmouseenter="this.style.backgroundColor='var(--color-bg-subtle)'" onmouseleave="this.style.backgroundColor='transparent'">
+          <td style="padding: 10px 16px;">
+            ${AerosolWebapp.renderCanister(p.color || '#1e3a5f', 48, '')}
+          </td>
+          <td style="padding: 10px 16px;">
+            <div style="font-weight: 600; color: var(--color-text);">${p.name}</div>
+            <div style="font-size: 11px; font-family: var(--font-mono); color: var(--color-text-muted);">${p.sku} · ${p.volume || '500ml'}</div>
+          </td>
+          <td style="padding: 10px 16px;">
+            <span style="font-size: 11px; padding: 2px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-xs); background: var(--color-bg-subtle);">
+              ${p.category}
+            </span>
+          </td>
+          <td style="padding: 10px 16px; font-weight: 600; color: var(--color-text);">
+            $${Number(p.price).toFixed(2)}
+          </td>
+          <td style="padding: 10px 16px;">
+            <span style="font-weight: 500; color: ${p.stockCount > 50 ? 'var(--color-text)' : 'var(--color-warning)'};">
+              ${p.stockCount} units
+            </span>
+          </td>
+          <td style="padding: 10px 16px; text-align: right;">
+            <div style="display: inline-flex; gap: 8px;">
+              <button class="btn btn-neutral btn-xs" onclick="openEditProductModal('${p.id}')">
+                Edit
+              </button>
+              <button class="btn btn-danger btn-xs" onclick="deleteProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')">
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterAdminProducts() {
+      const q = (document.getElementById('admin-product-search')?.value || '').toLowerCase().trim();
+      const cat = document.getElementById('admin-category-filter')?.value || 'All';
+
+      const filtered = adminProducts.filter(p => {
+        const matchSearch = !q || p.name.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)) || p.category.toLowerCase().includes(q);
+        const matchCat = cat === 'All' || p.category === cat;
+        return matchSearch && matchCat;
+      });
+
+      renderAdminProducts(filtered);
+    }
+
+    function openAddProductModal() {
+      document.getElementById('modal-title').textContent = 'Add New Formulation Project';
+      document.getElementById('modal-submit-btn').textContent = 'Create Product';
+      document.getElementById('prod-id').value = '';
+      document.getElementById('product-form').reset();
+      document.getElementById('prod-color').value = '#0284c7';
+      document.getElementById('prod-color-picker').value = '#0284c7';
+      document.getElementById('product-modal').style.display = 'block';
+    }
+
+    function openEditProductModal(id) {
+      const p = adminProducts.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('modal-title').textContent = 'Edit Formulation Details';
+      document.getElementById('modal-submit-btn').textContent = 'Save Changes';
+      document.getElementById('prod-id').value = p.id;
+      document.getElementById('prod-name').value = p.name || '';
+      document.getElementById('prod-sku').value = p.sku || '';
+      document.getElementById('prod-category').value = p.category || 'Industrial & Coatings';
+      document.getElementById('prod-price').value = p.price || '';
+      document.getElementById('prod-stockCount').value = p.stockCount || 100;
+      document.getElementById('prod-volume').value = p.volume || '500ml (16.9 fl oz)';
+      document.getElementById('prod-tagline').value = p.tagline || '';
+      document.getElementById('prod-description').value = p.description || '';
+      document.getElementById('prod-propellant').value = p.propellant || 'Eco-HFO 1234ze';
+      document.getElementById('prod-unNumber').value = p.sds?.unNumber || 'UN1950';
+
+      const color = p.color || '#0284c7';
+      document.getElementById('prod-color').value = color;
+      document.getElementById('prod-color-picker').value = color;
+
+      document.getElementById('product-modal').style.display = 'block';
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-modal').style.display = 'none';
+    }
+
+    async function handleProductFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('prod-id').value.trim();
+      const isEdit = Boolean(id);
+
+      const payload = {
+        name: document.getElementById('prod-name').value.trim(),
+        sku: document.getElementById('prod-sku').value.trim(),
+        category: document.getElementById('prod-category').value,
+        price: parseFloat(document.getElementById('prod-price').value),
+        stockCount: parseInt(document.getElementById('prod-stockCount').value, 10),
+        volume: document.getElementById('prod-volume').value.trim(),
+        tagline: document.getElementById('prod-tagline').value.trim(),
+        description: document.getElementById('prod-description').value.trim(),
+        propellant: document.getElementById('prod-propellant').value.trim(),
+        color: document.getElementById('prod-color').value.trim(),
+        sds: {
+          unNumber: document.getElementById('prod-unNumber').value.trim() || 'UN1950',
+          storageTemp: '0°C to 50°C (32°F to 122°F)',
+          shelfLife: '36 Months'
+        }
+      };
+
+      try {
+        const url = isEdit ? `/api/v1/products/${id}` : '/api/v1/products';
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+        if (result.success) {
+          AerosolWebapp.showToast(isEdit ? 'Product updated successfully.' : 'New formulation created.');
+          closeProductModal();
+          await loadAdminProducts();
+        } else {
+          AerosolWebapp.showToast(result.message || 'Error saving product.');
+        }
+      } catch (err) {
+        console.error('Error saving product:', err);
+        AerosolWebapp.showToast('Server error while saving product.');
+      }
+    }
+
+    async function deleteProduct(id, name) {
+      if (!confirm(`Are you sure you want to remove formulation "${name}" from the catalog?`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/v1/products/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          AerosolWebapp.showToast(`Removed "${name}" from catalog.`);
+          await loadAdminProducts();
+        } else {
+          AerosolWebapp.showToast(result.message || 'Error deleting product.');
+        }
+      } catch (err) {
+        console.error('Failed to delete product:', err);
+        AerosolWebapp.showToast('Server error deleting product.');
+      }
+    }
+
+    async function loadAppSettings() {
+      try {
+        const res = await fetch('/api/v1/settings');
+        const data = await res.json();
+        if (data.success && data.data) {
+          const s = data.data;
+          document.getElementById('setting-appName').value = s.appName || '';
+          document.getElementById('setting-heroTitle').value = s.heroTitle || '';
+          document.getElementById('setting-heroDescription').value = s.heroDescription || '';
+          document.getElementById('setting-brandStatement').value = s.brandStatement || '';
+          document.getElementById('setting-announcementBanner').value = s.announcementBanner || '';
+          document.getElementById('setting-footerDescription').value = s.footerDescription || '';
+          document.getElementById('setting-contactEmail').value = s.contactEmail || '';
+          document.getElementById('setting-contactPhone').value = s.contactPhone || '';
+          document.getElementById('setting-address').value = s.address || '';
+        }
+      } catch (err) {
+        console.error('Error loading settings:', err);
+      }
+    }
+
+    async function saveAppSettings(e) {
+      e.preventDefault();
+      const payload = {
+        appName: document.getElementById('setting-appName').value.trim(),
+        heroTitle: document.getElementById('setting-heroTitle').value.trim(),
+        heroDescription: document.getElementById('setting-heroDescription').value.trim(),
+        brandStatement: document.getElementById('setting-brandStatement').value.trim(),
+        announcementBanner: document.getElementById('setting-announcementBanner').value.trim(),
+        footerDescription: document.getElementById('setting-footerDescription').value.trim(),
+        contactEmail: document.getElementById('setting-contactEmail').value.trim(),
+        contactPhone: document.getElementById('setting-contactPhone').value.trim(),
+        address: document.getElementById('setting-address').value.trim()
+      };
+
+      try {
+        const res = await fetch('/api/v1/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (result.success) {
+          AerosolWebapp.showToast('Web app settings and descriptions saved successfully.');
+        } else {
+          AerosolWebapp.showToast('Failed to save settings.');
+        }
+      } catch (err) {
+        console.error('Error saving settings:', err);
+        AerosolWebapp.showToast('Server error saving settings.');
+      }
+    }
+
+    async function refreshAtlasStatus() {
+      try {
+        const res = await fetch('/api/v1/settings/db-status');
+        const data = await res.json();
+        if (data.success && data.data) {
+          const status = data.data;
+          const badge = document.getElementById('atlas-status-badge');
+          const pill = document.getElementById('db-status-pill');
+          
+          if (status.isConnected) {
+            badge.textContent = '● Connected to Atlas';
+            badge.style.background = '#ecfdf5';
+            badge.style.color = '#059669';
+            badge.style.borderColor = '#a7f3d0';
+
+            pill.textContent = '🍃 Atlas Connected';
+            pill.style.background = '#ecfdf5';
+            pill.style.color = '#059669';
+          } else {
+            badge.textContent = `● Atlas Support Active (${status.mode})`;
+            badge.style.background = '#eff6ff';
+            badge.style.color = '#2563eb';
+            badge.style.borderColor = '#bfdbfe';
+
+            pill.textContent = '🍃 Atlas Ready';
+          }
+
+          const uriInput = document.getElementById('atlas-uri-input');
+          if (uriInput && !uriInput.value && status.configuredUri) {
+            uriInput.placeholder = status.configuredUri;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch DB status:', e);
+      }
+    }
+
+    async function testAndConnectAtlas() {
+      const uri = document.getElementById('atlas-uri-input').value.trim();
+      const resultBox = document.getElementById('atlas-connection-result');
+      if (!uri) {
+        AerosolWebapp.showToast('Please enter a MongoDB Atlas connection URI.');
+        return;
+      }
+
+      resultBox.style.display = 'block';
+      resultBox.style.background = 'var(--color-bg-subtle)';
+      resultBox.style.border = '1px solid var(--color-border)';
+      resultBox.style.color = 'var(--color-text-secondary)';
+      resultBox.textContent = 'Attempting connection to MongoDB Atlas...';
+
+      try {
+        const res = await fetch('/api/v1/settings/db-connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mongoUri: uri })
+        });
+
+        const result = await res.json();
+        if (result.success) {
+          resultBox.style.background = '#ecfdf5';
+          resultBox.style.borderColor = '#a7f3d0';
+          resultBox.style.color = '#059669';
+          resultBox.textContent = `✓ ${result.message} Host: ${result.data?.host}`;
+          AerosolWebapp.showToast('MongoDB Atlas Connected successfully!');
+          refreshAtlasStatus();
+        } else {
+          resultBox.style.background = '#fef2f2';
+          resultBox.style.borderColor = '#fca5a5';
+          resultBox.style.color = '#dc2626';
+          resultBox.textContent = `✕ ${result.message}`;
+        }
+      } catch (err) {
+        resultBox.style.background = '#fef2f2';
+        resultBox.style.borderColor = '#fca5a5';
+        resultBox.style.color = '#dc2626';
+        resultBox.textContent = `✕ Connection error: ${err.message}`;
+      }
+    }
+
+    function renderAdminOrders() {
+      const tbody = document.getElementById('admin-orders-table-body');
+      if (!tbody) return;
+
+      tbody.innerHTML = INITIAL_ORDERS.map((o, idx) => `
+        <tr style="border-bottom: 1px solid var(--color-border);">
+          <td style="padding: 12px 16px; font-family: var(--font-mono); font-weight: 600;">${o.id}</td>
+          <td style="padding: 12px 16px;">${o.customer}</td>
+          <td style="padding: 12px 16px; color: var(--color-text-secondary);">${o.items}</td>
+          <td style="padding: 12px 16px; font-weight: 600;">$${o.total.toFixed(2)}</td>
+          <td style="padding: 12px 16px;">
+            <select onchange="updateOrderStatus(${idx}, this.value)" class="input select" style="padding: 4px 28px 4px 8px; font-size: 12px; width: auto;">
+              <option ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
+              <option ${o.status === 'Dispatched' ? 'selected' : ''}>Dispatched</option>
+              <option ${o.status === 'In Transit' ? 'selected' : ''}>In Transit</option>
+              <option ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+            </select>
+          </td>
+          <td style="padding: 12px 16px; text-align: right;">
+            <a href="/track.html?id=${o.id}" class="btn btn-neutral btn-xs">View Telemetry →</a>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateOrderStatus(idx, newStatus) {
+      INITIAL_ORDERS[idx].status = newStatus;
+      AerosolWebapp.showToast(`Order ${INITIAL_ORDERS[idx].id} status set to ${newStatus}`);
+    }
+
+    document.addEventListener('DOMContentLoaded', checkAdminAuth);
+  </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safety, SDS & FAQs | Aerosol Webapp Precision Aerosols</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="header-logo" aria-label="Aerosol Webapp Home"><span>Aerosol Webapp</span></a>
+      <nav class="header-nav hidden-mobile">
+        <a href="/index.html" class="nav-link">Home</a>
+        <a href="/shop.html" class="nav-link">Products</a>
+        <a href="/about.html" class="nav-link">About</a>
+        <a href="/faq.html" class="nav-link active">Safety & SDS</a>
+        <a href="/contact.html" class="nav-link">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm hidden-mobile" onclick="AerosolWebapp.toggleSearch(true)"><span style="font-size: 13px; font-weight: 500;">Search</span></button>
+        <a href="/wishlist.html" class="btn btn-ghost btn-sm hidden-mobile" style="position: relative;">
+          <span style="font-size: 13px; font-weight: 500;">Wishlist</span>
+          <span class="header-wish-badge badge-count" style="display: none;">0</span>
+        </a>
+        <button class="btn btn-ghost btn-sm" onclick="AerosolWebapp.handleUserIconClick()" aria-label="User Account"><span style="font-size: 13px; font-weight: 500;">Account</span></button>
+        <button class="btn btn-neutral btn-sm" onclick="AerosolWebapp.toggleCart(true)" style="position: relative; padding: 7px 14px; gap: 6px;">
+          <span class="header-cart-badge badge-count" style="display: none; top: -4px; right: -4px;">0</span>
+          <span style="font-size: 13px; font-weight: 500;">Cart</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="section-border-b">
+      <div class="container" style="padding-top: 40px; padding-bottom: 40px;">
+        <span class="section-label">Help Center</span>
+        <h1 class="text-h2">Frequently asked questions</h1>
+        <p class="text-large" style="max-width: 520px; margin-top: 10px;">
+          Technical specifications, storage rules, and DOT UN1950 shipping regulations.
+        </p>
+      </div>
+    </div>
+
+    <div class="container" style="padding-top: 48px; padding-bottom: 96px; max-width: 800px;">
+      <div style="display: flex; flex-direction: column; gap: 0;">
+        <div style="border-bottom: 1px solid var(--color-border); padding: 24px 0;">
+          <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 8px;">What propellant system do Aerosol Webapp aerosols use?</h3>
+          <p style="font-size: 15px; color: var(--color-text-secondary); line-height: 1.65;">
+            All Aerosol Webapp products utilize Eco-HFO 1234ze or purified nitrogen with GWP &lt; 1, compliant with CARB 2026 and EU F-Gas regulations. No HFC-134a or ozone-depleting propellants are used.
+          </p>
+        </div>
+
+        <div style="border-bottom: 1px solid var(--color-border); padding: 24px 0;">
+          <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 8px;">Can the canisters spray fully inverted?</h3>
+          <p style="font-size: 15px; color: var(--color-text-secondary); line-height: 1.65;">
+            Yes. Formulations designated with 360° All-Angle technology feature dual-port dip tubes that provide uniform 12-micron atomization at any angle, including upside down.
+          </p>
+        </div>
+
+        <div style="border-bottom: 1px solid var(--color-border); padding: 24px 0;">
+          <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 8px;">Why is air freight shipping not available?</h3>
+          <p style="font-size: 15px; color: var(--color-text-secondary); line-height: 1.65;">
+            Under DOT 49 CFR and IATA DGR, pressurized canisters are classified UN1950 and must travel via certified ground HazMat carriers to ensure safety.
+          </p>
+        </div>
+
+        <div style="border-bottom: 1px solid var(--color-border); padding: 24px 0;">
+          <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 8px;">What storage temperatures are required?</h3>
+          <p style="font-size: 15px; color: var(--color-text-secondary); line-height: 1.65;">
+            Store all canisters between 0°C and 50°C (32°F to 122°F). Keep away from open flames, electrical arcs, and direct radiant heat.
+          </p>
+        </div>
+
+        <div style="border-bottom: 1px solid var(--color-border); padding: 24px 0;">
+          <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 8px;">Where can I download official Safety Data Sheets (SDS)?</h3>
+          <p style="font-size: 15px; color: var(--color-text-secondary); line-height: 1.65;">
+            Full GHS-compliant Safety Data Sheets are available on individual product detail pages and are automatically attached to order dispatch confirmations.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer style="border-top: 1px solid var(--color-border); background-color: var(--color-bg); margin-top: auto;">
+    <div class="container" style="padding: 24px 32px; font-size: 13px; color: var(--color-text-muted); text-align: center;">
+      © 2026 Aerosol Webapp Inc.
+    </div>
+  </footer>
+
+  <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 64px; gap: 12px;"><span style="font-size: 18px;">🔍</span><input id="search-input" type="text" placeholder="Search aerosol formulations..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 16px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 16px; padding-bottom: 24px;"></div></div></div>
+  <div id="toast-container"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/auth-component.js"></script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Products & Aerosol Catalog | E-Commerce Webapp</title>
+  <meta name="description" content="Browse our complete catalog of industrial, automotive, electronics, and medical aerosol formulations.">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="header-logo" aria-label="Home">
+        <span>Aerosol Webapp</span>
+      </a>
+
+      <nav class="header-nav hidden-mobile">
+        <a href="/index.html" class="nav-link">Home</a>
+        <a href="/shop.html" class="nav-link active">Products</a>
+        <a href="/about.html" class="nav-link">About</a>
+        <a href="/faq.html" class="nav-link">Safety & SDS</a>
+        <a href="/contact.html" class="nav-link">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm hidden-mobile" onclick="AerosolWebapp.toggleSearch(true)" aria-label="Search">
+          <span style="font-size: 13px; font-weight: 500;">Search</span>
+        </button>
+        <a href="/wishlist.html" class="btn btn-ghost btn-sm hidden-mobile" style="position: relative;" aria-label="Wishlist">
+          <span style="font-size: 13px; font-weight: 500;">Wishlist</span>
+          <span class="header-wish-badge badge-count" style="display: none;">0</span>
+        </a>
+        <button class="btn btn-ghost btn-sm" onclick="AerosolWebapp.handleUserIconClick()" aria-label="User Account" title="User Details / Sign In">
+          <span style="font-size: 13px; font-weight: 500;">Account</span>
+        </button>
+        <button class="btn btn-neutral btn-sm" onclick="AerosolWebapp.toggleCart(true)" style="position: relative; padding: 7px 14px; gap: 6px;">
+          <span class="header-cart-badge badge-count" style="display: none; top: -4px; right: -4px;">0</span>
+          <span style="font-size: 13px; font-weight: 500;">Cart</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="section-border-b">
+      <div class="container" style="padding-top: 36px; padding-bottom: 0;">
+        <span class="section-label">Catalog</span>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 28px;">
+          <div>
+            <h1 class="text-h1">All Formulations</h1>
+            <p id="shop-count-label" style="font-size: 13px; color: var(--color-text-muted); margin-top: 4px;">
+              Loading formulations...
+            </p>
+          </div>
+        </div>
+
+        <div id="shop-category-bar" style="display: flex; align-items: center; border-top: 1px solid var(--color-border); overflow-x: auto;"></div>
+      </div>
+    </div>
+
+    <div id="shop-filter-panel" class="section-border-b" style="display: none; background-color: var(--color-bg-subtle);">
+      <div class="container" style="padding-top: 18px; padding-bottom: 18px; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-end;">
+        <div style="min-width: 220px;">
+          <label class="label">Keyword Search</label>
+          <input type="text" id="filter-search" class="input" placeholder="e.g. ceramic, dielectric..." oninput="applyFilters()" style="font-size: 13px;">
+        </div>
+        <div style="min-width: 180px;">
+          <label id="filter-price-label" class="label">Max Price: $70</label>
+          <input type="range" id="filter-price" min="15" max="70" step="5" value="70" oninput="applyFilters()" style="width: 100%; accent-color: var(--color-text); cursor: pointer;">
+        </div>
+        <div>
+          <label class="label">Min Rating</label>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-sm btn-inverted filter-rating-btn" data-rating="0" onclick="setRatingFilter(0)">Any</button>
+            <button class="btn btn-sm btn-neutral filter-rating-btn" data-rating="4" onclick="setRatingFilter(4)">4+ ★</button>
+            <button class="btn btn-sm btn-neutral filter-rating-btn" data-rating="4.5" onclick="setRatingFilter(4.5)">4.5+ ★</button>
+          </div>
+        </div>
+        <div>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--color-text-secondary);">
+            <input type="checkbox" id="filter-instock" onchange="applyFilters()" style="accent-color: var(--color-text); width: 14px; height: 14px;">
+            In stock only
+          </label>
+        </div>
+        <button onclick="resetFilters()" style="font-size: 12px; color: var(--color-text-muted); text-decoration: underline; padding-bottom: 2px; cursor: pointer;">
+          Reset filters
+        </button>
+      </div>
+    </div>
+
+    <div class="container" style="padding-bottom: 96px;">
+      <div id="shop-products-grid" class="product-grid"></div>
+    </div>
+  </main>
+
+  <footer style="border-top: 1px solid var(--color-border); background-color: var(--color-bg); margin-top: auto;">
+    <div class="container" style="padding-top: 48px; padding-bottom: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px;">
+      <div>
+        <div style="font-size: 15px; font-weight: 700; color: var(--color-text); margin-bottom: 12px;">Aerosol Webapp</div>
+        <p style="font-size: 13px; color: var(--color-text-muted); max-width: 260px;">
+          Precision aerosol formulations engineered for aerospace, automotive, electronics, and medical applications.
+        </p>
+      </div>
+      <div>
+        <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 12px;">Categories</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--color-text-secondary);">
+          <a href="javascript:void(0)" onclick="setCategory('Automotive & Marine')">Automotive & Marine</a>
+          <a href="javascript:void(0)" onclick="setCategory('Electronics & Precision')">Electronics & Precision</a>
+          <a href="javascript:void(0)" onclick="setCategory('Industrial & Coatings')">Industrial & Coatings</a>
+          <a href="javascript:void(0)" onclick="setCategory('Sanitization & Medical')">Sanitization & Medical</a>
+          <a href="javascript:void(0)" onclick="setCategory('Art & Specialty')">Art & Specialty</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 12px;">Support</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--color-text-secondary);">
+          <a href="/track.html">Track Shipment</a>
+          <a href="/faq.html">Safety Documentation</a>
+          <a href="/contact.html">Contact Engineering</a>
+        </div>
+      </div>
+    </div>
+    <div class="section-border-t">
+      <div class="container" style="padding-top: 18px; padding-bottom: 18px; font-size: 12px; color: var(--color-text-muted);">
+        © 2026 Aerosol Webapp Inc. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><span style="font-size: 16px;">🔍</span><input id="search-input" type="text" placeholder="Search aerosol formulations, SKUs, categories..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
+  <div id="toast-container"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/auth-component.js"></script>
+  <script>
+    let allProducts = [];
+    let selectedCategory = 'All';
+    let minRatingFilter = 0;
+    let currentSort = 'featured';
+
+    const CATEGORIES = [
+      'All',
+      'Automotive & Marine',
+      'Electronics & Precision',
+      'Industrial & Coatings',
+      'Sanitization & Medical',
+      'Art & Specialty'
+    ];
+
+    async function loadShop() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const catParam = urlParams.get('category');
+      if (catParam) {
+        const match = CATEGORIES.find(c => c.toLowerCase() === decodeURIComponent(catParam).toLowerCase().trim());
+        selectedCategory = match ? match : decodeURIComponent(catParam).trim();
+      }
+
+      try {
+        const res = await fetch('/api/v1/products');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          allProducts = data.data;
+          renderCategoryBar();
+          applyFilters();
+        }
+      } catch (err) {
+        console.error('Error loading products:', err);
+      }
+    }
+
+    function renderCategoryBar() {
+      const bar = document.getElementById('shop-category-bar');
+      if (!bar) return;
+
+      bar.innerHTML = `
+        ${CATEGORIES.map(cat => {
+          const isSelected = selectedCategory.toLowerCase().trim() === cat.toLowerCase().trim();
+          return `
+            <button onclick="setCategory('${cat}')"
+                    style="flex-shrink: 0; padding: 11px 15px; font-size: 13px; font-weight: ${isSelected ? '600' : '400'}; color: ${isSelected ? 'var(--color-text)' : 'var(--color-text-muted)'}; border-bottom: ${isSelected ? '2px solid var(--color-text)' : '2px solid transparent'}; margin-bottom: -1px; white-space: nowrap; cursor: pointer; transition: color var(--transition-fast);">
+              ${cat}
+            </button>
+          `;
+        }).join('')}
+
+        <div style="flex: 1;"></div>
+
+        <div style="position: relative; flex-shrink: 0;">
+          <select onchange="currentSort = this.value; applyFilters();" class="select"
+                  style="font-size: 12px; color: var(--color-text-secondary); border: none; border-left: 1px solid var(--color-border); padding: 11px 32px 11px 14px; background: transparent; cursor: pointer; outline: none;">
+            <option value="featured">Featured</option>
+            <option value="rating">Highest Rated</option>
+            <option value="reviews">Most Reviews</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
+
+        <button onclick="toggleFilterPanel()"
+                style="display: flex; align-items: center; gap: 6px; padding: 11px 15px; font-size: 12px; color: var(--color-text-muted); border-left: 1px solid var(--color-border); white-space: nowrap; cursor: pointer;">
+          ⚙ Filters
+        </button>
+      `;
+    }
+
+    function setCategory(cat) {
+      selectedCategory = cat;
+      const newUrl = cat === 'All' ? '/shop.html' : `/shop.html?category=${encodeURIComponent(cat)}`;
+      window.history.pushState(null, '', newUrl);
+      renderCategoryBar();
+      applyFilters();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleFilterPanel() {
+      const panel = document.getElementById('shop-filter-panel');
+      if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    function setRatingFilter(r) {
+      minRatingFilter = r;
+      document.querySelectorAll('.filter-rating-btn').forEach(btn => {
+        const matches = Number(btn.dataset.rating) === r;
+        btn.classList.toggle('btn-inverted', matches);
+        btn.classList.toggle('btn-neutral', !matches);
+      });
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const search = (document.getElementById('filter-search')?.value || '').toLowerCase().trim();
+      const maxPrice = Number(document.getElementById('filter-price')?.value || 70);
+      const inStockOnly = document.getElementById('filter-instock')?.checked || false;
+
+      const priceLabel = document.getElementById('filter-price-label');
+      if (priceLabel) priceLabel.textContent = `Max Price: $${maxPrice}`;
+
+      const selCatNorm = selectedCategory.toLowerCase().trim();
+
+      let filtered = allProducts.filter(p => {
+        const prodCatNorm = (p.category || '').toLowerCase().trim();
+        const matchCat = selCatNorm === 'all' || prodCatNorm === selCatNorm || prodCatNorm.includes(selCatNorm);
+        const matchSearch = !search ||
+          p.name.toLowerCase().includes(search) ||
+          prodCatNorm.includes(search) ||
+          (p.sku && p.sku.toLowerCase().includes(search));
+        const matchPrice = Number(p.price) <= maxPrice;
+        const matchStock = !inStockOnly || p.inStock;
+        const matchRating = Number(p.rating || 0) >= minRatingFilter;
+        return matchCat && matchSearch && matchPrice && matchStock && matchRating;
+      });
+
+      if (currentSort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+      else if (currentSort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+      else if (currentSort === 'rating') filtered.sort((a, b) => b.rating - a.rating);
+      else if (currentSort === 'reviews') filtered.sort((a, b) => b.reviewCount - a.reviewCount);
+
+      const countLabel = document.getElementById('shop-count-label');
+      if (countLabel) {
+        countLabel.textContent = `${filtered.length} formulation${filtered.length !== 1 ? 's' : ''} ${selectedCategory !== 'All' ? `in ${selectedCategory}` : ''}`;
+      }
+
+      const grid = document.getElementById('shop-products-grid');
+      if (!grid) return;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 80px 20px; border-bottom: 1px solid var(--color-border);">
+            <p style="font-size: 15px; color: var(--color-text-secondary); margin-bottom: 16px;">
+              No formulations found in "${selectedCategory}".
+            </p>
+            <button class="btn btn-neutral btn-sm" onclick="resetFilters()">View all formulations</button>
+          </div>
+        `;
+      } else {
+        grid.innerHTML = filtered.map(p => `
+          <div class="product-card" onclick="window.location.href='/product.html?id=${p.id}'">
+            <div class="product-card__image-wrap">
+              <div class="product-card__canister" style="padding: 28px 0 20px;">
+                ${AerosolWebapp.renderCanister(p.color || '#1e3a5f', 135, p.sku ? p.sku.split('-')[1] : '')}
+              </div>
+              <div class="product-card__quick-add">
+                <button class="btn btn-inverted btn-sm btn-full" onclick="event.stopPropagation(); AerosolWebapp.addToCart(${JSON.stringify(p).replace(/"/g, '&quot;')});">
+                  Add to cart
+                </button>
+              </div>
+            </div>
+            <div class="product-card__info">
+              <div class="product-card__category">${p.category}</div>
+              <div class="product-card__name">${p.name}</div>
+              <div style="font-size: 11px; color: var(--color-text-placeholder); margin-top: 1px;">${p.volume || ''}</div>
+              <div class="product-card__meta">
+                <div class="product-card__rating">
+                  <span style="color: #f59e0b;">★</span>
+                  <span>${p.rating} <span style="color: var(--color-text-placeholder);">(${p.reviewCount})</span></span>
+                </div>
+                <div class="product-card__price">$${Number(p.price).toFixed(2)}</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function resetFilters() {
+      selectedCategory = 'All';
+      minRatingFilter = 0;
+      window.history.pushState(null, '', '/shop.html');
+      const searchInput = document.getElementById('filter-search');
+      if (searchInput) searchInput.value = '';
+      const priceInput = document.getElementById('filter-price');
+      if (priceInput) priceInput.value = '70';
+      const inStockInput = document.getElementById('filter-instock');
+      if (inStockInput) inStockInput.checked = false;
+      renderCategoryBar();
+      applyFilters();
+    }
+
+    window.addEventListener('popstate', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const catParam = urlParams.get('category');
+      selectedCategory = catParam ? decodeURIComponent(catParam) : 'All';
+      renderCategoryBar();
+      applyFilters();
+    });
+
+    document.addEventListener('DOMContentLoaded', loadShop);
+  </script>
+</body>
+</html>

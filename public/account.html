@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Account & Orders | Aerosol Webapp</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="header-logo" aria-label="Aerosol Webapp Home">
+        <span>Aerosol Webapp</span>
+      </a>
+
+      <nav class="header-nav hidden-mobile">
+        <a href="/index.html" class="nav-link">Home</a>
+        <a href="/shop.html" class="nav-link">Products</a>
+        <a href="/about.html" class="nav-link">About</a>
+        <a href="/faq.html" class="nav-link">Safety & SDS</a>
+        <a href="/contact.html" class="nav-link">Contact</a>
+        <a href="/admin.html" class="nav-link">Admin ↗</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm hidden-mobile" onclick="AerosolWebapp.toggleSearch(true)"><span style="font-size: 13px; font-weight: 500;">Search</span></button>
+        <a href="/wishlist.html" class="btn btn-ghost btn-sm hidden-mobile" style="position: relative;">
+          <span style="font-size: 13px; font-weight: 500;">Wishlist</span>
+          <span class="header-wish-badge badge-count" style="display: none;">0</span>
+        </a>
+        <button class="btn btn-ghost btn-sm" onclick="AerosolWebapp.handleUserIconClick()" aria-label="User Account"><span style="font-size: 13px; font-weight: 500;">Account</span></button>
+        <button class="btn btn-neutral btn-sm" onclick="AerosolWebapp.toggleCart(true)" style="position: relative; padding: 7px 14px; gap: 6px;">
+          <span class="header-cart-badge badge-count" style="display: none; top: -4px; right: -4px;">0</span>
+          <span style="font-size: 13px; font-weight: 500;">Cart</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="account-main">
+    <!-- Injected dynamically via script -->
+  </main>
+
+  <footer style="border-top: 1px solid var(--color-border); background-color: var(--color-bg); margin-top: auto;">
+    <div class="container" style="padding: 24px 32px; font-size: 12px; color: var(--color-text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <span>© 2026 Aerosol Webapp Inc. All rights reserved.</span>
+      <div style="display: flex; gap: 16px;">
+        <a href="/faq.html">Safety Guidelines</a>
+        <a href="/shop.html">Catalog</a>
+        <a href="/admin.html">Admin Portal</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><span style="font-size: 16px;">🔍</span><input id="search-input" type="text" placeholder="Search aerosol formulations..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
+  <div id="toast-container"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/auth-component.js"></script>
+  <script>
+    let authTab = 'signin';
+    let currentTab = 'orders';
+
+    function renderAccount() {
+      const container = document.getElementById('account-main');
+      if (!container) return;
+
+      const u = AerosolWebapp.user;
+
+      if (!u) {
+        container.innerHTML = `<div id="account-auth-mount" style="padding: 40px 16px; width: 100%;"></div>`;
+        AerosolAuth.init('account-auth-mount', {
+          redirectUrl: '/account.html',
+          onSuccess: () => renderAccount()
+        });
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="section-border-b">
+          <div class="container" style="padding-top: 36px; padding-bottom: 0;">
+            <span class="section-label">Account Portal</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+              <div>
+                <h1 class="text-h2">${u.name}</h1>
+                <p style="font-size: 13px; color: var(--color-text-muted); margin-top: 4px;">
+                  ${u.email} ${u.tier ? `· <span style="font-weight: 600; color: var(--color-text);">${u.tier}</span>` : ''} · <span style="color: var(--color-success);">✓ Terms & HazMat Verified</span>
+                </p>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="AerosolWebapp.logout()">Sign out ⎋</button>
+            </div>
+
+            <div style="display: flex; border-top: 1px solid var(--color-border); margin-top: 28px; overflow-x: auto;">
+              ${['orders', 'wishlist', 'addresses', 'profile'].map(tab => `
+                <button onclick="currentTab = '${tab}'; renderAccount();"
+                        style="padding: 12px 18px; font-size: 13px; font-weight: ${currentTab === tab ? '600' : '400'}; color: ${currentTab === tab ? 'var(--color-text)' : 'var(--color-text-muted)'}; border-bottom: ${currentTab === tab ? '2px solid var(--color-text)' : '2px solid transparent'}; margin-bottom: -1px; cursor: pointer; text-transform: capitalize; white-space: nowrap;">
+                  ${tab === 'orders' ? '📋 Orders & Tracking' : tab === 'wishlist' ? `♡ Wishlist (${AerosolWebapp.wishlist.length})` : tab === 'addresses' ? '📍 Delivery Addresses' : '⚙️ Profile'}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="container" style="padding-top: 36px; padding-bottom: 80px;">
+          ${currentTab === 'orders' ? `
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              ${[
+                { id: 'DNKL-99420', date: 'Aug 28, 2026', total: 1000.51, status: 'In Transit', items: 'CERAMAX™ 9H (12x), TRIBO-SYNTH™ (24x)' },
+                { id: 'DNKL-99419', date: 'Aug 25, 2026', total: 228.57, status: 'Delivered', items: 'SPECTRUM-X™ Prism-Shift (4x), MARINEX™ (2x)' },
+              ].map(ord => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-card-bg); box-shadow: var(--shadow-card); flex-wrap: wrap; gap: 12px;">
+                  <div>
+                    <div style="font-weight: 700; font-family: var(--font-mono); font-size: 13px;">${ord.id}</div>
+                    <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">${ord.date} · ${ord.items}</div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 14px;">
+                    <span style="font-weight: 600; font-size: 14px;">$${ord.total.toFixed(2)}</span>
+                    <span style="padding: 2px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-xs); font-size: 11px; font-weight: 600; background: var(--color-bg-subtle);">${ord.status}</span>
+                    <a href="/track.html?id=${ord.id}" class="btn btn-neutral btn-xs">Track Dispatch →</a>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : currentTab === 'wishlist' ? `
+            ${AerosolWebapp.wishlist.length === 0 ? `
+              <div style="text-align: center; padding: 48px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-card-bg);">
+                <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 16px;">No saved formulations in your wishlist.</p>
+                <a href="/shop.html" class="btn btn-neutral btn-sm">Explore catalog</a>
+              </div>
+            ` : `
+              <div class="product-grid">
+                ${AerosolWebapp.wishlist.map(p => `
+                  <div class="product-card" onclick="window.location.href='/product.html?id=${p.id}'">
+                    <div class="product-card__image-wrap">
+                      <div class="product-card__canister" style="padding: 28px 0 20px;">
+                        ${AerosolWebapp.renderCanister(p.color || '#1e3a5f', 135, p.sku ? p.sku.split('-')[1] : '')}
+                      </div>
+                    </div>
+                    <div class="product-card__info">
+                      <div class="product-card__category">${p.category}</div>
+                      <div class="product-card__name">${p.name}</div>
+                      <div class="product-card__meta">
+                        <span style="font-size: 11px; color: var(--color-text-muted);">${p.volume || ''}</span>
+                        <div class="product-card__price">$${Number(p.price).toFixed(2)}</div>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          ` : currentTab === 'addresses' ? `
+            <div style="max-width: 540px;">
+              ${(!u.addresses || u.addresses.length === 0) ? `
+                <div style="background: var(--color-card-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 28px; box-shadow: var(--shadow-card);">
+                  <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 6px;">No Saved Addresses</h3>
+                  <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">You currently have no delivery addresses saved. Fill in your address details below.</p>
+
+                  <form onsubmit="saveNewUserAddress(event)">
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                      <div>
+                        <label class="label">Full Name *</label>
+                        <input id="addr-name" class="input" placeholder="Jane Smith" required value="${u.name || ''}">
+                      </div>
+                      <div>
+                        <label class="label">Company / Facility (Optional)</label>
+                        <input id="addr-company" class="input" placeholder="Acme Logistics Ltd" value="${u.company || ''}">
+                      </div>
+                      <div>
+                        <label class="label">Street Address *</label>
+                        <input id="addr-street" class="input" placeholder="100 Precision Way, Suite 400" required>
+                      </div>
+                      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
+                        <div><label class="label">City *</label><input id="addr-city" class="input" placeholder="Seattle" required></div>
+                        <div><label class="label">State *</label><input id="addr-state" class="input" placeholder="WA" required maxlength="2"></div>
+                        <div><label class="label">ZIP *</label><input id="addr-zip" class="input" placeholder="98108" required></div>
+                      </div>
+                      <div>
+                        <label class="label">Phone Number for HazMat Delivery *</label>
+                        <input id="addr-phone" class="input" placeholder="+1 (555) 000-0000" required value="${u.phone || ''}">
+                      </div>
+                      <button type="submit" class="btn btn-inverted btn-md" style="margin-top: 8px;">
+                        Save Delivery Address →
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ` : `
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  ${u.addresses.map((addr, idx) => `
+                    <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 22px; background: var(--color-card-bg); box-shadow: var(--shadow-card);">
+                      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <span class="section-label" style="margin-bottom: 0;">${addr.type || 'Primary Address'}</span>
+                        <button onclick="deleteUserAddress(${idx})" class="btn btn-ghost btn-xs" style="color: var(--color-error);">Remove ✕</button>
+                      </div>
+                      <div style="font-weight: 600; font-size: 14px; color: var(--color-text);">${addr.name}</div>
+                      <div style="font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5;">
+                        ${addr.company ? addr.company + '<br>' : ''}${addr.street}<br>${addr.city}, ${addr.state} ${addr.zip} · United States
+                      </div>
+                      <div style="margin-top: 10px; font-size: 11px; color: var(--color-text-muted);">
+                        📞 Phone: ${addr.phone || u.phone || 'N/A'}
+                      </div>
+                    </div>
+                  `).join('')}
+                  <button onclick="u.addresses = []; renderAccount();" class="btn btn-neutral btn-sm" style="align-self: flex-start;">+ Add Another Address</button>
+                </div>
+              `}
+            </div>
+          ` : `
+            <div style="max-width: 520px; background: var(--color-card-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 32px; box-shadow: var(--shadow-card);">
+              <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 6px;">Edit Profile & Contact Details</h3>
+              <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">Update your personal details, phone number, and organization information.</p>
+
+              <form onsubmit="saveProfileChanges(event)">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <div>
+                    <label class="label">Full Name *</label>
+                    <input id="prof-name" class="input" value="${u.name || ''}" required placeholder="Dr. Marcus Sterling">
+                  </div>
+                  <div>
+                    <label class="label">Email Address *</label>
+                    <input id="prof-email" class="input" value="${u.email || ''}" required placeholder="name@example.com">
+                  </div>
+                  <div>
+                    <label class="label">Mobile / Phone Number *</label>
+                    <input id="prof-phone" class="input" value="${u.phone || ''}" required placeholder="+1 (555) 000-0000">
+                  </div>
+                  <div>
+                    <label class="label">Company / Organization (Optional)</label>
+                    <input id="prof-company" class="input" value="${u.company || ''}" placeholder="NovaAero Dynamics LLC">
+                  </div>
+                  <div style="padding: 12px; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 12px; color: var(--color-text-muted);">
+                    Account Tier: <strong>${u.tier || 'Standard Member'}</strong> · Role: <strong>${u.role || 'CUSTOMER'}</strong> · Terms Agreed: <strong style="color: var(--color-success);">Yes</strong>
+                  </div>
+                  <button type="submit" class="btn btn-inverted btn-md" style="margin-top: 4px;">
+                    Save Profile Details →
+                  </button>
+                </div>
+              </form>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    function demoFill(email, name) {
+      const emailInput = document.getElementById('auth-login-email');
+      const termsBox = document.getElementById('auth-login-terms');
+      if (emailInput) emailInput.value = email;
+      if (termsBox) termsBox.checked = true;
+    }
+
+    async function handleUserLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-login-email').value.trim();
+      const password = document.getElementById('auth-login-password').value.trim();
+      const termsAccepted = document.getElementById('auth-login-terms').checked;
+      const errorBox = document.getElementById('auth-error-box');
+
+      if (!termsAccepted) {
+        errorBox.textContent = 'Please check the box to agree to the Terms of Service & HazMat Guidelines.';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, termsAccepted })
+        });
+
+        const data = await res.json();
+        if (data.success && data.data) {
+          AerosolWebapp.user = data.data;
+          AerosolWebapp.saveUser();
+          AerosolWebapp.showToast(`Welcome back, ${data.data.name}!`);
+          renderAccount();
+        } else {
+          errorBox.textContent = data.message || 'Login failed.';
+          errorBox.style.display = 'block';
+        }
+      } catch (err) {
+        errorBox.textContent = 'Server error connecting to authentication service.';
+        errorBox.style.display = 'block';
+      }
+    }
+
+    async function handleUserRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('auth-reg-name').value.trim();
+      const email = document.getElementById('auth-reg-email').value.trim();
+      const company = document.getElementById('auth-reg-company').value.trim();
+      const password = document.getElementById('auth-reg-password').value.trim();
+      const termsAccepted = document.getElementById('auth-reg-terms').checked;
+      const errorBox = document.getElementById('auth-error-box');
+
+      if (!termsAccepted) {
+        errorBox.textContent = 'You must mark the checkbox to accept the Terms & Conditions and Safety Guidelines.';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/v1/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, company, password, termsAccepted })
+        });
+
+        const data = await res.json();
+        if (data.success && data.data) {
+          AerosolWebapp.user = data.data;
+          AerosolWebapp.saveUser();
+          AerosolWebapp.showToast(`Account created for ${data.data.name}!`);
+          renderAccount();
+        } else {
+          errorBox.textContent = data.message || 'Registration failed.';
+          errorBox.style.display = 'block';
+        }
+      } catch (err) {
+        errorBox.textContent = 'Server error creating account.';
+        errorBox.style.display = 'block';
+      }
+    }
+
+    function saveProfileChanges(e) {
+      if (e) e.preventDefault();
+      const name = document.getElementById('prof-name')?.value.trim();
+      const email = document.getElementById('prof-email')?.value.trim();
+      const phone = document.getElementById('prof-phone')?.value.trim();
+      const company = document.getElementById('prof-company')?.value.trim();
+
+      if (AerosolWebapp.user) {
+        if (name) AerosolWebapp.user.name = name;
+        if (email) AerosolWebapp.user.email = email;
+        if (phone) AerosolWebapp.user.phone = phone;
+        if (company !== undefined) AerosolWebapp.user.company = company;
+        AerosolWebapp.saveUser();
+        AerosolWebapp.showToast('Profile details updated successfully.');
+        renderAccount();
+      }
+    }
+
+    function saveNewUserAddress(e) {
+      e.preventDefault();
+      if (!AerosolWebapp.user) return;
+      if (!AerosolWebapp.user.addresses) AerosolWebapp.user.addresses = [];
+
+      const newAddr = {
+        id: 'addr-' + Date.now(),
+        isDefault: true,
+        type: 'Primary Delivery Location',
+        name: document.getElementById('addr-name').value.trim(),
+        company: document.getElementById('addr-company').value.trim(),
+        street: document.getElementById('addr-street').value.trim(),
+        city: document.getElementById('addr-city').value.trim(),
+        state: document.getElementById('addr-state').value.trim(),
+        zip: document.getElementById('addr-zip').value.trim(),
+        phone: document.getElementById('addr-phone').value.trim()
+      };
+
+      AerosolWebapp.user.addresses.push(newAddr);
+      AerosolWebapp.saveUser();
+      AerosolWebapp.showToast('Delivery address saved successfully.');
+      renderAccount();
+    }
+
+    function deleteUserAddress(idx) {
+      if (!AerosolWebapp.user || !AerosolWebapp.user.addresses) return;
+      AerosolWebapp.user.addresses.splice(idx, 1);
+      AerosolWebapp.saveUser();
+      AerosolWebapp.showToast('Address removed.');
+      renderAccount();
+    }
+
+    document.addEventListener('DOMContentLoaded', renderAccount);
+  </script>
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerosol Webapp | Precision Aerosol Technologies & High-Performance Sprays</title>
+  <meta name="description" content="Precision aerosol engineering and industrial formulations for aerospace, automotive, electronics, and medical applications.">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="header-logo" aria-label="Home">
+        <span id="header-brand-name">Aerosol Webapp</span>
+      </a>
+
+      <nav class="header-nav hidden-mobile">
+        <a href="/index.html" class="nav-link active">Home</a>
+        <a href="/shop.html" class="nav-link">Products</a>
+        <a href="/about.html" class="nav-link">About</a>
+        <a href="/faq.html" class="nav-link">Safety & SDS</a>
+        <a href="/contact.html" class="nav-link">Contact</a>
+        <a href="/admin.html" class="nav-link" style="color: var(--color-text); font-weight: 500;">Admin ↗</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm hidden-mobile" onclick="AerosolWebapp.toggleSearch(true)" aria-label="Search" title="Search (Cmd+K)">
+          <span style="font-size: 13px; font-weight: 500;">Search</span>
+        </button>
+        <a href="/wishlist.html" class="btn btn-ghost btn-sm hidden-mobile" style="position: relative;" aria-label="Wishlist">
+          <span style="font-size: 13px; font-weight: 500;">Wishlist</span>
+          <span class="header-wish-badge badge-count" style="display: none;">0</span>
+        </a>
+        <button class="btn btn-ghost btn-sm" onclick="AerosolWebapp.handleUserIconClick()" aria-label="User Account" title="User Details / Sign In">
+          <span style="font-size: 13px; font-weight: 500;">Account</span>
+        </button>
+        <button class="btn btn-neutral btn-sm" onclick="AerosolWebapp.toggleCart(true)" style="position: relative; padding: 7px 14px; gap: 6px;">
+          <span class="header-cart-badge badge-count" style="display: none; top: -4px; right: -4px;">0</span>
+          <span style="font-size: 13px; font-weight: 500;">Cart</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section-border-b" style="padding-top: 80px; padding-bottom: 0; overflow: hidden;">
+      <div class="container">
+        <span id="home-banner" class="section-label" style="margin-bottom: 24px;">ISO 9001:2015 · DOT-SP Certified · UN1950 Compliant</span>
+        <h1 id="home-hero-title" class="text-display" style="max-width: 780px; margin-bottom: 24px;">
+          Precision aerosol engineering for every application.
+        </h1>
+        <p id="home-hero-desc" class="text-large" style="max-width: 520px; margin-bottom: 40px;">
+          Professional aerosol formulations for aerospace, automotive, electronics, and industrial applications — built with 360° all-angle valves and zero-ODP eco-propellants.
+        </p>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 72px;">
+          <a href="/shop.html" class="btn btn-inverted btn-xl">
+            Explore products →
+          </a>
+          <a href="/about.html" class="btn btn-neutral btn-xl">
+            About Aerosol Webapp
+          </a>
+        </div>
+
+        <div id="hero-canister-row" style="display: flex; border-top: 1px solid var(--color-border); border-left: 1px solid var(--color-border); flex-wrap: wrap;"></div>
+      </div>
+    </section>
+
+    <section class="section-border-b" style="padding-top: var(--section-spacing); padding-bottom: var(--section-spacing);">
+      <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+          <div>
+            <span class="section-label">Browse</span>
+            <h2 class="text-h2">Shop by category</h2>
+          </div>
+          <a href="/shop.html" class="btn btn-neutral btn-sm">
+            All formulations →
+          </a>
+        </div>
+
+        <div class="category-grid">
+          <a href="/shop.html?category=Automotive%20%26%20Marine" class="category-cell">
+            <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted);">
+              Automotive & Marine
+            </div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--color-text); letter-spacing: -0.01em;">
+              Automotive & Marine
+            </div>
+            <div style="font-size: 13px; color: var(--color-text-muted); line-height: 1.4;">
+              Ceramic coatings, cavity wax, chassis protection, and clear coats.
+            </div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-top: 8px;">
+              Shop category →
+            </div>
+          </a>
+
+          <a href="/shop.html?category=Electronics%20%26%20Precision" class="category-cell">
+            <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted);">
+              Electronics & Precision
+            </div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--color-text); letter-spacing: -0.01em;">
+              Electronics & Precision
+            </div>
+            <div style="font-size: 13px; color: var(--color-text-muted); line-height: 1.4;">
+              High-dielectric cleaners, flux removers, and ESD-safe coatings.
+            </div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-top: 8px;">
+              Shop category →
+            </div>
+          </a>
+
+          <a href="/shop.html?category=Industrial%20%26%20Coatings" class="category-cell">
+            <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted);">
+              Industrial & Coatings
+            </div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--color-text); letter-spacing: -0.01em;">
+              Industrial & Coatings
+            </div>
+            <div style="font-size: 13px; color: var(--color-text-muted); line-height: 1.4;">
+              1200°C thermal enamel, graphene dry-film lubricants, and corrosion shields.
+            </div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-top: 8px;">
+              Shop category →
+            </div>
+          </a>
+
+          <a href="/shop.html?category=Sanitization%20%26%20Medical" class="category-cell">
+            <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted);">
+              Sanitization & Medical
+            </div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--color-text); letter-spacing: -0.01em;">
+              Sanitization & Medical
+            </div>
+            <div style="font-size: 13px; color: var(--color-text-muted); line-height: 1.4;">
+              Cleanroom foggers, hospital-grade total-release decontaminants.
+            </div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-top: 8px;">
+              Shop category →
+            </div>
+          </a>
+
+          <a href="/shop.html?category=Art%20%26%20Specialty" class="category-cell">
+            <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted);">
+              Art & Specialty
+            </div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--color-text); letter-spacing: -0.01em;">
+              Art & Specialty
+            </div>
+            <div style="font-size: 13px; color: var(--color-text-muted); line-height: 1.4;">
+              Prism-shift holographic finishes, custom fan actuators, and studio effects.
+            </div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-top: 8px;">
+              Shop category →
+            </div>
+          </a>
+
+          <a href="/shop.html" class="category-cell">
+            <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted);">
+              All Formulations
+            </div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--color-text); letter-spacing: -0.01em;">
+              Complete Catalog
+            </div>
+            <div style="font-size: 13px; color: var(--color-text-muted); line-height: 1.4;">
+              Explore our full inventory of high-performance aerosol systems.
+            </div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-top: 8px;">
+              View all products →
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-border-b" style="padding-top: var(--section-spacing); padding-bottom: var(--section-spacing);">
+      <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+          <div>
+            <span class="section-label">Featured</span>
+            <h2 class="text-h2">Best-selling formulations</h2>
+          </div>
+          <a href="/shop.html" class="btn btn-neutral btn-sm">
+            View all →
+          </a>
+        </div>
+
+        <div id="featured-products-grid" class="product-grid"></div>
+      </div>
+    </section>
+
+    <section class="section-border-b" style="padding-top: var(--section-spacing-lg); padding-bottom: var(--section-spacing-lg); background-color: var(--color-bg);">
+      <div class="container" style="text-align: center;">
+        <p id="home-brand-statement" style="font-size: clamp(24px, 3.2vw, 44px); font-weight: 500; line-height: 1.25; letter-spacing: -0.02em; color: var(--color-text); max-width: 860px; margin: 0 auto;">
+          "Aerosol products engineered for performance, reliability, and every industrial challenge — from the cleanroom to the field."
+        </p>
+        <div style="width: 40px; height: 1px; background-color: var(--color-border-strong); margin: 40px auto 0;"></div>
+      </div>
+    </section>
+
+    <section class="section-border-b" style="padding-top: var(--section-spacing); padding-bottom: var(--section-spacing);">
+      <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+          <div>
+            <span class="section-label">Catalog</span>
+            <h2 class="text-h2">Complete product line</h2>
+          </div>
+          <a href="/shop.html" class="btn btn-neutral btn-sm">
+            Browse catalog →
+          </a>
+        </div>
+
+        <div id="full-catalog-grid" class="product-grid"></div>
+      </div>
+    </section>
+
+    <section class="section-border-b" style="padding-top: var(--section-spacing); padding-bottom: var(--section-spacing);">
+      <div class="container">
+        <div style="margin-bottom: 48px;">
+          <span class="section-label">Why Aerosol Webapp</span>
+          <h2 class="text-h2" style="max-width: 480px;">Manufacturing standards that set the benchmark.</h2>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); border-top: 1px solid var(--color-border); border-left: 1px solid var(--color-border); box-shadow: var(--shadow-card);">
+          <div style="border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 36px 28px; background: var(--color-bg);">
+            <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 16px;">01</div>
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 10px;">ISO Class 5 Cleanroom</h3>
+            <p style="font-size: 13.5px; color: var(--color-text-muted); line-height: 1.6;">Every canister is filled in a particulate-controlled environment and 100% water-bath tested for structural integrity before dispatch.</p>
+          </div>
+          <div style="border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 36px 28px; background: var(--color-bg);">
+            <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 16px;">02</div>
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 10px;">Zero-ODP Propellants</h3>
+            <p style="font-size: 13.5px; color: var(--color-text-muted); line-height: 1.6;">We use Eco-HFO 1234ze and purified nitrogen — both with GWP &lt; 1 — across our entire product line. CARB 2026 and EU REACH compliant.</p>
+          </div>
+          <div style="border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 36px 28px; background: var(--color-bg);">
+            <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 16px;">03</div>
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 10px;">360° All-Angle Valves</h3>
+            <p style="font-size: 13.5px; color: var(--color-text-muted); line-height: 1.6;">Dual-port dip tube technology delivers consistent 12-micron atomization at any spray angle, including fully inverted application.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-border-b" style="padding-top: var(--section-spacing); padding-bottom: var(--section-spacing); background-color: var(--color-bg-subtle);">
+      <div class="container">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 64px; align-items: center;">
+          <div>
+            <span class="section-label">Safety & Compliance</span>
+            <h2 class="text-h2" style="margin-bottom: 16px;">Every canister is certified before it ships.</h2>
+            <p class="text-body" style="margin-bottom: 28px;">
+              All Aerosol Webapp aerosols comply with DOT 49 CFR HazMat regulations, OSHA Hazard Communication Standard (29 CFR 1910.1200), and full Safety Data Sheet (SDS/GHS) documentation is included with every order.
+            </p>
+            <a href="/faq.html" class="btn btn-neutral btn-md">
+              Safety documentation →
+            </a>
+          </div>
+
+          <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; background: var(--color-bg); box-shadow: var(--shadow-card);">
+            <div style="display: flex; gap: 20px; padding: 14px 20px; border-bottom: 1px solid var(--color-border);">
+              <div style="font-size: 11px; font-weight: 700; color: var(--color-text); font-family: var(--font-mono); min-width: 100px;">UN1950</div>
+              <div style="font-size: 13px; color: var(--color-text-muted);">Aerosols — Limited Quantity HazMat Classification</div>
+            </div>
+            <div style="display: flex; gap: 20px; padding: 14px 20px; border-bottom: 1px solid var(--color-border);">
+              <div style="font-size: 11px; font-weight: 700; color: var(--color-text); font-family: var(--font-mono); min-width: 100px;">ISO 9001:2015</div>
+              <div style="font-size: 13px; color: var(--color-text-muted);">Quality Management System Certified</div>
+            </div>
+            <div style="display: flex; gap: 20px; padding: 14px 20px; border-bottom: 1px solid var(--color-border);">
+              <div style="font-size: 11px; font-weight: 700; color: var(--color-text); font-family: var(--font-mono); min-width: 100px;">CARB 2026</div>
+              <div style="font-size: 13px; color: var(--color-text-muted);">California VOC Emission Standard Compliant</div>
+            </div>
+            <div style="display: flex; gap: 20px; padding: 14px 20px;">
+              <div style="font-size: 11px; font-weight: 700; color: var(--color-text); font-family: var(--font-mono); min-width: 100px;">DOT-SP</div>
+              <div style="font-size: 13px; color: var(--color-text-muted);">Special Permit — Pressurized Ground Transport</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-top: var(--section-spacing-lg); padding-bottom: var(--section-spacing-lg); background-color: var(--color-text);">
+      <div class="container" style="text-align: center;">
+        <span class="section-label" style="color: rgba(255,255,255,0.5); margin-bottom: 16px;">Get Started</span>
+        <h2 style="font-size: clamp(26px, 3.2vw, 44px); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; color: #ffffff; max-width: 640px; margin: 0 auto 20px;">
+          Ready to upgrade your aerosol program?
+        </h2>
+        <p style="font-size: 15px; color: rgba(255,255,255,0.65); max-width: 480px; margin: 0 auto 36px; line-height: 1.6;">
+          Order online with same-day HazMat ground dispatch, or contact our engineers to discuss custom formulations.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a href="/shop.html" class="btn btn-lg" style="background: #ffffff; color: var(--color-text);">
+            Browse catalog →
+          </a>
+          <a href="/contact.html" class="btn btn-lg" style="background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.25);">
+            Contact sales
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="border-top: 1px solid var(--color-border); background-color: var(--color-bg); margin-top: auto;">
+    <div class="container" style="padding-top: 64px; padding-bottom: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 48px;">
+      <div>
+        <div id="footer-brand-name" style="font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--color-text); margin-bottom: 16px;">Aerosol Webapp</div>
+        <p id="footer-desc" style="font-size: 13px; line-height: 1.65; color: var(--color-text-muted); max-width: 260px;">
+          Precision aerosol formulations engineered for aerospace, automotive, electronics, and medical applications.
+        </p>
+        <p style="font-size: 11px; color: var(--color-text-placeholder); margin-top: 20px;">
+          ISO 9001:2015 · DOT-SP Certified · UN1950 Compliant
+        </p>
+      </div>
+
+      <div>
+        <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 16px;">Products</div>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--color-text-secondary);">
+          <a href="/shop.html?category=Automotive%20%26%20Marine">Automotive & Marine</a>
+          <a href="/shop.html?category=Electronics%20%26%20Precision">Electronics & Precision</a>
+          <a href="/shop.html?category=Industrial%20%26%20Coatings">Industrial & Coatings</a>
+          <a href="/shop.html?category=Sanitization%20%26%20Medical">Sanitization & Medical</a>
+          <a href="/shop.html?category=Art%20%26%20Specialty">Art & Specialty</a>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 16px;">Company</div>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--color-text-secondary);">
+          <a href="/about.html">About Us</a>
+          <a href="/contact.html">Contact Engineering</a>
+          <a href="/faq.html">Safety & Compliance</a>
+          <a href="/admin.html">Operations & Admin Portal</a>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 16px;">Support</div>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--color-text-secondary);">
+          <a href="/track.html">Track Order</a>
+          <a href="/faq.html">Help & FAQs</a>
+          <a href="/contact.html">Returns & RMA</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-border-t">
+      <div class="container" style="padding-top: 20px; padding-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--color-text-muted);">
+        <span>© 2026 Aerosol Webapp Inc. All rights reserved.</span>
+        <div style="display: flex; gap: 20px;">
+          <a href="#privacy">Privacy Policy</a>
+          <a href="#terms">Terms of Service</a>
+          <a href="#hazmat">HazMat Guidelines</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><span style="font-size: 16px;">🔍</span><input id="search-input" type="text" placeholder="Search aerosol formulations, SKUs, categories..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
+  <div id="toast-container"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/auth-component.js"></script>
+  <script>
+    async function loadHomeProducts() {
+      try {
+        fetch('/api/v1/settings')
+          .then(r => r.json())
+          .then(res => {
+            if (res.success && res.data) {
+              const s = res.data;
+              if (s.heroTitle) document.getElementById('home-hero-title').textContent = s.heroTitle;
+              if (s.heroDescription) document.getElementById('home-hero-desc').textContent = s.heroDescription;
+              if (s.brandStatement) document.getElementById('home-brand-statement').textContent = s.brandStatement;
+              if (s.announcementBanner) document.getElementById('home-banner').textContent = s.announcementBanner;
+              if (s.footerDescription) document.getElementById('footer-desc').textContent = s.footerDescription;
+            }
+          }).catch(() => {});
+
+        const res = await fetch('/api/v1/products');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          const prods = data.data;
+
+          const heroRow = document.getElementById('hero-canister-row');
+          if (heroRow) {
+            heroRow.innerHTML = prods.slice(0, 4).map(p => `
+              <a href="/product.html?id=${p.id}" style="flex: 1; min-width: 200px; border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 36px 20px 28px; display: flex; flex-direction: column; align-items: center; gap: 16px; background: var(--color-bg); transition: background-color var(--transition-fast); color: inherit;"
+                 onmouseenter="this.style.backgroundColor='var(--color-bg-subtle)'"
+                 onmouseleave="this.style.backgroundColor='var(--color-bg)'">
+                ${AerosolWebapp.renderCanister(p.color || '#1e3a5f', 140, p.sku ? p.sku.split('-')[1] : '')}
+                <div style="text-align: center;">
+                  <div style="font-size: 12px; font-weight: 600; color: var(--color-text); margin-bottom: 2px;">${p.name}</div>
+                  <div style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 6px;">${p.tagline ? p.tagline.substring(0, 28) + '...' : ''}</div>
+                  <div style="font-size: 13px; font-weight: 600; color: var(--color-text);">$${Number(p.price).toFixed(2)}</div>
+                </div>
+              </a>
+            `).join('');
+          }
+
+          const featuredGrid = document.getElementById('featured-products-grid');
+          if (featuredGrid) {
+            featuredGrid.innerHTML = prods.slice(0, 4).map(p => renderCardHtml(p)).join('');
+          }
+
+          const fullGrid = document.getElementById('full-catalog-grid');
+          if (fullGrid) {
+            fullGrid.innerHTML = prods.slice(0, 8).map(p => renderCardHtml(p)).join('');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      }
+    }
+
+    function renderCardHtml(p) {
+      return `
+        <div class="product-card" onclick="window.location.href='/product.html?id=${p.id}'">
+          <div class="product-card__image-wrap">
+            <div class="product-card__canister" style="padding: 28px 0 20px;">
+              ${AerosolWebapp.renderCanister(p.color || '#1e3a5f', 135, p.sku ? p.sku.split('-')[1] : '')}
+            </div>
+            <div class="product-card__quick-add">
+              <button class="btn btn-inverted btn-sm btn-full" onclick="event.stopPropagation(); AerosolWebapp.addToCart(${JSON.stringify(p).replace(/"/g, '&quot;')});">
+                Add to cart
+              </button>
+            </div>
+          </div>
+          <div class="product-card__info">
+            <div class="product-card__category">${p.category}</div>
+            <div class="product-card__name">${p.name}</div>
+            <div style="font-size: 11px; color: var(--color-text-placeholder); margin-top: 1px;">${p.volume || ''}</div>
+            <div class="product-card__meta">
+              <div class="product-card__rating">
+                <span style="color: #f59e0b;">★</span>
+                <span>${p.rating} <span style="color: var(--color-text-placeholder);">(${p.reviewCount})</span></span>
+              </div>
+              <div class="product-card__price">$${Number(p.price).toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadHomeProducts);
+  </script>
+</body>
+</html>

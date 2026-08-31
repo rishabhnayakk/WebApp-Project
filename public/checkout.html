@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | Aerosol Webapp Precision Aerosols</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="header-logo" aria-label="Aerosol Webapp Home"><span>Aerosol Webapp</span></a>
+      <div style="font-size: 13px; color: var(--color-text-muted);">🔒 Secure HazMat Checkout</div>
+      <a href="/shop.html" class="btn btn-ghost btn-sm">Exit</a>
+    </div>
+  </header>
+
+  <main id="checkout-main">
+    <!-- Injected via script -->
+  </main>
+
+  <footer style="border-top: 1px solid var(--color-border); background-color: var(--color-bg); margin-top: auto;">
+    <div class="container" style="padding: 24px 32px; font-size: 13px; color: var(--color-text-muted); text-align: center;">
+      © 2026 Aerosol Webapp Inc. · All orders ship via DOT-SP Certified Ground Freight.
+    </div>
+  </footer>
+
+  <div id="toast-container"></div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    let step = 1;
+    let contact = { name: '', email: '', phone: '' };
+    let shipping = { name: '', company: '', street: '', city: '', state: '', zip: '', country: 'US' };
+    let shippingMethod = 'standard';
+    let payment = { cardNumber: '', name: '', expiry: '', cvv: '' };
+    let checkoutTermsAccepted = false;
+    let completedOrder = null;
+
+    function initCheckout() {
+      if (AerosolWebapp.user) {
+        contact.name = AerosolWebapp.user.name || '';
+        contact.email = AerosolWebapp.user.email || '';
+        contact.phone = AerosolWebapp.user.phone || '';
+        if (AerosolWebapp.user.addresses?.[0]) {
+          const a = AerosolWebapp.user.addresses[0];
+          shipping.name = a.name;
+          shipping.company = a.company || '';
+          shipping.street = a.street;
+          shipping.city = a.city;
+          shipping.state = a.state;
+          shipping.zip = a.zip;
+        }
+      }
+      renderCheckout();
+    }
+
+    function renderCheckout() {
+      const container = document.getElementById('checkout-main');
+      if (!container) return;
+
+      const subtotal = AerosolWebapp.cart.reduce((s, i) => s + i.price * i.quantity, 0);
+      const totalItems = AerosolWebapp.cart.reduce((s, i) => s + i.quantity, 0);
+
+      let volumeDiscount = 0;
+      if (totalItems >= 12) volumeDiscount = subtotal * 0.15;
+      else if (totalItems >= 6) volumeDiscount = subtotal * 0.08;
+
+      let promoDiscount = 0;
+      if (AerosolWebapp.appliedCoupon?.discountPercent) {
+        promoDiscount = (subtotal * AerosolWebapp.appliedCoupon.discountPercent) / 100;
+      }
+
+      const discount = volumeDiscount + promoDiscount;
+      const shippingCosts = { standard: subtotal >= 150 ? 0 : 14.95, expedited: 32.00, express: 58.00 };
+      const shippingCost = shippingCosts[shippingMethod] || 14.95;
+      const total = Math.max(0, subtotal - discount + shippingCost);
+
+      if (AerosolWebapp.cart.length === 0 && step < 4) {
+        container.innerHTML = `
+          <div class="container" style="padding: 80px 20px; text-align: center;">
+            <h2 class="text-h3" style="margin-bottom: 12px;">Your cart is empty</h2>
+            <p style="color: var(--color-text-muted); margin-bottom: 24px;">Please add formulations to checkout.</p>
+            <a href="/shop.html" class="btn btn-inverted btn-md">Browse catalog</a>
+          </div>
+        `;
+        return;
+      }
+
+      if (step === 4) {
+        container.innerHTML = `
+          <div class="container" style="padding: 80px 20px; max-width: 580px; text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-success-bg); border: 1px solid #a7f3d0; color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 20px;">✓</div>
+            <span class="section-label">Order Confirmed</span>
+            <h1 class="text-h2" style="margin-bottom: 12px;">${completedOrder?.orderNumber || 'DNKL-84920'}</h1>
+            <p style="font-size: 15px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 32px;">
+              Your order has been queued for HazMat ground dispatch with tracking verification.
+            </p>
+
+            <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 24px; text-align: left; background: var(--color-bg); margin-bottom: 32px; font-size: 14px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--color-text-muted);">Confirmation Email</span>
+                <span style="font-weight: 500;">${contact.email}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--color-text-muted);">HazMat Destination</span>
+                <span style="font-weight: 500;">${shipping.city}, ${shipping.state}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--color-text-muted);">Carrier</span>
+                <span style="font-weight: 500;">DOT-SP Ground Freight</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border); font-weight: 600;">
+                <span>Total Paid</span>
+                <span>$${total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: center;">
+              <a href="/track.html?id=${completedOrder?.orderNumber || 'DNKL-84920'}" class="btn btn-inverted btn-md">Track shipment →</a>
+              <a href="/shop.html" class="btn btn-neutral btn-md">Continue shopping</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="container" style="padding-top: 40px; padding-bottom: 80px;">
+          <!-- Progress bar -->
+          <div style="display: flex; gap: 24px; margin-bottom: 36px; font-size: 13px;">
+            <span style="font-weight: ${step === 1 ? '600' : '400'}; color: ${step === 1 ? 'var(--color-text)' : 'var(--color-text-muted)'};">1. Contact</span>
+            <span style="color: var(--color-text-placeholder);">→</span>
+            <span style="font-weight: ${step === 2 ? '600' : '400'}; color: ${step === 2 ? 'var(--color-text)' : 'var(--color-text-muted)'};">2. Shipping</span>
+            <span style="color: var(--color-text-placeholder);">→</span>
+            <span style="font-weight: ${step === 3 ? '600' : '400'}; color: ${step === 3 ? 'var(--color-text)' : 'var(--color-text-muted)'};">3. Payment & Terms</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 380px; gap: 48px;" class="grid-2col">
+            <div>
+              ${step === 1 ? `
+                <h2 class="text-h4" style="margin-bottom: 20px;">Contact Information</h2>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <div>
+                    <label class="label">Full Name *</label>
+                    <input class="input" value="${contact.name}" oninput="contact.name = this.value" placeholder="Jane Smith" required>
+                  </div>
+                  <div>
+                    <label class="label">Work Email *</label>
+                    <input class="input" type="email" value="${contact.email}" oninput="contact.email = this.value" placeholder="you@company.com" required>
+                  </div>
+                  <div>
+                    <label class="label">Phone Number (For HazMat Alerts) *</label>
+                    <input class="input" type="tel" value="${contact.phone}" oninput="contact.phone = this.value" placeholder="+1 (555) 000-0000" required>
+                  </div>
+                  <button class="btn btn-inverted btn-lg" style="margin-top: 12px;" onclick="validateStep1();">
+                    Continue to shipping →
+                  </button>
+                </div>
+              ` : step === 2 ? `
+                <h2 class="text-h4" style="margin-bottom: 20px;">Shipping Destination</h2>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div><label class="label">Full Name</label><input class="input" value="${shipping.name}" oninput="shipping.name = this.value}"></div>
+                    <div><label class="label">Company (Optional)</label><input class="input" value="${shipping.company}" oninput="shipping.company = this.value}"></div>
+                  </div>
+                  <div><label class="label">Street Address</label><input class="input" value="${shipping.street}" oninput="shipping.street = this.value" placeholder="740 Aerospace Blvd"></div>
+                  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px;">
+                    <div><label class="label">City</label><input class="input" value="${shipping.city}" oninput="shipping.city = this.value"></div>
+                    <div><label class="label">State</label><input class="input" value="${shipping.state}" oninput="shipping.state = this.value" maxlength="2"></div>
+                    <div><label class="label">ZIP Code</label><input class="input" value="${shipping.zip}" oninput="shipping.zip = this.value"></div>
+                  </div>
+
+                  <div style="padding: 14px 16px; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-sm); margin-top: 12px; font-size: 13px; color: var(--color-text-secondary);">
+                    <strong>Standard Ground Freight Shipping:</strong> Included on all certified orders (${shippingCost === 0 ? 'Free' : `$${shippingCost.toFixed(2)}`}).
+                  </div>
+
+                  <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    <button class="btn btn-neutral btn-lg" onclick="step = 1; renderCheckout();">Back</button>
+                    <button class="btn btn-inverted btn-lg" style="flex: 1;" onclick="validateStep2();">Continue to payment →</button>
+                  </div>
+                </div>
+              ` : `
+                <h2 class="text-h4" style="margin-bottom: 12px;">Payment & Compliance</h2>
+                <div style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">256-bit encrypted SSL checkout</div>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <div><label class="label">Card Number</label><input class="input" placeholder="4242 •••• •••• 4242" value="${payment.cardNumber}" oninput="payment.cardNumber = this.value"></div>
+                  <div><label class="label">Name on Card</label><input class="input" placeholder="JANE SMITH" value="${payment.name}" oninput="payment.name = this.value"></div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div><label class="label">Expiry</label><input class="input" placeholder="MM / YY" value="${payment.expiry}" oninput="payment.expiry = this.value"></div>
+                    <div><label class="label">CVV</label><input class="input" placeholder="•••" maxlength="4" value="${payment.cvv}" oninput="payment.cvv = this.value"></div>
+                  </div>
+
+                  <div style="padding: 14px; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-sm); margin-top: 8px;">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 12px; line-height: 1.45; color: var(--color-text-secondary);">
+                      <input type="checkbox" id="checkout-terms-check" ${checkoutTermsAccepted ? 'checked' : ''} onchange="checkoutTermsAccepted = this.checked;" style="margin-top: 2px; accent-color: var(--color-text); width: 16px; height: 16px;" required>
+                      <span>
+                        I mark and agree to the <a href="/faq.html" target="_blank" style="text-decoration: underline; color: var(--color-text); font-weight: 600;">Terms & Conditions</a>, DOT UN1950 Aerosol Transport Rules, and HazMat Liability Waiver. *
+                      </span>
+                    </label>
+                  </div>
+
+                  <div id="checkout-error-msg" style="display: none; font-size: 12px; color: var(--color-error); padding: 8px 12px; background: var(--color-error-bg); border-radius: var(--radius-xs);"></div>
+
+                  <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    <button class="btn btn-neutral btn-lg" onclick="step = 2; renderCheckout();">Back</button>
+                    <button class="btn btn-inverted btn-lg" style="flex: 1;" onclick="placeOrder();">
+                      Place Order — $${total.toFixed(2)}
+                    </button>
+                  </div>
+                </div>
+              `}
+            </div>
+
+            <!-- Right: Order Summary Box -->
+            <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 28px; background: var(--color-bg); align-self: flex-start;">
+              <span class="section-label">Summary</span>
+              <div style="margin-bottom: 20px;">
+                ${AerosolWebapp.cart.map(item => `
+                  <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--color-border); font-size: 14px;">
+                    <div>
+                      <div style="font-weight: 500;">${item.name}</div>
+                      <div style="font-size: 12px; color: var(--color-text-muted);">Qty ${item.quantity} · ${item.volume}</div>
+                    </div>
+                    <div style="font-weight: 600;">$${(item.price * item.quantity).toFixed(2)}</div>
+                  </div>
+                `).join('')}
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; color: var(--color-text-muted);">
+                  <span>Subtotal</span>
+                  <span>$${subtotal.toFixed(2)}</span>
+                </div>
+                ${discount > 0 ? `
+                  <div style="display: flex; justify-content: space-between; color: var(--color-success);">
+                    <span>Discount</span>
+                    <span>−$${discount.toFixed(2)}</span>
+                  </div>
+                ` : ''}
+                <div style="display: flex; justify-content: space-between; color: var(--color-text-muted);">
+                  <span>Shipping (${shippingMethod})</span>
+                  <span>${shippingCost === 0 ? 'Free' : `$${shippingCost.toFixed(2)}`}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; padding-top: 12px; border-top: 1px solid var(--color-border); color: var(--color-text);">
+                  <span>Total</span>
+                  <span>$${total.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div style="padding: 12px; background: var(--color-bg-subtle); border-radius: var(--radius-sm); font-size: 11px; color: var(--color-text-muted);">
+                ✓ DOT-SP Limited Quantity Ground Certification
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function validateStep1() {
+      if (!contact.name || !contact.email) {
+        AerosolWebapp.showToast('Please enter your name and email.');
+        return;
+      }
+      step = 2;
+      renderCheckout();
+    }
+
+    function validateStep2() {
+      if (!shipping.street || !shipping.city || !shipping.state) {
+        AerosolWebapp.showToast('Please complete street address, city, and state.');
+        return;
+      }
+      step = 3;
+      renderCheckout();
+    }
+
+    function placeOrder() {
+      const termsCheck = document.getElementById('checkout-terms-check');
+      const isAccepted = termsCheck ? termsCheck.checked : checkoutTermsAccepted;
+      const errorMsg = document.getElementById('checkout-error-msg');
+
+      if (!isAccepted) {
+        if (errorMsg) {
+          errorMsg.textContent = 'You must mark the checkbox to agree to the Terms & Conditions and HazMat Compliance to place your order.';
+          errorMsg.style.display = 'block';
+        } else {
+          AerosolWebapp.showToast('Please mark the box to agree to the Terms & Conditions.');
+        }
+        return;
+      }
+
+      const orderNum = 'DNKL-' + Math.floor(10000 + Math.random() * 90000);
+      completedOrder = {
+        orderNumber: orderNum,
+        createdAt: new Date().toISOString(),
+        status: 'Processing',
+      };
+      step = 4;
+      AerosolWebapp.cart = [];
+      AerosolWebapp.appliedCoupon = null;
+      AerosolWebapp.saveCart();
+      AerosolWebapp.showToast(`Order ${orderNum} created successfully!`);
+      renderCheckout();
+    }
+
+    document.addEventListener('DOMContentLoaded', initCheckout);
+  </script>
+</body>
+</html>

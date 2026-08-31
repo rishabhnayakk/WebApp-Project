@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Aerosol Webapp | Precision Aerosol Technologies</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="header-logo" aria-label="Aerosol Webapp Home"><span>Aerosol Webapp</span></a>
+      <nav class="header-nav hidden-mobile">
+        <a href="/index.html" class="nav-link">Home</a>
+        <a href="/shop.html" class="nav-link">Products</a>
+        <a href="/about.html" class="nav-link active">About</a>
+        <a href="/faq.html" class="nav-link">Safety & SDS</a>
+        <a href="/contact.html" class="nav-link">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm hidden-mobile" onclick="AerosolWebapp.toggleSearch(true)"><span style="font-size: 13px; font-weight: 500;">Search</span></button>
+        <a href="/wishlist.html" class="btn btn-ghost btn-sm hidden-mobile" style="position: relative;">
+          <span style="font-size: 13px; font-weight: 500;">Wishlist</span>
+          <span class="header-wish-badge badge-count" style="display: none;">0</span>
+        </a>
+        <button class="btn btn-ghost btn-sm" onclick="AerosolWebapp.handleUserIconClick()" aria-label="User Account"><span style="font-size: 13px; font-weight: 500;">Account</span></button>
+        <button class="btn btn-neutral btn-sm" onclick="AerosolWebapp.toggleCart(true)" style="position: relative; padding: 7px 14px; gap: 6px;">
+          <span class="header-cart-badge badge-count" style="display: none; top: -4px; right: -4px;">0</span>
+          <span style="font-size: 13px; font-weight: 500;">Cart</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="section-border-b">
+      <div class="container" style="padding-top: 40px; padding-bottom: 0;">
+        <span class="section-label">Company</span>
+        <h1 class="text-display" style="max-width: 720px; margin-bottom: 24px;">
+          Engineering precision aerosols since 2011.
+        </h1>
+        <p class="text-large" style="max-width: 560px; margin-bottom: 64px;">
+          Aerosol Webapp develops professional-grade formulations for aerospace, automotive, electronics, and medical applications.
+        </p>
+
+        <!-- Stats Strip -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); border-top: 1px solid var(--color-border); border-left: 1px solid var(--color-border);">
+          <div style="border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 32px;">
+            <div style="font-size: 32px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px;">2.4M+</div>
+            <div style="font-size: 13px; color: var(--color-text-muted);">Canisters shipped annually</div>
+          </div>
+          <div style="border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 32px;">
+            <div style="font-size: 32px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px;">36</div>
+            <div style="font-size: 13px; color: var(--color-text-muted);">Countries served</div>
+          </div>
+          <div style="border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 32px;">
+            <div style="font-size: 32px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px;">28</div>
+            <div style="font-size: 13px; color: var(--color-text-muted);">Active formulations</div>
+          </div>
+          <div style="border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 32px;">
+            <div style="font-size: 32px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px;">ISO</div>
+            <div style="font-size: 13px; color: var(--color-text-muted);">9001:2015 certified</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mission & History -->
+    <div class="container" style="padding-top: 80px; padding-bottom: 80px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 64px;">
+        <div>
+          <span class="section-label">Mission</span>
+          <h2 class="text-h2" style="margin-bottom: 16px;">Formulated for extreme conditions.</h2>
+          <p style="font-size: 15px; color: var(--color-text-secondary); line-height: 1.7;">
+            From carbon-fibre winglets to medical sterilization chambers, our aerosols deliver exact micronic atomization with zero solvent sputter and GWP &lt; 1 eco-propellants.
+          </p>
+        </div>
+        <div>
+          <span class="section-label">History & Patents</span>
+          <div style="display: flex; flex-direction: column; gap: 16px; font-size: 14px;">
+            <div><strong>2011</strong> — Founded in Seattle with high-temp industrial lubricants.</div>
+            <div><strong>2017</strong> — Invented 360° all-angle inverted dual-port valve.</div>
+            <div><strong>2024</strong> — Full transition to Eco-HFO 1234ze propellants worldwide.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer style="border-top: 1px solid var(--color-border); background-color: var(--color-bg); margin-top: auto;">
+    <div class="container" style="padding: 24px 32px; font-size: 13px; color: var(--color-text-muted); display: flex; justify-content: space-between;">
+      <span>© 2026 Aerosol Webapp Inc.</span>
+      <a href="/shop.html">Explore Products</a>
+    </div>
+  </footer>
+
+  <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 64px; gap: 12px;"><span style="font-size: 18px;">🔍</span><input id="search-input" type="text" placeholder="Search aerosol formulations..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 16px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 16px; padding-bottom: 24px;"></div></div></div>
+  <div id="toast-container"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/auth-component.js"></script>
+</body>
+</html>

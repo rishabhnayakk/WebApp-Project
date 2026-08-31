@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In & Account Authentication | Aerosol Webapp</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body style="background: var(--color-bg); display: flex; flex-direction: column; min-height: 100vh;">
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/index.html" class="header-logo" aria-label="Aerosol Webapp Home">
+        <span>Aerosol Webapp</span>
+      </a>
+
+      <nav class="header-nav hidden-mobile">
+        <a href="/index.html" class="nav-link">Home</a>
+        <a href="/shop.html" class="nav-link">Products</a>
+        <a href="/about.html" class="nav-link">About</a>
+        <a href="/faq.html" class="nav-link">Safety & SDS</a>
+        <a href="/contact.html" class="nav-link">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="/shop.html" class="btn btn-neutral btn-sm">Explore Shop ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 16px;">
+    <div id="unified-auth-container" style="width: 100%;">
+      <!-- Hydrated by AerosolAuth -->
+    </div>
+  </main>
+
+  <footer style="border-top: 1px solid var(--color-border); background-color: var(--color-bg); margin-top: auto;">
+    <div class="container" style="padding: 24px 32px; font-size: 12px; color: var(--color-text-muted); text-align: center;">
+      © 2026 Aerosol Webapp Inc. · Unified Authentication Platform · ISO 9001:2015 Compliant
+    </div>
+  </footer>
+
+  <div id="toast-container"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/auth-component.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      AerosolAuth.init('unified-auth-container');
+    });
+  </script>
+</body>
+</html>
