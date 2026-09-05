@@ -67,6 +67,11 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/admin.html'));
 });
 
+// Return JSON 404 for any unhandled API calls instead of serving HTML
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ success: false, message: `API endpoint ${req.originalUrl} not found.` });
+});
+
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
