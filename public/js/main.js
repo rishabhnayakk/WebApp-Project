@@ -58,6 +58,30 @@ const AerosolWebapp = {
       b.textContent = this.wishlist.length;
       b.style.display = this.wishlist.length > 0 ? 'flex' : 'none';
     });
+
+    // Dynamic Login / Account status in header
+    const u = this.user || JSON.parse(localStorage.getItem('aerosol_user') || 'null');
+    const authNavLinks = document.querySelectorAll('#header-auth-nav-link, .header-auth-nav-link');
+    const userBtnSpans = document.querySelectorAll('#header-user-btn span, .header-user-btn span');
+
+    if (u && u.id) {
+      const isAdm = u.role === 'ADMIN' || u.role === 'SUPER_ADMIN';
+      authNavLinks.forEach(l => {
+        l.textContent = isAdm ? 'Admin ↗' : 'Account';
+        l.href = isAdm ? '/admin.html' : '/account.html';
+      });
+      userBtnSpans.forEach(s => {
+        s.textContent = u.name ? (u.name.split(' ')[0] || 'User') : (isAdm ? 'Admin' : 'Account');
+      });
+    } else {
+      authNavLinks.forEach(l => {
+        l.textContent = 'Login';
+        l.href = '/login.html';
+      });
+      userBtnSpans.forEach(s => {
+        s.textContent = 'Account';
+      });
+    }
   },
 
   addToCart(product, qty = 1, showToastMsg = true) {
@@ -346,9 +370,13 @@ const AerosolWebapp = {
   handleUserIconClick() {
     const u = this.user || JSON.parse(localStorage.getItem('aerosol_user') || 'null');
     if (u && u.id) {
-      window.location.href = '/account.html';
+      if (u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') {
+        window.location.href = '/admin.html';
+      } else {
+        window.location.href = '/account.html';
+      }
     } else {
-      this.openAuthModal('/account.html');
+      window.location.href = '/login.html';
     }
   },
 

@@ -143,11 +143,11 @@ router.post('/admin-login', rateLimiter(20, 60000), (req, res) => {
 });
 
 // 1. EMAIL-FIRST LOOKUP (Rate Limited)
-router.post('/email-lookup', rateLimiter(15, 60000), (req, res) => {
+router.post('/email-lookup', rateLimiter(25, 60000), (req, res) => {
   const { email } = req.body;
 
-  if (!email || !email.includes('@')) {
-    return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+  if (!email || !email.trim()) {
+    return res.status(400).json({ success: false, message: 'Please enter your email address or Admin ID.' });
   }
 
   const cleanEmail = email.trim().toLowerCase();
@@ -161,11 +161,11 @@ router.post('/email-lookup', rateLimiter(15, 60000), (req, res) => {
     return res.json({
       success: true,
       exists: true,
-      email: adminEmail,
+      email: cleanEmail,
       name: 'Operations Administrator',
       isGoogleConnected: false,
       role: 'ADMIN',
-      requiresMfa: true
+      requiresMfa: false
     });
   }
 
@@ -190,12 +190,12 @@ router.post('/email-lookup', rateLimiter(15, 60000), (req, res) => {
   });
 });
 
-// 2. UNIFIED LOGIN (Rate-Limited, Safe Error Messages, Admin MFA Simulation)
-router.post('/login', rateLimiter(10, 60000), (req, res) => {
-  const { email, password, mfaCode, redirect } = req.body;
+// 2. UNIFIED LOGIN (Rate-Limited, Safe Error Messages)
+router.post('/login', rateLimiter(20, 60000), (req, res) => {
+  const { email, password, redirect } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email and password are required.' });
+    return res.status(400).json({ success: false, message: 'Email/Admin ID and password are required.' });
   }
 
   const q = email.trim().toLowerCase();
@@ -204,30 +204,21 @@ router.post('/login', rateLimiter(10, 60000), (req, res) => {
   const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
   const expectedAdminPass = (process.env.ADMIN_PASSWORD || '').trim();
 
-  // Admin authentication with MFA requirement - strictly using .env
+  // Admin authentication - strictly using .env
   if (expectedAdminPass && ((adminId && q === adminId) || (adminEmail && q === adminEmail)) && password === expectedAdminPass) {
-    // If MFA code is missing or incorrect for Admin
-    if (!mfaCode || mfaCode.trim() !== '123456') {
-      logAudit('ADMIN_MFA_PROMPT', { email: q });
-      return res.json({
-        success: true,
-        requiresMfa: true,
-        message: 'Admin authorization requires 2FA/MFA verification. Please enter your 6-digit authenticator code (Default demo: 123456).'
-      });
-    }
-
-    const adminUser = usersDB.find((u) => u.role === 'ADMIN') || {
-      id: 'usr-admin',
+    const adminUser = {
+      id: process.env.ADMIN_ID || 'admin',
       name: 'Operations Administrator',
-      email: adminEmail,
-      role: 'ADMIN'
+      email: process.env.ADMIN_EMAIL || 'admin@aerosolwebapp.com',
+      role: 'ADMIN',
+      tier: 'Super Administrator'
     };
     const token = generateToken(adminUser);
     logAudit('ADMIN_LOGIN_SUCCESS', { email: q, ip: req.ip });
 
     return res.json({
       success: true,
-      message: 'Admin 2FA verified. Access granted.',
+      message: 'Welcome Administrator! Access granted.',
       token,
       redirectUrl: '/admin.html',
       user: {
@@ -235,8 +226,7 @@ router.post('/login', rateLimiter(10, 60000), (req, res) => {
         name: adminUser.name,
         email: adminUser.email,
         role: 'ADMIN',
-        tier: 'Super Administrator',
-        mfaVerified: true
+        tier: 'Super Administrator'
       }
     });
   }
@@ -246,7 +236,6 @@ router.post('/login', rateLimiter(10, 60000), (req, res) => {
 
   if (!user || (user.password && user.password !== password)) {
     logAudit('LOGIN_FAILED', { email: q, ip: req.ip });
-    // Safe non-enumeration error message
     return res.status(401).json({
       success: false,
       message: 'The email or password you entered is incorrect. Try again or click Forgot Password.'
@@ -254,22 +243,21 @@ router.post('/login', rateLimiter(10, 60000), (req, res) => {
   }
 
   const token = generateToken(user);
-  const isTargetAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
-  const targetRedirect = isTargetAdmin ? '/admin.html' : safeRedirect;
-
   logAudit('LOGIN_SUCCESS', { userId: user.id, email: user.email });
 
   res.json({
     success: true,
     message: `Welcome back, ${user.name}!`,
     token,
-    redirectUrl: targetRedirect,
+    redirectUrl: safeRedirect,
     user: {
       id: user.id,
       name: user.name,
       email: user.email,
       role: user.role || 'CUSTOMER',
       company: user.company || '',
+      phone: user.phone || '',
+      addresses: user.addresses || [],
       tier: user.tier || 'Standard Member',
       isEmailVerified: user.isEmailVerified,
       authProviders: user.authProviders || ['email']
@@ -515,10 +503,46 @@ router.get('/me', requireAuth, (req, res) => {
       email: user.email,
       role: user.role || 'CUSTOMER',
       company: user.company || '',
+      phone: user.phone || '',
+      addresses: user.addresses || [],
       tier: user.tier || 'Standard Member',
       isEmailVerified: user.isEmailVerified ?? true,
       authProviders: user.authProviders || ['email']
     }
+  });
+});
+
+// 9. UPDATE PROFILE DETAILS
+router.put('/profile', (req, res) => {
+  const { email, name, phone, company } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'User email is required.' });
+
+  const user = usersDB.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
+  if (user) {
+    if (name) user.name = name.trim();
+    if (phone) user.phone = phone.trim();
+    if (company !== undefined) user.company = company.trim();
+  }
+  res.json({
+    success: true,
+    message: 'Profile updated successfully!',
+    user: user || { email, name, phone, company }
+  });
+});
+
+// 10. UPDATE SAVED ADDRESSES
+router.put('/addresses', (req, res) => {
+  const { email, addresses } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'User email is required.' });
+
+  const user = usersDB.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
+  if (user) {
+    user.addresses = Array.isArray(addresses) ? addresses : [];
+  }
+  res.json({
+    success: true,
+    message: 'Addresses saved successfully!',
+    addresses: user ? user.addresses : addresses
   });
 });
 

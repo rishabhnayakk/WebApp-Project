@@ -277,7 +277,7 @@
       renderCheckout();
     }
 
-    function placeOrder() {
+    async function placeOrder() {
       const termsCheck = document.getElementById('checkout-terms-check');
       const isAccepted = termsCheck ? termsCheck.checked : checkoutTermsAccepted;
       const errorMsg = document.getElementById('checkout-error-msg');
@@ -293,6 +293,68 @@
       }
 
       const orderNum = 'DNKL-' + Math.floor(10000 + Math.random() * 90000);
+      const subtotal = AerosolWebapp.cart.reduce((s, i) => s + i.price * i.quantity, 0);
+      const itemsSnapshot = AerosolWebapp.cart.map(c => ({
+        id: c.id,
+        name: c.name,
+        quantity: c.quantity,
+        price: c.price,
+        volume: c.volume || '500ml'
+      }));
+
+      const newOrderData = {
+        id: orderNum,
+        customer: {
+          name: contact.name || 'Valued Customer',
+          email: contact.email || 'customer@example.com',
+          company: contact.company || '',
+          phone: contact.phone || '',
+          address: `${shipping.street || ''}, ${shipping.city || ''}, ${shipping.state || ''} ${shipping.zip || ''}`.trim()
+        },
+        items: itemsSnapshot,
+        subtotal,
+        total,
+        paymentMethod: 'Credit Card (Encrypted)',
+        status: 'Processing',
+        placedAt: new Date().toISOString()
+      };
+
+      try {
+        await fetch('/api/v1/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newOrderData)
+        });
+      } catch (err) {
+        console.warn('Backend order sync notice:', err);
+      }
+
+      // Save to user orders history
+      const userEmail = contact.email || (AerosolWebapp.user ? AerosolWebapp.user.email : 'guest');
+      const localKey = 'aerosol_orders_' + userEmail;
+      const existingUserOrders = JSON.parse(localStorage.getItem(localKey) || '[]');
+      existingUserOrders.unshift(newOrderData);
+      localStorage.setItem(localKey, JSON.stringify(existingUserOrders));
+
+      // Auto-save delivery address to customer profile if logged in
+      if (AerosolWebapp.user && shipping.street) {
+        if (!AerosolWebapp.user.addresses) AerosolWebapp.user.addresses = [];
+        const exists = AerosolWebapp.user.addresses.some(a => a.street === shipping.street);
+        if (!exists) {
+          AerosolWebapp.user.addresses.push({
+            id: 'addr-' + Date.now(),
+            name: contact.name || AerosolWebapp.user.name,
+            company: contact.company || '',
+            street: shipping.street,
+            city: shipping.city,
+            state: shipping.state,
+            zip: shipping.zip,
+            phone: contact.phone || ''
+          });
+          AerosolWebapp.saveUser();
+        }
+      }
+
       completedOrder = {
         orderNumber: orderNum,
         createdAt: new Date().toISOString(),

@@ -99,12 +99,12 @@ const AerosolAuth = {
         ${this.step === 'email' ? `
           <form onsubmit="AerosolAuth.handleEmailSubmit(event)">
             <div style="margin-bottom: 18px;">
-              <label class="label">Email address</label>
-              <input type="email" id="auth-email-input" class="input input-lg" placeholder="name@example.com" required value="${this.email}" autocomplete="email">
+              <label class="label">Email address or Admin ID</label>
+              <input type="text" id="auth-email-input" class="input input-lg" placeholder="Enter your email or Admin ID" required value="${this.email}" autocomplete="username">
             </div>
 
             <button type="submit" class="btn btn-inverted btn-lg btn-full" ${this.loading ? 'disabled' : ''} style="margin-bottom: 20px;">
-              ${this.loading ? 'Checking email...' : 'Continue →'}
+              ${this.loading ? 'Checking account...' : 'Continue →'}
             </button>
           </form>
 
@@ -138,7 +138,7 @@ const AerosolAuth = {
                 <label class="label" style="margin-bottom: 0;">Password</label>
                 <button type="button" onclick="AerosolAuth.togglePasswordVisibility('login-pass-input')" style="font-size: 11px; color: var(--color-text-muted); background: none; border: none; cursor: pointer;">Show</button>
               </div>
-              <input type="password" id="login-pass-input" class="input input-lg" placeholder="••••••••••••" required autocomplete="current-password" value="sterling123">
+              <input type="password" id="login-pass-input" class="input input-lg" placeholder="Enter your password" required autocomplete="current-password">
             </div>
 
             <button type="submit" class="btn btn-inverted btn-lg btn-full" ${this.loading ? 'disabled' : ''} style="margin-bottom: 16px;">
@@ -276,12 +276,27 @@ const AerosolAuth = {
           localStorage.setItem('aerosol_token', data.token);
         }
 
+        // If admin logged in through unified login, store admin session for admin console
+        if (data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN') {
+          const adminSession = {
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            role: 'ADMIN',
+            tier: data.user.tier || 'Super Administrator',
+            token: data.token
+          };
+          sessionStorage.setItem('aerosol_admin_auth', JSON.stringify(adminSession));
+          localStorage.setItem('aerosol_admin_auth', JSON.stringify(adminSession));
+        }
+
+        AerosolWebapp.updateHeaderBadges();
         AerosolWebapp.showToast(data.message || `Welcome back, ${data.user.name}!`);
 
         if (this.onSuccess) {
           this.onSuccess(data);
         } else {
-          const target = data.redirectUrl || (data.user.role === 'ADMIN' ? '/admin.html' : '/account.html');
+          const target = data.user.role === 'ADMIN' ? '/admin.html' : (data.redirectUrl || '/account.html');
           setTimeout(() => { window.location.href = target; }, 300);
         }
       } else {

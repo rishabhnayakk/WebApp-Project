@@ -22,6 +22,7 @@
         <a href="/about.html" class="nav-link">About</a>
         <a href="/faq.html" class="nav-link">Safety & SDS</a>
         <a href="/contact.html" class="nav-link">Contact</a>
+        <a href="/login.html" id="header-auth-nav-link" class="nav-link">Login</a>
       </nav>
 
       <div class="header-actions">
@@ -32,7 +33,7 @@
           <span style="font-size: 13px; font-weight: 500;">Wishlist</span>
           <span class="header-wish-badge badge-count" style="display: none;">0</span>
         </a>
-        <button class="btn btn-ghost btn-sm" onclick="AerosolWebapp.handleUserIconClick()" aria-label="User Account" title="User Details / Sign In">
+        <button class="btn btn-ghost btn-sm" onclick="AerosolWebapp.handleUserIconClick()" aria-label="User Account" title="User Details / Sign In" id="header-user-btn">
           <span style="font-size: 13px; font-weight: 500;">Account</span>
         </button>
         <button class="btn btn-neutral btn-sm" onclick="AerosolWebapp.toggleCart(true)" style="position: relative; padding: 7px 14px; gap: 6px;">
