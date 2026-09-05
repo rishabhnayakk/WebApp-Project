@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node server/index.js",
-    "server": "node server/index.js"
+    "server": "node server/index.js",
+    "build": "echo 'Build complete'"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
