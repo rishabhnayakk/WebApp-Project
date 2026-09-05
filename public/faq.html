@@ -93,7 +93,7 @@
   </footer>
 
   <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
-  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 64px; gap: 12px;"><span style="font-size: 18px;">🔍</span><input id="search-input" type="text" placeholder="Search aerosol formulations..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 16px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 16px; padding-bottom: 24px;"></div></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 64px; gap: 12px;"><span style="font-size: 18px;">🔍</span><input id="search-input" type="search" placeholder="Search aerosol formulations..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 16px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 16px; padding-bottom: 24px;"></div></div></div>
   <div id="toast-container"></div>
 
   <script src="/js/main.js"></script>

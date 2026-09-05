@@ -55,7 +55,7 @@
   </footer>
 
   <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
-  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><span style="font-size: 16px;">🔍</span><input id="search-input" type="text" placeholder="Search aerosol formulations..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><span style="font-size: 16px;">🔍</span><input id="search-input" type="search" placeholder="Search aerosol formulations..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
   <div id="toast-container"></div>
 
   <script src="/js/main.js"></script>
@@ -224,24 +224,24 @@
                     <div style="display: flex; flex-direction: column; gap: 14px;">
                       <div>
                         <label class="label">Full Name *</label>
-                        <input id="addr-name" class="input" placeholder="Jane Smith" required value="${u.name || ''}">
+                        <input type="text" id="addr-name" class="input" placeholder="Jane Smith" required value="${u.name || ''}">
                       </div>
                       <div>
                         <label class="label">Company / Facility (Optional)</label>
-                        <input id="addr-company" class="input" placeholder="Acme Logistics Ltd" value="${u.company || ''}">
+                        <input type="text" id="addr-company" class="input" placeholder="Acme Logistics Ltd" value="${u.company || ''}">
                       </div>
                       <div>
                         <label class="label">Street Address *</label>
-                        <input id="addr-street" class="input" placeholder="100 Precision Way, Suite 400" required>
+                        <textarea id="addr-street" class="input" rows="2" placeholder="100 Precision Way, Suite 400" required></textarea>
                       </div>
                       <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
-                        <div><label class="label">City *</label><input id="addr-city" class="input" placeholder="Seattle" required></div>
-                        <div><label class="label">State *</label><input id="addr-state" class="input" placeholder="WA" required maxlength="2"></div>
-                        <div><label class="label">ZIP *</label><input id="addr-zip" class="input" placeholder="98108" required></div>
+                        <div><label class="label">City *</label><input type="text" id="addr-city" class="input" placeholder="Seattle" required></div>
+                        <div><label class="label">State *</label><input type="text" id="addr-state" class="input" placeholder="WA" required maxlength="2"></div>
+                        <div><label class="label">ZIP *</label><input type="text" id="addr-zip" class="input" placeholder="98108" required></div>
                       </div>
                       <div>
                         <label class="label">Phone Number for HazMat Delivery *</label>
-                        <input id="addr-phone" class="input" placeholder="+1 (555) 000-0000" required value="${u.phone || ''}">
+                        <input type="tel" id="addr-phone" class="input" placeholder="+1 (555) 000-0000" required value="${u.phone || ''}">
                       </div>
                       <button type="submit" class="btn btn-inverted btn-md" style="margin-top: 8px;">
                         Save Delivery Address →
@@ -279,19 +279,19 @@
                 <div style="display: flex; flex-direction: column; gap: 16px;">
                   <div>
                     <label class="label">Full Name *</label>
-                    <input id="prof-name" class="input" value="${u.name || ''}" required placeholder="Dr. Marcus Sterling">
+                    <input type="text" id="prof-name" class="input" value="${u.name || ''}" required placeholder="Dr. Marcus Sterling">
                   </div>
                   <div>
                     <label class="label">Email Address *</label>
-                    <input id="prof-email" class="input" value="${u.email || ''}" required placeholder="name@example.com">
+                    <input type="email" id="prof-email" class="input" value="${u.email || ''}" required placeholder="name@example.com">
                   </div>
                   <div>
                     <label class="label">Mobile / Phone Number *</label>
-                    <input id="prof-phone" class="input" value="${u.phone || ''}" required placeholder="+1 (555) 000-0000">
+                    <input type="tel" id="prof-phone" class="input" value="${u.phone || ''}" required placeholder="+1 (555) 000-0000">
                   </div>
                   <div>
                     <label class="label">Company / Organization (Optional)</label>
-                    <input id="prof-company" class="input" value="${u.company || ''}" placeholder="NovaAero Dynamics LLC">
+                    <input type="text" id="prof-company" class="input" value="${u.company || ''}" placeholder="NovaAero Dynamics LLC">
                   </div>
                   <div style="padding: 12px; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 12px; color: var(--color-text-muted);">
                     Account Tier: <strong>${u.tier || 'Standard Member'}</strong> · Role: <strong>${u.role || 'CUSTOMER'}</strong> · Terms Agreed: <strong style="color: var(--color-success);">Yes</strong>

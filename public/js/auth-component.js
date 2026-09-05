@@ -200,13 +200,13 @@ const AerosolAuth = {
         ${this.step === 'email' ? `
           <div style="margin-bottom: 20px; text-align: left;">
             <h1 style="font-size: 20px; font-weight: 700; color: var(--color-text); margin: 0 0 4px 0;">Welcome back</h1>
-            <p style="font-size: 13px; color: var(--color-text-muted); margin: 0;">Sign in to your account with your email address or Admin ID.</p>
+            <p style="font-size: 13px; color: var(--color-text-muted); margin: 0;">Sign in to your account with your email address.</p>
           </div>
 
           <form onsubmit="AerosolAuth.handleEmailSubmit(event)">
             <div style="margin-bottom: 18px; text-align: left;">
-              <label class="label" for="auth-email-input" style="font-weight: 600; margin-bottom: 6px; display: block;">Email address or Admin ID</label>
-              <input type="text" id="auth-email-input" class="input input-lg" placeholder="Enter your email or Admin ID" required value="${this.email}" autocomplete="username">
+              <label class="label" for="auth-email-input" style="font-weight: 600; margin-bottom: 6px; display: block;">Email address</label>
+              <input type="email" id="auth-email-input" class="input input-lg" placeholder="Enter your email address" required value="${this.email}" autocomplete="username">
             </div>
 
             <button type="submit" class="btn btn-inverted btn-lg btn-full" ${this.loading ? 'disabled' : ''} style="margin-bottom: 20px;">
