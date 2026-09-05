@@ -265,26 +265,48 @@ router.post('/login', rateLimiter(20, 60000), (req, res) => {
   });
 });
 
-// 3. REGISTRATION (Public Signup ALWAYS creates CUSTOMER only)
+// 3. REGISTRATION (Customer Signup with Required & Optional fields, Dual Legal Consent, and Opt-in Marketing)
 router.post('/register', rateLimiter(10, 60000), (req, res) => {
-  const { email, name, password, termsAccepted, redirect } = req.body;
-
-  if (!email || !email.includes('@')) {
-    return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
-  }
+  const {
+    email,
+    name,
+    password,
+    confirmPassword,
+    termsAccepted,
+    privacyAccepted,
+    phone,
+    dob,
+    marketingAccepted,
+    redirect
+  } = req.body;
 
   if (!name || name.trim().length < 2) {
     return res.status(400).json({ success: false, message: 'Please enter your full name.' });
+  }
+
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
   }
 
   if (!password || password.length < 6) {
     return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
   }
 
+  if (confirmPassword && password !== confirmPassword) {
+    return res.status(400).json({ success: false, message: 'Passwords do not match. Please re-enter your password.' });
+  }
+
   if (!termsAccepted) {
     return res.status(400).json({
       success: false,
-      message: 'You must mark and agree to the Terms of Service & HazMat Guidelines to create an account.'
+      message: 'You must agree to the Terms & Conditions and understand the store policies.'
+    });
+  }
+
+  if (!privacyAccepted) {
+    return res.status(400).json({
+      success: false,
+      message: 'You must confirm that you have read and understand the Privacy Policy.'
     });
   }
 
@@ -293,33 +315,28 @@ router.post('/register', rateLimiter(10, 60000), (req, res) => {
   const existing = usersDB.find((u) => u.email.toLowerCase() === cleanEmail && u.status !== 'DEACTIVATED');
 
   if (existing) {
-    const token = generateToken(existing);
-    return res.json({
-      success: true,
-      message: `An account already exists for ${cleanEmail}. Signed in successfully!`,
-      token,
-      redirectUrl: safeRedirect,
-      user: {
-        id: existing.id,
-        name: existing.name,
-        email: existing.email,
-        role: existing.role,
-        tier: existing.tier
-      }
+    return res.status(409).json({
+      success: false,
+      message: `An account already exists for ${cleanEmail}. Please log in instead.`
     });
   }
 
   // FORCE role: 'CUSTOMER' regardless of any client input
+  // No payment details, UPI ID, delivery addresses, government IDs, or bank details collected at signup.
   const newUser = {
     id: `usr-${Date.now()}`,
     name: name.trim(),
     email: cleanEmail,
     password,
+    phone: (phone || '').trim(),
+    dob: (dob || '').trim(),
     role: 'CUSTOMER',
     company: '',
     tier: 'Standard Member',
     discountTier: 0,
     termsAccepted: true,
+    privacyAccepted: true,
+    marketingAccepted: Boolean(marketingAccepted),
     isEmailVerified: false,
     mfaEnabled: false,
     authProviders: ['email'],
@@ -331,19 +348,28 @@ router.post('/register', rateLimiter(10, 60000), (req, res) => {
   usersDB.push(newUser);
   const token = generateToken(newUser);
 
-  logAudit('USER_REGISTERED', { userId: newUser.id, email: newUser.email, role: 'CUSTOMER' });
+  logAudit('USER_REGISTERED', {
+    userId: newUser.id,
+    email: newUser.email,
+    marketingAccepted: newUser.marketingAccepted,
+    role: 'CUSTOMER'
+  });
 
   res.status(201).json({
     success: true,
-    message: 'Account created successfully! Please check your email to complete verification.',
+    message: `Account created successfully! Welcome to Aerosol Webapp, ${newUser.name}.`,
     token,
     redirectUrl: safeRedirect,
     user: {
       id: newUser.id,
       name: newUser.name,
       email: newUser.email,
+      phone: newUser.phone,
+      dob: newUser.dob,
       role: 'CUSTOMER',
+      company: newUser.company,
       tier: newUser.tier,
+      addresses: newUser.addresses,
       isEmailVerified: false,
       authProviders: ['email']
     }
