@@ -22,12 +22,12 @@
       <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
         <div style="margin-bottom: 16px;">
           <label class="label">Admin ID or Email</label>
-          <input type="text" id="login-admin-id" class="input input-lg" placeholder="admin" required autocomplete="username" value="admin">
+          <input type="text" id="login-admin-id" class="input input-lg" placeholder="Enter Admin ID or Email" required autocomplete="username">
         </div>
 
         <div style="margin-bottom: 20px;">
           <label class="label">Password</label>
-          <input type="password" id="login-admin-password" class="input input-lg" placeholder="••••••••" required autocomplete="current-password" value="admin123">
+          <input type="password" id="login-admin-password" class="input input-lg" placeholder="Enter Password" required autocomplete="current-password">
         </div>
 
         <div id="login-error-msg" style="display: none; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: var(--color-error); background: var(--color-error-bg); border: 1px solid #fca5a5; border-radius: var(--radius-sm);"></div>
@@ -35,11 +35,6 @@
         <button type="submit" id="login-submit-btn" class="btn btn-inverted btn-lg btn-full" style="margin-bottom: 16px;">
           Sign In to Admin Panel →
         </button>
-
-        <div style="padding: 12px 14px; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">
-          <strong>Default Admin Credentials:</strong><br>
-          Admin ID: <code style="font-family: var(--font-mono); color: var(--color-text);">admin</code> &nbsp;|&nbsp; Password: <code style="font-family: var(--font-mono); color: var(--color-text);">admin123</code>
-        </div>
       </form>
 
       <div style="margin-top: 24px; text-align: center;">

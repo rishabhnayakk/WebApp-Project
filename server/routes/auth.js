@@ -50,8 +50,8 @@ const usersDB = [
   {
     id: 'usr-admin',
     name: 'Operations Administrator',
-    email: process.env.ADMIN_EMAIL || 'admin@aerosolwebapp.com',
-    password: process.env.ADMIN_PASSWORD || 'admin123',
+    email: process.env.ADMIN_EMAIL || '',
+    password: process.env.ADMIN_PASSWORD || '',
     phone: '+1 (800) 555-AERO',
     role: 'ADMIN',
     company: 'Aerosol Webapp HQ',
@@ -87,26 +87,33 @@ const generateToken = (user) => {
   return token;
 };
 
-// ADMIN DIRECT LOGIN (Used by admin.html)
+// ADMIN DIRECT LOGIN (Used by admin.html - strictly checks .env credentials)
 router.post('/admin-login', rateLimiter(20, 60000), (req, res) => {
   const { adminId, password } = req.body;
   if (!adminId || !password) {
     return res.status(400).json({ success: false, message: 'Admin ID and password are required.' });
   }
 
-  const expectedAdminId = (process.env.ADMIN_ID || 'admin').toLowerCase();
-  const expectedAdminEmail = (process.env.ADMIN_EMAIL || 'admin@aerosolwebapp.com').toLowerCase();
-  const expectedAdminPass = process.env.ADMIN_PASSWORD || 'admin123';
+  const expectedAdminId = (process.env.ADMIN_ID || '').trim().toLowerCase();
+  const expectedAdminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+  const expectedAdminPass = (process.env.ADMIN_PASSWORD || '').trim();
+
+  if (!expectedAdminPass || (!expectedAdminId && !expectedAdminEmail)) {
+    return res.status(500).json({
+      success: false,
+      message: 'Server configuration error: Admin credentials are not set in .env.'
+    });
+  }
 
   const inputId = (adminId || req.body.email || '').trim().toLowerCase();
-  const isIdMatch = inputId === expectedAdminId || inputId === expectedAdminEmail || inputId === 'admin';
-  const isPassMatch = password === expectedAdminPass || password === 'admin123';
+  const isIdMatch = (expectedAdminId && inputId === expectedAdminId) || (expectedAdminEmail && inputId === expectedAdminEmail);
+  const isPassMatch = password.trim() === expectedAdminPass;
 
   if (isIdMatch && isPassMatch) {
     const adminUser = {
       id: process.env.ADMIN_ID || 'admin',
       name: 'Operations Administrator',
-      email: process.env.ADMIN_EMAIL || 'admin@aerosolwebapp.com',
+      email: process.env.ADMIN_EMAIL || '',
       role: 'ADMIN',
       tier: 'Super Administrator'
     };
@@ -144,10 +151,10 @@ router.post('/email-lookup', rateLimiter(15, 60000), (req, res) => {
   }
 
   const cleanEmail = email.trim().toLowerCase();
-  const adminId = (process.env.ADMIN_ID || 'admin').toLowerCase();
-  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@aerosolwebapp.com').toLowerCase();
+  const adminId = (process.env.ADMIN_ID || '').trim().toLowerCase();
+  const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
 
-  const isAdminMatch = cleanEmail === adminId || cleanEmail === adminEmail;
+  const isAdminMatch = (adminId && cleanEmail === adminId) || (adminEmail && cleanEmail === adminEmail);
   const user = usersDB.find((u) => u.email.toLowerCase() === cleanEmail && u.status !== 'DEACTIVATED');
 
   if (isAdminMatch) {
@@ -193,12 +200,12 @@ router.post('/login', rateLimiter(10, 60000), (req, res) => {
 
   const q = email.trim().toLowerCase();
   const safeRedirect = sanitizeRedirectUrl(redirect, '/account.html');
-  const adminId = (process.env.ADMIN_ID || 'admin').toLowerCase();
-  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@aerosolwebapp.com').toLowerCase();
-  const expectedAdminPass = process.env.ADMIN_PASSWORD || 'admin123';
+  const adminId = (process.env.ADMIN_ID || '').trim().toLowerCase();
+  const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+  const expectedAdminPass = (process.env.ADMIN_PASSWORD || '').trim();
 
-  // Admin authentication with MFA requirement
-  if ((q === adminId || q === adminEmail) && password === expectedAdminPass) {
+  // Admin authentication with MFA requirement - strictly using .env
+  if (expectedAdminPass && ((adminId && q === adminId) || (adminEmail && q === adminEmail)) && password === expectedAdminPass) {
     // If MFA code is missing or incorrect for Admin
     if (!mfaCode || mfaCode.trim() !== '123456') {
       logAudit('ADMIN_MFA_PROMPT', { email: q });

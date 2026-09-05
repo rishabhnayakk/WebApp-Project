@@ -1,5 +1,23 @@
 [
   {
+    "id": "audit-1788638218096-el0e",
+    "eventType": "ADMIN_DIRECT_LOGIN_SUCCESS",
+    "details": {
+      "adminId": "admindinkal",
+      "ip": "::1"
+    },
+    "timestamp": "2026-09-05T19:56:58.096Z"
+  },
+  {
+    "id": "audit-1788638218082-tni0",
+    "eventType": "ADMIN_DIRECT_LOGIN_FAILED",
+    "details": {
+      "adminId": "admin",
+      "ip": "::1"
+    },
+    "timestamp": "2026-09-05T19:56:58.082Z"
+  },
+  {
     "id": "audit-1788203985715-yzr3",
     "eventType": "RATE_LIMIT_EXCEEDED",
     "details": {
