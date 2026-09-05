@@ -84,20 +84,13 @@ if (!State.currentUser) {
   localStorage.setItem('dinkal_user', JSON.stringify(State.currentUser));
 }
 
-// Ensure default cart item if totally empty for demo
-if (State.cart.length === 0) {
-  State.cart = [
-    {
-      id: 'aero-ceramax-pro',
-      name: 'CERAMAX™ 9H Nano-Ceramic Clear Coat',
-      sku: 'AERO-CRM-500',
-      price: 49.99,
-      quantity: 2,
-      volume: '500ml (16.9 fl oz)',
-      color: '#0284c7',
-    }
-  ];
-  localStorage.setItem('dinkal_cart', JSON.stringify(State.cart));
+// Cart starts clean and empty (0)
+if (localStorage.getItem('dinkal_demo_cart_cleared') !== 'v1') {
+  if (State.cart.length === 1 && State.cart[0].id === 'aero-ceramax-pro') {
+    State.cart = [];
+    localStorage.setItem('dinkal_cart', JSON.stringify(State.cart));
+  }
+  localStorage.setItem('dinkal_demo_cart_cleared', 'v1');
 }
 
 function saveCart() {

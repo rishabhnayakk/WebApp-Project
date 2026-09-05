@@ -1,5 +1,25 @@
 [
   {
+    "id": "audit-1788640578220-8lfp",
+    "eventType": "LOGIN_SUCCESS",
+    "details": {
+      "userId": "usr-1788640113566",
+      "email": "rishabh@gmail.com"
+    },
+    "timestamp": "2026-09-05T20:36:18.221Z"
+  },
+  {
+    "id": "audit-1788640113579-d7bq",
+    "eventType": "USER_REGISTERED",
+    "details": {
+      "userId": "usr-1788640113566",
+      "email": "rishabh@gmail.com",
+      "marketingAccepted": false,
+      "role": "CUSTOMER"
+    },
+    "timestamp": "2026-09-05T20:28:33.579Z"
+  },
+  {
     "id": "audit-1788638218096-el0e",
     "eventType": "ADMIN_DIRECT_LOGIN_SUCCESS",
     "details": {

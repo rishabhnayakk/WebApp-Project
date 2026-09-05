@@ -8,19 +8,13 @@ const AerosolWebapp = {
     // Default to null user if not logged in
     this.user = JSON.parse(localStorage.getItem('aerosol_user') || 'null');
 
-    if (this.cart.length === 0) {
-      this.cart = [
-        {
-          id: 'aero-ceramax-pro',
-          name: 'CERAMAX™ 9H Nano-Ceramic Clear Coat',
-          sku: 'AERO-CRM-500',
-          price: 49.99,
-          quantity: 2,
-          volume: '500ml (16.9 fl oz)',
-          color: '#0284c7'
-        }
-      ];
-      this.saveCart();
+    // Clean up any previously stored demo cart items so cart is initially 0
+    if (localStorage.getItem('aerosol_demo_cart_cleared') !== 'v1') {
+      if (this.cart.length === 1 && this.cart[0].id === 'aero-ceramax-pro') {
+        this.cart = [];
+        this.saveCart();
+      }
+      localStorage.setItem('aerosol_demo_cart_cleared', 'v1');
     }
 
     this.updateHeaderBadges();
@@ -62,24 +56,59 @@ const AerosolWebapp = {
     // Dynamic Login / Account status in header
     const u = this.user || JSON.parse(localStorage.getItem('aerosol_user') || 'null');
     const authNavLinks = document.querySelectorAll('#header-auth-nav-link, .header-auth-nav-link');
-    const userBtnSpans = document.querySelectorAll('#header-user-btn span, .header-user-btn span');
+    const userBtns = document.querySelectorAll('#header-user-btn, .header-user-btn');
 
     if (u && u.id) {
       const isAdm = u.role === 'ADMIN' || u.role === 'SUPER_ADMIN';
+      const firstName = u.name ? u.name.split(' ')[0] : (isAdm ? 'Admin' : 'User');
+      const initial = (u.name ? u.name.charAt(0) : (isAdm ? 'A' : 'U')).toUpperCase();
+
       authNavLinks.forEach(l => {
         l.textContent = isAdm ? 'Admin ↗' : 'Account';
         l.href = isAdm ? '/admin.html' : '/account.html';
       });
-      userBtnSpans.forEach(s => {
-        s.textContent = u.name ? (u.name.split(' ')[0] || 'User') : (isAdm ? 'Admin' : 'Account');
+
+      userBtns.forEach(btn => {
+        btn.innerHTML = `
+          <div style="display: inline-flex; align-items: center; gap: 7px;">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+              ${isAdm ? '🛡️' : initial}
+            </div>
+            <span style="font-size: 13px; font-weight: 600; color: var(--color-text); max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${firstName}
+            </span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted);">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        `;
+        btn.setAttribute('title', `${u.name || 'User'} (${u.email || ''})`);
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          AerosolWebapp.handleUserIconClick(e);
+        };
       });
     } else {
       authNavLinks.forEach(l => {
         l.textContent = 'Login';
         l.href = '/login.html';
       });
-      userBtnSpans.forEach(s => {
-        s.textContent = 'Account';
+
+      userBtns.forEach(btn => {
+        btn.innerHTML = `
+          <div style="display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span style="font-size: 13px; font-weight: 500;">Login</span>
+          </div>
+        `;
+        btn.removeAttribute('title');
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          window.location.href = '/login.html';
+        };
       });
     }
   },
@@ -367,17 +396,145 @@ const AerosolWebapp = {
     `;
   },
 
-  handleUserIconClick() {
+  handleUserIconClick(e) {
+    if (e && e.stopPropagation) e.stopPropagation();
     const u = this.user || JSON.parse(localStorage.getItem('aerosol_user') || 'null');
     if (u && u.id) {
-      if (u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') {
-        window.location.href = '/admin.html';
-      } else {
-        window.location.href = '/account.html';
-      }
+      this.toggleUserPopover();
     } else {
       window.location.href = '/login.html';
     }
+  },
+
+  toggleUserPopover(open) {
+    let popover = document.getElementById('user-profile-popover');
+    const userBtn = document.getElementById('header-user-btn');
+
+    const shouldOpen = open !== undefined ? open : (!popover || popover.style.display !== 'block');
+
+    if (!shouldOpen) {
+      if (popover) popover.style.display = 'none';
+      return;
+    }
+
+    const u = this.user || JSON.parse(localStorage.getItem('aerosol_user') || 'null');
+    if (!u || !u.id) {
+      window.location.href = '/login.html';
+      return;
+    }
+
+    if (!popover) {
+      popover = document.createElement('div');
+      popover.id = 'user-profile-popover';
+      document.body.appendChild(popover);
+    }
+
+    const isAdm = u.role === 'ADMIN' || u.role === 'SUPER_ADMIN';
+    const initial = (u.name ? u.name.charAt(0) : (isAdm ? 'A' : 'U')).toUpperCase();
+
+    // Position popover cleanly right beneath the header-user-btn
+    let top = 70;
+    let right = 20;
+    if (userBtn) {
+      const bRect = userBtn.getBoundingClientRect();
+      top = bRect.bottom + window.scrollY + 8;
+      right = Math.max(16, window.innerWidth - bRect.right);
+    }
+
+    popover.style.position = 'absolute';
+    popover.style.top = `${top}px`;
+    popover.style.right = `${right}px`;
+    popover.style.zIndex = '9999';
+    popover.style.display = 'block';
+
+    popover.innerHTML = `
+      <div style="width: 320px; background: #ffffff; border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: 0 16px 36px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.06); overflow: hidden; font-family: var(--font-sans); text-align: left;">
+        
+        <!-- USER IDENTITY HEADER -->
+        <div style="padding: 16px 18px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-subtle);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+            <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              ${isAdm ? '🛡️' : initial}
+            </div>
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-size: 14px; font-weight: 700; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${u.name || 'User'}
+              </div>
+              <div style="font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${u.email || ''}
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <span style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: var(--radius-full); background: ${isAdm ? '#059669' : 'var(--color-border)'}; color: ${isAdm ? '#ffffff' : 'var(--color-text)'};">
+              ${isAdm ? 'Operations Administrator' : (u.tier || 'Verified Customer')}
+            </span>
+            ${u.phone ? `<span style="font-size: 11px; color: var(--color-text-muted);">📱 ${u.phone}</span>` : ''}
+          </div>
+        </div>
+
+        <!-- QUICK ACCESS MENU -->
+        <div style="padding: 6px 0;">
+          ${isAdm ? `
+            <a href="/admin.html" onclick="AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 600; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
+              <span style="font-size: 16px;">🛡️</span>
+              <div style="flex: 1;">
+                <div>Admin Operations Console</div>
+                <div style="font-size: 11px; color: var(--color-text-muted); font-weight: 400;">Telemetry, formulations & orders</div>
+              </div>
+              <span style="font-size: 12px; color: var(--color-text-muted);">↗</span>
+            </a>
+            <div style="height: 1px; background: var(--color-border); margin: 4px 0;"></div>
+          ` : ''}
+
+          <a href="/account.html" onclick="sessionStorage.setItem('aerosol_account_tab', 'orders'); AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
+            <span style="font-size: 16px;">📦</span>
+            <div style="flex: 1;">
+              <div style="font-weight: 600;">Previous Orders &amp; History</div>
+              <div style="font-size: 11px; color: var(--color-text-muted);">Track shipments & invoices</div>
+            </div>
+          </a>
+
+          <a href="/account.html" onclick="sessionStorage.setItem('aerosol_account_tab', 'addresses'); AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
+            <span style="font-size: 16px;">📍</span>
+            <div style="flex: 1;">
+              <div style="font-weight: 600;">Saved Delivery Addresses</div>
+              <div style="font-size: 11px; color: var(--color-text-muted);">Delivery & billing destinations</div>
+            </div>
+          </a>
+
+          <a href="/wishlist.html" onclick="AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
+            <span style="font-size: 16px;">❤️</span>
+            <div style="flex: 1;">
+              <div style="font-weight: 600;">Saved Formulations</div>
+              <div style="font-size: 11px; color: var(--color-text-muted);">Wishlist and laboratory saves</div>
+            </div>
+          </a>
+
+          <a href="/account.html" onclick="sessionStorage.setItem('aerosol_account_tab', 'profile'); AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
+            <span style="font-size: 16px;">⚙️</span>
+            <div style="flex: 1;">
+              <div style="font-weight: 600;">Account &amp; Profile Settings</div>
+              <div style="font-size: 11px; color: var(--color-text-muted);">Name, phone & organization</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- FOOTER: SIGN OUT -->
+        <div style="padding: 10px 18px; border-top: 1px solid var(--color-border); background: var(--color-bg-subtle); display: flex; justify-content: space-between; align-items: center;">
+          <button onclick="AerosolWebapp.logout(); AerosolWebapp.toggleUserPopover(false);" style="background: none; border: none; font-size: 12px; font-weight: 600; color: var(--color-error); cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 4px 0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Sign Out
+          </button>
+          <span style="font-size: 11px; color: var(--color-text-muted);">ISO 9001:2015</span>
+        </div>
+      </div>
+    `;
   },
 
   openAuthModal(redirectUrl = '') {
@@ -465,6 +622,10 @@ const AerosolWebapp = {
     this.user = null;
     localStorage.removeItem('aerosol_user');
     localStorage.removeItem('dinkal_user');
+    localStorage.removeItem('aerosol_token');
+    localStorage.removeItem('aerosol_admin_auth');
+    sessionStorage.removeItem('aerosol_admin_auth');
+    this.toggleUserPopover(false);
     this.showToast('Signed out successfully.');
     window.location.href = '/index.html';
   },
@@ -475,6 +636,15 @@ const AerosolWebapp = {
       if (header) header.classList.toggle('scrolled', window.scrollY > 10);
     }, { passive: true });
 
+    window.addEventListener('click', (e) => {
+      const popover = document.getElementById('user-profile-popover');
+      if (popover && popover.style.display === 'block') {
+        if (!e.target.closest('#header-user-btn') && !e.target.closest('#user-profile-popover')) {
+          this.toggleUserPopover(false);
+        }
+      }
+    });
+
     window.addEventListener('keydown', (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -484,6 +654,7 @@ const AerosolWebapp = {
         this.toggleSearch(false);
         this.toggleCart(false);
         this.closeAuthModal();
+        this.toggleUserPopover(false);
       }
     });
   },

@@ -62,9 +62,8 @@
   <script src="/js/auth-component.js"></script>
   <script>
     let authTab = 'signin';
-    let currentTab = 'orders';
-
-    let currentTab = 'orders';
+    let currentTab = sessionStorage.getItem('aerosol_account_tab') || (window.location.hash ? window.location.hash.replace('#', '') : 'orders');
+    sessionStorage.removeItem('aerosol_account_tab');
     let userOrdersCache = null;
 
     async function getUserOrders(email) {

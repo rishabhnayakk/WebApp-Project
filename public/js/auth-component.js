@@ -155,10 +155,12 @@ const AerosolAuth = {
           <div style="display: flex; flex-direction: column; gap: 12px;">
             ${u.role === 'ADMIN' || u.role === 'SUPER_ADMIN' ? `
               <a href="/admin.html" class="btn btn-inverted btn-lg btn-full" style="text-align: center;">Go to Admin Operations Console ↗</a>
+              <a href="/index.html" class="btn btn-neutral btn-md btn-full" style="text-align: center;">Go to Home Page →</a>
             ` : `
-              <a href="${this.redirectUrl || '/account.html'}" class="btn btn-inverted btn-lg btn-full" style="text-align: center;">Continue to Account Portal →</a>
+              <a href="/index.html" class="btn btn-inverted btn-lg btn-full" style="text-align: center;">Go to Home Page →</a>
+              <a href="/account.html" class="btn btn-neutral btn-md btn-full" style="text-align: center;">View Orders & Saved Addresses ↗</a>
             `}
-            <button onclick="AerosolAuth.switchAccount()" class="btn btn-neutral btn-md btn-full">Sign in with a different account</button>
+            <button onclick="AerosolAuth.switchAccount()" class="btn btn-ghost btn-sm btn-full">Sign in with a different account</button>
             <button onclick="AerosolWebapp.logout()" class="btn btn-ghost btn-sm btn-full" style="color: var(--color-error);">Sign Out</button>
           </div>
         </div>
@@ -493,7 +495,8 @@ const AerosolAuth = {
         if (this.onSuccess) {
           this.onSuccess(data);
         } else {
-          const target = data.user.role === 'ADMIN' ? '/admin.html' : (data.redirectUrl || '/account.html');
+          const isAdm = data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN';
+          const target = isAdm ? '/admin.html' : (this.redirectUrl || '/index.html');
           setTimeout(() => { window.location.href = target; }, 300);
         }
       } else {
@@ -603,7 +606,7 @@ const AerosolAuth = {
         if (this.onSuccess) {
           this.onSuccess(data);
         } else {
-          const target = data.redirectUrl || '/account.html';
+          const target = this.redirectUrl || '/index.html';
           setTimeout(() => { window.location.href = target; }, 300);
         }
       } else {
@@ -649,7 +652,8 @@ const AerosolAuth = {
         if (this.onSuccess) {
           this.onSuccess(data);
         } else {
-          const target = data.redirectUrl || (data.user.role === 'ADMIN' ? '/admin.html' : '/account.html');
+          const isAdm = data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN';
+          const target = isAdm ? '/admin.html' : (this.redirectUrl || '/index.html');
           setTimeout(() => { window.location.href = target; }, 300);
         }
       }
