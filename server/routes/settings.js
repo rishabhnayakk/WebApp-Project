@@ -65,7 +65,10 @@ router.post('/db-connect', async (req, res) => {
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect();
     }
-    await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 });
+    await mongoose.connect(mongoUri, { 
+      serverSelectionTimeoutMS: 5000,
+      dbName: process.env.DB_NAME || 'Dinkal',
+    });
     res.json({
       success: true,
       message: 'Successfully connected to MongoDB Atlas!',

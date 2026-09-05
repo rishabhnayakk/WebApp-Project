@@ -87,6 +87,52 @@ const generateToken = (user) => {
   return token;
 };
 
+// ADMIN DIRECT LOGIN (Used by admin.html)
+router.post('/admin-login', rateLimiter(20, 60000), (req, res) => {
+  const { adminId, password } = req.body;
+  if (!adminId || !password) {
+    return res.status(400).json({ success: false, message: 'Admin ID and password are required.' });
+  }
+
+  const expectedAdminId = (process.env.ADMIN_ID || 'admin').toLowerCase();
+  const expectedAdminEmail = (process.env.ADMIN_EMAIL || 'admin@aerosolwebapp.com').toLowerCase();
+  const expectedAdminPass = process.env.ADMIN_PASSWORD || 'admin123';
+
+  const inputId = adminId.trim().toLowerCase();
+
+  if ((inputId === expectedAdminId || inputId === expectedAdminEmail) && password === expectedAdminPass) {
+    const adminUser = {
+      id: process.env.ADMIN_ID || 'admin',
+      name: 'Operations Administrator',
+      email: process.env.ADMIN_EMAIL || 'admin@aerosolwebapp.com',
+      role: 'ADMIN',
+      tier: 'Super Administrator'
+    };
+    const token = generateToken(adminUser);
+    logAudit('ADMIN_DIRECT_LOGIN_SUCCESS', { adminId: inputId, ip: req.ip });
+
+    return res.json({
+      success: true,
+      message: 'Admin access granted.',
+      token,
+      data: {
+        id: adminUser.id,
+        name: adminUser.name,
+        email: adminUser.email,
+        role: adminUser.role,
+        tier: adminUser.tier,
+        token
+      }
+    });
+  }
+
+  logAudit('ADMIN_DIRECT_LOGIN_FAILED', { adminId: inputId, ip: req.ip });
+  return res.status(401).json({
+    success: false,
+    message: 'Invalid Admin ID or Password.'
+  });
+});
+
 // 1. EMAIL-FIRST LOOKUP (Rate Limited)
 router.post('/email-lookup', rateLimiter(15, 60000), (req, res) => {
   const { email } = req.body;

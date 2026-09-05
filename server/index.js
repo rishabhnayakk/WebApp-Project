@@ -23,7 +23,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public'), {
+  extensions: ['html']
+}));
 
 app.use('/api/v1/products', productsRouter);
 app.use('/api/v1/categories', (req, res, next) => {
@@ -59,6 +61,10 @@ app.get('/api/health', (req, res) => {
     pressureNormal: true,
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin.html'));
 });
 
 app.use((req, res) => {

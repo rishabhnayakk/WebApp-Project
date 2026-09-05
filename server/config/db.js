@@ -17,10 +17,11 @@ export const connectDB = async () => {
   try {
     const conn = await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 5000,
+      dbName: process.env.DB_NAME || 'Dinkal',
     });
     isConnected = true;
     connectionMode = 'MONGODB_ATLAS_CONNECTED';
-    console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host}`);
+    console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host} | Database: ${conn.connection.name}`);
   } catch (error) {
     console.warn(`⚠️ MongoDB Atlas Connection Notice: ${error.message}. Operating with local persistent JSON fallback.`);
     isConnected = false;
