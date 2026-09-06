@@ -439,7 +439,7 @@ const AerosolAuth = {
       }
     } catch (err) {
       this.loading = false;
-      this.errorMsg = 'Could not connect to authentication service. Please try again.';
+      this.step = 'login';
     }
 
     this.render();
@@ -450,6 +450,7 @@ const AerosolAuth = {
     const passInput = document.getElementById('login-pass-input');
     if (!passInput || !passInput.value) return;
 
+    const passVal = passInput.value.trim();
     this.loading = true;
     this.errorMsg = '';
     this.render();
@@ -460,7 +461,7 @@ const AerosolAuth = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: this.email,
-          password: passInput.value,
+          password: passVal,
           redirect: this.redirectUrl
         })
       });

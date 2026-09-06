@@ -334,10 +334,10 @@ function renderHomeView(container) {
         <!-- Featured Canister Row -->
         <div style="display: flex; border-top: 1px solid var(--color-border); border-left: 1px solid var(--color-border); flex-wrap: wrap;">
           ${[
-            { color: '#0284c7', label: 'CERAMAX', name: 'CERAMAX™ 9H', sub: 'Nano-Ceramic Coat', price: '$49.99', id: 'aero-ceramax-pro' },
-            { color: '#b91c1c', label: 'PYROGRD', name: 'PYROGUARD™', sub: '1200°C Thermal', price: '$34.99', id: 'aero-thermal-1200' },
-            { color: '#047857', label: 'ELECCLR', name: 'ELECTRICLEAN™', sub: 'Dielectric Flush', price: '$28.99', id: 'aero-dielectric-flush' },
-            { color: '#6d28d9', label: 'VAPOR', name: 'VAPOR-PURE™', sub: 'Hospital Fogger', price: '$44.99', id: 'aero-bio-fogger' },
+            { color: '#0284c7', label: 'CERAMAX', name: 'CERAMAX™ 9H', sub: 'Nano-Ceramic Coat', price: '₹3,999', id: 'aero-ceramax-pro' },
+            { color: '#b91c1c', label: 'PYROGRD', name: 'PYROGUARD™', sub: '1200°C Thermal', price: '₹2,299', id: 'aero-thermal-1200' },
+            { color: '#047857', label: 'ELECCLR', name: 'ELECTRICLEAN™', sub: 'Dielectric Flush', price: '₹2,899', id: 'aero-dielectric-flush' },
+            { color: '#6d28d9', label: 'VAPOR', name: 'VAPOR-PURE™', sub: 'Hospital Fogger', price: '₹1,999', id: 'aero-bio-fogger' },
           ].map(item => `
             <div style="flex: 1; min-width: 200px; border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 40px 24px 32px; display: flex; flex-direction: column; align-items: center; gap: 20px; cursor: pointer; background: var(--color-bg); transition: background-color var(--transition-fast);"
                  onmouseenter="this.style.backgroundColor='var(--color-bg-subtle)'"
@@ -937,7 +937,7 @@ function renderProductDetailView(container) {
             <div style="height: 1px; background-color: var(--color-border);"></div>
             <div>
               <h3 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin-bottom: 6px;">Free Shipping Threshold</h3>
-              <p>Orders over $150 qualify for complimentary HazMat ground freight.</p>
+              <p>Orders over ₹2,999 qualify for complimentary HazMat ground freight.</p>
             </div>
           </div>
         `}
@@ -1611,7 +1611,7 @@ function renderAdminView(container) {
       <!-- KPI Stats -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
         ${[
-          { label: '30-Day Revenue', val: '$148,920.00' },
+          { label: '30-Day Revenue', val: '₹12,48,920' },
           { label: 'Active Canister Orders', val: '42 Orders' },
           { label: 'Cleanroom Pressurization', val: '99.8% Normal' },
           { label: 'Inventory Total', val: '1,420 Units' },
@@ -1638,9 +1638,9 @@ function renderAdminView(container) {
           </thead>
           <tbody>
             ${[
-              { id: 'DNKL-99420', cust: 'Dr. Marcus Sterling (NovaAero)', items: '36 Units', total: '$1,000.51', st: 'In Transit' },
-              { id: 'DNKL-99419', cust: 'Elena Rostova (HyperSonic)', items: '6 Units', total: '$228.57', st: 'Delivered' },
-              { id: 'DNKL-99418', cust: 'Apex BioTech Cleanrooms', items: '12 Units', total: '$539.88', st: 'Processing' },
+              { id: 'DNKL-99420', cust: 'Dr. Marcus Sterling (NovaAero)', items: '36 Units', total: '₹88,500', st: 'In Transit' },
+              { id: 'DNKL-99419', cust: 'Elena Rostova (HyperSonic)', items: '6 Units', total: '₹18,999', st: 'Delivered' },
+              { id: 'DNKL-99418', cust: 'Apex BioTech Cleanrooms', items: '12 Units', total: '₹42,999', st: 'Processing' },
             ].map(row => `
               <tr style="border-bottom: 1px solid var(--color-border);">
                 <td style="padding: 12px 16px; font-family: var(--font-mono); font-weight: 600;">${row.id}</td>
@@ -1719,7 +1719,7 @@ function renderCartDrawer() {
         <!-- Free Shipping Meter -->
         <div style="padding: 14px 24px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-subtle);">
           <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
-            <span>${isFreeShipping ? '✓ Free HazMat Shipping Applied' : `Free Shipping over $150 ($${(150 - subtotal).toFixed(2)} away)`}</span>
+            <span>${isFreeShipping ? '✓ Free HazMat Shipping Applied' : `Free Shipping over ₹2,999 (₹${(2999 - subtotal).toLocaleString('en-IN')} away)`}</span>
           </div>
           <div style="height: 3px; background: var(--color-border); border-radius: 2px; overflow: hidden;">
             <div style="height: 100%; width: ${progress}%; background: var(--color-text); transition: width 0.3s ease;"></div>

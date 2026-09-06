@@ -39,6 +39,307 @@ const AerosolWebapp = {
     localStorage.setItem('dinkal_user', JSON.stringify(this.user));
   },
 
+  formatMoney(amount) {
+    const num = Number(amount) || 0;
+    return `₹${num.toLocaleString('en-IN')}`;
+  },
+
+  fallbackProducts: [
+    {
+      id: "aero-ceramax-pro",
+      name: "CERAMAX™ 9H Nano-Ceramic Aerosol Clear Coat",
+      slug: "ceramax-9h-nano-ceramic-aerosol",
+      tagline: "Aerospace-Grade Hydrophobic Ceramic Clear Coat Shield",
+      category: "Automotive & Marine",
+      price: 3999,
+      comparePrice: 4999,
+      sku: "AERO-CRM-500",
+      volume: "500ml (16.9 fl oz)",
+      availableSizes: ["300ml", "500ml", "650ml Jumbo"],
+      rating: 4.9,
+      reviewCount: 184,
+      inStock: true,
+      stockCount: 420,
+      lowStockThreshold: 50,
+      badge: "Best Seller",
+      color: "#0284c7",
+      image: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=800&q=80",
+      propellant: "Eco-HFO 1234ze (Ultra Low GWP < 1)",
+      nozzle: "360° Variable Fan Atomizer",
+      pressureBar: 7.4,
+      optimalDistance: "20 - 25 cm (8 - 10 in)",
+      dryTime: "12 min touch / 4 hrs full cure",
+      voc: "< 2.8% CARB 2026 Compliant",
+      flammability: "Class 1 Aerosol (Non-Chlorinated)",
+      description: "Engineered with ultra-pure SiO2 nano-particles suspended in an eco-friendly propellant matrix. CERAMAX™ forms an ultra-dense 9H diamond-hard hydrophobic barrier that repels UV rays, acid rain, road salts, brake dust, and industrial fallout for up to 24 months. Features a true 360-degree all-angle ball valve for effortless application in tight chassis recesses.",
+      features: [
+        "9H Diamond Hardness Scratch & Mar Resistance",
+        "118° Superhydrophobic Water Contact Angle",
+        "True 360° All-Angle Inversion Valve Technology",
+        "Self-Leveling Zero Orange-Peel Optical Clarity",
+        "UV-A & UV-B Radiation Blocking Inhibitors"
+      ]
+    },
+    {
+      id: "aero-dielectric-max",
+      name: "VOLTX™ Ultra-Dielectric Precision Contact Cleaner",
+      slug: "voltx-dielectric-precision-cleaner",
+      tagline: "Zero-Residue High-Voltage Electronics & PCB Flush",
+      category: "Electronics & Precision",
+      price: 2299,
+      comparePrice: 2799,
+      sku: "AERO-VTX-400",
+      volume: "400ml (13.5 fl oz)",
+      availableSizes: ["200ml", "400ml"],
+      rating: 4.8,
+      reviewCount: 96,
+      inStock: true,
+      stockCount: 280,
+      lowStockThreshold: 40,
+      badge: "Industrial Standard",
+      color: "#e11d48",
+      image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+      propellant: "Compressed Purified Nitrogen (100% Non-Flammable)",
+      nozzle: "Dual-Action Pinpoint Capillary Straw + Blast Fan",
+      pressureBar: 8.1,
+      optimalDistance: "10 - 15 cm (4 - 6 in)",
+      dryTime: "Flash Evaporation (< 3 seconds)",
+      voc: "0% VOC Non-Conductive",
+      flammability: "Non-Flammable (Dielectric Strength 35,000V)",
+      description: "High-purity electronic contact cleaner formulated to rapidly flush flux residue, silicone oils, grease, carbon tracking, and microscopic particulate from energized avionics, circuit boards, relays, switches, and edge connectors without leaving any conductive film or moisture.",
+      features: [
+        "Dielectric Breakdown Rating up to 35kV (Safe on live circuits)",
+        "100% Safe on Sensitive Polycarbonates, ABS, & Elastomers",
+        "Instantaneous Flash Evaporation with Zero Residue",
+        "Detachable Pinpoint Micro-Straw for Micro-Crevices"
+      ]
+    },
+    {
+      id: "aero-thermo-shield",
+      name: "PYROGUARD™ 1200°C Thermal Ceramic Enamel",
+      slug: "pyroguard-thermal-ceramic-enamel",
+      tagline: "Extreme High-Temperature Exhaust & Header Coating",
+      category: "Industrial & Coatings",
+      price: 2899,
+      comparePrice: 3599,
+      sku: "AERO-PYR-450",
+      volume: "450ml (15.2 fl oz)",
+      availableSizes: ["450ml", "650ml Jumbo"],
+      rating: 4.9,
+      reviewCount: 142,
+      inStock: true,
+      stockCount: 310,
+      lowStockThreshold: 45,
+      badge: "Heavy Duty",
+      color: "#d97706",
+      image: "https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=800&q=80",
+      propellant: "Hydrocarbon A-70 High Stability Blend",
+      nozzle: "Heavy-Solid High Output Fan Atomizer",
+      pressureBar: 6.8,
+      optimalDistance: "25 - 30 cm (10 - 12 in)",
+      dryTime: "30 min touch / Heat cured at 200°C",
+      voc: "< 3.9% Low-HAP Compliant",
+      flammability: "Class 1 Flammable Aerosol",
+      description: "Formulated with ceramic-boron micro-resins engineered to withstand direct continuous thermal exposure up to 1,200°C (2,192°F). Thermal shock resistant against rapid cold quenching; ideal for turbo housings, headers, brake calipers, industrial furnaces, and boiler pipes.",
+      features: [
+        "Withstands Thermal Spikes up to 1,200°C (2,192°F)",
+        "Corrosion-Proof Salt Spray Rating > 1,000 Hours",
+        "Chemically Inert to Gasoline, Synthetic Oils, and Brake Fluid",
+        "Thermal Shock Proof (No cracking during rapid water quench)"
+      ]
+    },
+    {
+      id: "aero-syn-lube",
+      name: "TRIBO-SYNTH™ Graphene Micro-Film Lubricant",
+      slug: "tribo-synth-graphene-micro-film",
+      tagline: "Frictionless Extreme-Pressure Anti-Seize Penetrating Spray",
+      category: "Industrial & Coatings",
+      price: 1999,
+      comparePrice: 2599,
+      sku: "AERO-TRB-500",
+      volume: "500ml (16.9 fl oz)",
+      availableSizes: ["300ml", "500ml"],
+      rating: 4.9,
+      reviewCount: 210,
+      inStock: true,
+      stockCount: 510,
+      lowStockThreshold: 60,
+      badge: "Popular",
+      color: "#059669",
+      image: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80",
+      propellant: "Eco-Propellant Dual Jet Matrix",
+      nozzle: "Smart-Straw 2-Way Flip Nozzle (Wide / Stream)",
+      pressureBar: 7.0,
+      optimalDistance: "15 - 20 cm (6 - 8 in)",
+      dryTime: "Leaves non-tacky micron dry film in 2 min",
+      voc: "< 1.5% Eco-Safe",
+      flammability: "Flammable Gas Aerosol",
+      description: "Infused with mono-layer graphene platelets that bond into microscopic surface asperities. Reduces coefficient of friction down to 0.02 under extreme loads up to 450,000 PSI without attracting dust, sand, or airborne debris.",
+      features: [
+        "82% Friction Reduction vs Traditional Mineral Oils",
+        "Operating Range -60°C to +480°C (-76°F to +896°F)",
+        "Repels Moisture, Acid Fumes, and Galvanic Oxidation",
+        "Non-Gumming Dry Boundary Film"
+      ]
+    },
+    {
+      id: "aero-fog-pure",
+      name: "VAPOR-PURE™ Hospital-Grade Micro-Mist Fogger",
+      slug: "vapor-pure-micro-mist-fogger",
+      tagline: "Total-Release Antimicrobial Airborne & Surface Sanitizer",
+      category: "Sanitization & Medical",
+      price: 1599,
+      comparePrice: 1999,
+      sku: "AERO-VPR-300",
+      volume: "300ml (10.1 fl oz)",
+      availableSizes: ["300ml", "500ml"],
+      rating: 4.9,
+      reviewCount: 320,
+      inStock: true,
+      stockCount: 650,
+      lowStockThreshold: 80,
+      badge: "EPA Registered",
+      color: "#7c3aed",
+      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80",
+      propellant: "Medical Grade Nitrogen + Purified Propellant",
+      nozzle: "Locking 360° Total-Release Aerosol Valve",
+      pressureBar: 6.2,
+      optimalDistance: "Central Room Placement (Up to 100m³ / 3,500 cu. ft.)",
+      dryTime: "15 min discharge / 2 hr re-entry",
+      voc: "0% VOC Chlorine-Free",
+      flammability: "Non-Flammable Aqueous Aerosol",
+      description: "Locking total-release aerosol cannister that dispenses an ultra-fine 5-micron dry mist cloud. Penetrates HVAC vents, fabrics, medical upholstery, and microscopic crevices, achieving certified 6-log (99.9999%) kill rate of viruses, bacteria, and mold spores without wetting surfaces.",
+      features: [
+        "EPA-Registered 6-Log (99.9999%) Pathogen Inactivation",
+        "Ultra-Fine 5-Micron Dry Fog Leaves No Wet Residue or Film",
+        "Neutralizes Biofilm, Mildew, and Organic Odors",
+        "Single Can Covers up to 3,500 Cubic Feet (100 m³)"
+      ]
+    },
+    {
+      id: "aero-chroma-shift",
+      name: "SPECTRUM-X™ Prism-Shift Holographic Coating",
+      slug: "spectrum-x-prism-shift-coating",
+      tagline: "Multi-Angle Color-Shifting Acrylic Specialty Aerosol",
+      category: "Art & Specialty",
+      price: 3399,
+      comparePrice: 4199,
+      sku: "AERO-SPC-400",
+      volume: "400ml (13.5 fl oz)",
+      availableSizes: ["400ml"],
+      rating: 4.8,
+      reviewCount: 115,
+      inStock: true,
+      stockCount: 190,
+      lowStockThreshold: 30,
+      badge: "Creative Pro",
+      color: "#db2777",
+      image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80",
+      propellant: "Low-Pressure Custom Art Gas Blend",
+      nozzle: "Interchangeable Ultra-Soft Skinny & Calligraphy Cap",
+      pressureBar: 6.5,
+      optimalDistance: "15 - 20 cm (6 - 8 in)",
+      dryTime: "8 min touch / 24 hrs full cure",
+      voc: "< 3.0% Low-Odor Formulation",
+      flammability: "Flammable Aerosol Class 2",
+      description: "Formulated with micro-encapsulated liquid crystals and interference mica that shifts dynamically between electric cyan, ultraviolet violet, and blazing gold depending on viewing angle and illumination. Designed for architectural models, automotive customization, and specialty art.",
+      features: [
+        "4-Axis Dynamic Color Optical Interference Shift",
+        "Optimized for High-Gloss Black Base Coat Surfaces",
+        "Ultra-Low Pressure Valve for Precise Feathering & Line Control",
+        "UV-Resistant Non-Yellowing Acrylic Matrix"
+      ]
+    },
+    {
+      id: "aero-corrosion-guard",
+      name: "MARINEX™ Cavity Wax & Salt-Shield Aerosol",
+      slug: "marinex-cavity-wax-salt-shield",
+      tagline: "Self-Healing Marine-Grade Rust Inhibitor with 360° Probe",
+      category: "Automotive & Marine",
+      price: 2599,
+      comparePrice: 3199,
+      sku: "AERO-MRX-500",
+      volume: "500ml (16.9 fl oz)",
+      availableSizes: ["500ml"],
+      rating: 4.9,
+      reviewCount: 88,
+      inStock: true,
+      stockCount: 240,
+      lowStockThreshold: 35,
+      badge: "Marine Certified",
+      color: "#0284c7",
+      image: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
+      propellant: "Eco-HFO 1234ze Propellant",
+      nozzle: "Includes 60cm Flexible 360° Cavity Probe Wand",
+      pressureBar: 7.2,
+      optimalDistance: "Probe insertion into frame rails & door sills",
+      dryTime: "Tack-free flexible wax in 45 min",
+      voc: "< 2.0% Low VOC",
+      flammability: "Flammable Aerosol",
+      description: "Heavy-duty thixotropic wax barrier designed to creep into internal seams, frame rails, subframes, and marine hull cavities. Displaces standing moisture and self-heals over scratch marks, preventing galvanic rust and ocean salt corrosion for 5+ years.",
+      features: [
+        "Includes 60cm (24-inch) 360° Multi-Port Extension Wand",
+        "Self-Healing Micro-Crystalline Wax Film",
+        "Passes 3,000-Hour ASTM B117 Salt Fog Corrosion Test",
+        "Creeps into Seams up to 50mm via Capillary Action"
+      ]
+    },
+    {
+      id: "aero-flux-remover",
+      name: "CIRCUIT-SHIELD™ Ultra-Pure Flux & Defluxer Spray",
+      slug: "circuit-shield-flux-defluxer",
+      tagline: "Non-Chlorinated Defluxer for SMT & Through-Hole Rework",
+      category: "Electronics & Precision",
+      price: 2099,
+      comparePrice: 2499,
+      sku: "AERO-FLX-400",
+      volume: "400ml (13.5 fl oz)",
+      availableSizes: ["400ml"],
+      rating: 4.8,
+      reviewCount: 72,
+      inStock: true,
+      stockCount: 340,
+      lowStockThreshold: 45,
+      badge: "SMT Grade",
+      color: "#e11d48",
+      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+      propellant: "Compressed Purified Nitrogen",
+      nozzle: "Scrubber Brush Actuator Attachment",
+      pressureBar: 7.8,
+      optimalDistance: "Direct surface contact with brush head",
+      dryTime: "Evaporates in 10 seconds",
+      voc: "< 1.0% Low VOC",
+      flammability: "Non-Flammable",
+      description: "Precision solvent defluxer with an integrated anti-static horsehair brush nozzle. Dissolves Rosin (R, RMA, RA), No-Clean, and lead-free solder flux residues from high-density circuit assemblies without leaving white ionic salt stains.",
+      features: [
+        "Includes ESD-Safe Anti-Static Bristle Brush Nozzle",
+        "Leaves Zero White Powder or Ionic Halide Residues",
+        "Safe on Sensitive SMT Plastics, Solder Masks, and Markings",
+        "Non-Ozone Depleting (Zero ODP)"
+      ]
+    }
+  ],
+
+  async getProducts() {
+    if (this._cachedProducts && this._cachedProducts.length > 0) {
+      return this._cachedProducts;
+    }
+    try {
+      const res = await fetch('/api/v1/products');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          this._cachedProducts = data.data;
+          return data.data;
+        }
+      }
+    } catch (err) {
+      console.warn('Live API unreachable, using robust offline catalog fallback:', err);
+    }
+    this._cachedProducts = this.fallbackProducts;
+    return this.fallbackProducts;
+  },
+
   updateHeaderBadges() {
     const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
     const cartBadges = document.querySelectorAll('.header-cart-badge');
@@ -208,10 +509,10 @@ const AerosolWebapp = {
     }
 
     const totalDiscount = volumeDiscount + promoDiscount;
-    const isFreeShipping = subtotal >= 150 || this.appliedCoupon?.freeShipping;
-    const shipping = isFreeShipping ? 0 : (subtotal > 0 ? 14.95 : 0);
+    const isFreeShipping = subtotal >= 2999 || this.appliedCoupon?.freeShipping;
+    const shipping = isFreeShipping ? 0 : (subtotal > 0 ? 199 : 0);
     const total = Math.max(0, subtotal - totalDiscount + shipping);
-    const progress = Math.min((subtotal / 150) * 100, 100);
+    const progress = Math.min((subtotal / 2999) * 100, 100);
 
     container.innerHTML = `
       <div class="drawer-header">
@@ -232,7 +533,7 @@ const AerosolWebapp = {
         ` : `
           <div style="padding: 12px 20px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-subtle);">
             <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;">
-              <span>${isFreeShipping ? '✓ Free HazMat Shipping Applied' : `Free Shipping over $150 ($${(150 - subtotal).toFixed(2)} away)`}</span>
+              <span>${isFreeShipping ? '✓ Free Shipping Applied' : `Free Shipping over ₹2,999 (${this.formatMoney(Math.max(0, 2999 - subtotal))} away)`}</span>
             </div>
             <div style="height: 3px; background: var(--color-border); border-radius: 2px; overflow: hidden;">
               <div style="height: 100%; width: ${progress}%; background: var(--color-text); transition: width 0.3s ease;"></div>
@@ -254,7 +555,7 @@ const AerosolWebapp = {
                       <span style="font-size: 11px; font-weight: 600; min-width: 20px; text-align: center;">${item.quantity}</span>
                       <button onclick="AerosolWebapp.updateCartQuantity('${item.id}', ${item.quantity + 1})" style="padding: 2px 7px; color: var(--color-text-muted); cursor: pointer; font-size: 12px;">+</button>
                     </div>
-                    <span style="font-size: 13px; font-weight: 600;">$${(item.price * item.quantity).toFixed(2)}</span>
+                    <span style="font-size: 13px; font-weight: 600;">${this.formatMoney(item.price * item.quantity)}</span>
                   </div>
                 </div>
                 <button onclick="AerosolWebapp.removeFromCart('${item.id}')" style="color: var(--color-text-placeholder); cursor: pointer; align-self: flex-start; font-size: 14px;">✕</button>
@@ -283,21 +584,21 @@ const AerosolWebapp = {
           <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; margin-bottom: 14px;">
             <div style="display: flex; justify-content: space-between; color: var(--color-text-muted);">
               <span>Subtotal</span>
-              <span>$${subtotal.toFixed(2)}</span>
+              <span>${this.formatMoney(subtotal)}</span>
             </div>
             ${totalDiscount > 0 ? `
               <div style="display: flex; justify-content: space-between; color: var(--color-success);">
                 <span>Discount</span>
-                <span>−$${totalDiscount.toFixed(2)}</span>
+                <span>−${this.formatMoney(totalDiscount)}</span>
               </div>
             ` : ''}
             <div style="display: flex; justify-content: space-between; color: var(--color-text-muted);">
               <span>Shipping</span>
-              <span>${isFreeShipping ? 'Free' : `$${shipping.toFixed(2)}`}</span>
+              <span>${isFreeShipping ? 'Free' : this.formatMoney(shipping)}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; padding-top: 8px; border-top: 1px solid var(--color-border);">
               <span>Total</span>
-              <span>$${total.toFixed(2)}</span>
+              <span>${this.formatMoney(total)}</span>
             </div>
           </div>
           <a href="/checkout.html" class="btn btn-inverted btn-lg btn-full" style="text-align: center;" onclick="AerosolWebapp.toggleCart(false);">
@@ -378,7 +679,7 @@ const AerosolWebapp = {
                 <div style="font-size: 10px; text-transform: uppercase; color: var(--color-text-muted);">${p.category}</div>
                 <div style="font-size: 13px; font-weight: 500;">${p.name}</div>
               </div>
-              <div style="font-weight: 600; font-size: 13px;">$${Number(p.price).toFixed(2)}</div>
+              <div style="font-weight: 600; font-size: 13px;">${this.formatMoney(p.price)}</div>
             </a>
           `).join('')}
         </div>

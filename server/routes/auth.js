@@ -1,10 +1,39 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
 import { rateLimiter, sanitizeRedirectUrl, logAudit } from '../middleware/securityMiddleware.js';
 
 dotenv.config();
+
+// Helper to dynamically read admin credentials strictly from .env
+export const getAdminConfig = () => {
+  try {
+    const envPath = path.resolve(process.cwd(), '.env');
+    if (fs.existsSync(envPath)) {
+      const parsed = dotenv.parse(fs.readFileSync(envPath, 'utf8'));
+      Object.assign(process.env, parsed);
+    }
+  } catch (err) {
+    // fallback to current process.env
+  }
+
+  return {
+    adminId: (process.env.ADMIN_ID || '').trim(),
+    adminEmail: (process.env.ADMIN_EMAIL || '').trim().toLowerCase(),
+    adminPassword: (process.env.ADMIN_PASSWORD || '').trim()
+  };
+};
+
+export const isAdminIdentifier = (identifier) => {
+  if (!identifier) return false;
+  const q = identifier.trim().toLowerCase();
+  const cfg = getAdminConfig();
+  return (cfg.adminId && q === cfg.adminId.toLowerCase()) ||
+         (cfg.adminEmail && q === cfg.adminEmail.toLowerCase());
+};
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'aerosol_secret_jwt_key_2026_super_secure';
@@ -88,32 +117,21 @@ const generateToken = (user) => {
 };
 
 // ADMIN DIRECT LOGIN (Used by admin.html - strictly checks .env credentials)
-router.post('/admin-login', rateLimiter(20, 60000), (req, res) => {
-  const { adminId, password } = req.body;
-  if (!adminId || !password) {
-    return res.status(400).json({ success: false, message: 'Admin ID and password are required.' });
+router.post('/admin-login', rateLimiter(30, 60000), (req, res) => {
+  const { adminId, password, email } = req.body;
+  const inputId = (adminId || email || '').trim().toLowerCase();
+  if (!inputId || !password) {
+    return res.status(400).json({ success: false, message: 'Admin ID or email and password are required.' });
   }
 
-  const expectedAdminId = (process.env.ADMIN_ID || '').trim().toLowerCase();
-  const expectedAdminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-  const expectedAdminPass = (process.env.ADMIN_PASSWORD || '').trim();
+  const cfg = getAdminConfig();
+  const isMatch = isAdminIdentifier(inputId) && password.trim() === cfg.adminPassword;
 
-  if (!expectedAdminPass || (!expectedAdminId && !expectedAdminEmail)) {
-    return res.status(500).json({
-      success: false,
-      message: 'Server configuration error: Admin credentials are not set in .env.'
-    });
-  }
-
-  const inputId = (adminId || req.body.email || '').trim().toLowerCase();
-  const isIdMatch = (expectedAdminId && inputId === expectedAdminId) || (expectedAdminEmail && inputId === expectedAdminEmail);
-  const isPassMatch = password.trim() === expectedAdminPass;
-
-  if (isIdMatch && isPassMatch) {
+  if (isMatch) {
     const adminUser = {
-      id: process.env.ADMIN_ID || 'admin',
+      id: cfg.adminId,
       name: 'Operations Administrator',
-      email: process.env.ADMIN_EMAIL || '',
+      email: inputId.includes('@') ? inputId : cfg.adminEmail,
       role: 'ADMIN',
       tier: 'Super Administrator'
     };
@@ -125,11 +143,7 @@ router.post('/admin-login', rateLimiter(20, 60000), (req, res) => {
       message: 'Admin access granted.',
       token,
       data: {
-        id: adminUser.id,
-        name: adminUser.name,
-        email: adminUser.email,
-        role: adminUser.role,
-        tier: adminUser.tier,
+        ...adminUser,
         token
       }
     });
@@ -138,36 +152,35 @@ router.post('/admin-login', rateLimiter(20, 60000), (req, res) => {
   logAudit('ADMIN_DIRECT_LOGIN_FAILED', { adminId: inputId, ip: req.ip });
   return res.status(401).json({
     success: false,
-    message: 'Invalid Admin ID or Password.'
+    message: 'Invalid Admin ID, Email, or Password.'
   });
 });
 
 // 1. EMAIL-FIRST LOOKUP (Rate Limited)
-router.post('/email-lookup', rateLimiter(25, 60000), (req, res) => {
-  const { email } = req.body;
+router.post('/email-lookup', rateLimiter(30, 60000), (req, res) => {
+  const { email, identifier } = req.body;
+  const input = (email || identifier || '').trim();
 
-  if (!email || !email.trim()) {
-    return res.status(400).json({ success: false, message: 'Please enter your email address or Admin ID.' });
+  if (!input) {
+    return res.status(400).json({ success: false, message: 'Please enter your email address.' });
   }
 
-  const cleanEmail = email.trim().toLowerCase();
-  const adminId = (process.env.ADMIN_ID || '').trim().toLowerCase();
-  const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+  const cleanInput = input.toLowerCase();
+  const cfg = getAdminConfig();
 
-  const isAdminMatch = (adminId && cleanEmail === adminId) || (adminEmail && cleanEmail === adminEmail);
-  const user = usersDB.find((u) => u.email.toLowerCase() === cleanEmail && u.status !== 'DEACTIVATED');
-
-  if (isAdminMatch) {
+  if (isAdminIdentifier(cleanInput)) {
     return res.json({
       success: true,
       exists: true,
-      email: cleanEmail,
+      email: cleanInput.includes('@') ? cleanInput : cfg.adminEmail,
       name: 'Operations Administrator',
       isGoogleConnected: false,
       role: 'ADMIN',
       requiresMfa: false
     });
   }
+
+  const user = usersDB.find((u) => u.email.toLowerCase() === cleanInput && u.status !== 'DEACTIVATED');
 
   if (user) {
     return res.json({
@@ -184,32 +197,30 @@ router.post('/email-lookup', rateLimiter(25, 60000), (req, res) => {
   return res.json({
     success: true,
     exists: false,
-    email: cleanEmail,
+    email: cleanInput,
     name: null,
     role: 'CUSTOMER'
   });
 });
 
 // 2. UNIFIED LOGIN (Rate-Limited, Safe Error Messages)
-router.post('/login', rateLimiter(20, 60000), (req, res) => {
+router.post('/login', rateLimiter(30, 60000), (req, res) => {
   const { email, password, redirect } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email/Admin ID and password are required.' });
+    return res.status(400).json({ success: false, message: 'Email and password are required.' });
   }
 
   const q = email.trim().toLowerCase();
-  const safeRedirect = sanitizeRedirectUrl(redirect, '/account.html');
-  const adminId = (process.env.ADMIN_ID || '').trim().toLowerCase();
-  const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-  const expectedAdminPass = (process.env.ADMIN_PASSWORD || '').trim();
+  const safeRedirect = sanitizeRedirectUrl(redirect, '/admin.html');
+  const cfg = getAdminConfig();
 
-  // Admin authentication - strictly using .env
-  if (expectedAdminPass && ((adminId && q === adminId) || (adminEmail && q === adminEmail)) && password === expectedAdminPass) {
+  // Admin authentication - strictly checks .env and recognized admin credentials
+  if (isAdminIdentifier(q) && password.trim() === cfg.adminPassword) {
     const adminUser = {
-      id: process.env.ADMIN_ID || 'admin',
+      id: cfg.adminId,
       name: 'Operations Administrator',
-      email: process.env.ADMIN_EMAIL || 'admin@aerosolwebapp.com',
+      email: q.includes('@') ? q : cfg.adminEmail,
       role: 'ADMIN',
       tier: 'Super Administrator'
     };
@@ -221,13 +232,7 @@ router.post('/login', rateLimiter(20, 60000), (req, res) => {
       message: 'Welcome Administrator! Access granted.',
       token,
       redirectUrl: '/admin.html',
-      user: {
-        id: adminUser.id,
-        name: adminUser.name,
-        email: adminUser.email,
-        role: 'ADMIN',
-        tier: 'Super Administrator'
-      }
+      user: adminUser
     });
   }
 

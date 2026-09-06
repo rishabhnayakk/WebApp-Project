@@ -376,11 +376,8 @@
             }
           }).catch(() => {});
 
-        const res = await fetch('/api/v1/products');
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          const prods = data.data;
-
+        const prods = await AerosolWebapp.getProducts();
+        if (Array.isArray(prods)) {
           const heroRow = document.getElementById('hero-canister-row');
           if (heroRow) {
             heroRow.innerHTML = prods.slice(0, 4).map(p => `
@@ -391,7 +388,7 @@
                 <div style="text-align: center;">
                   <div style="font-size: 12px; font-weight: 600; color: var(--color-text); margin-bottom: 2px;">${p.name}</div>
                   <div style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 6px;">${p.tagline ? p.tagline.substring(0, 28) + '...' : ''}</div>
-                  <div style="font-size: 13px; font-weight: 600; color: var(--color-text);">$${Number(p.price).toFixed(2)}</div>
+                  <div style="font-size: 13px; font-weight: 600; color: var(--color-text);">${AerosolWebapp.formatMoney(p.price)}</div>
                 </div>
               </a>
             `).join('');
@@ -434,7 +431,7 @@
                 <span style="color: #f59e0b;">★</span>
                 <span>${p.rating} <span style="color: var(--color-text-placeholder);">(${p.reviewCount})</span></span>
               </div>
-              <div class="product-card__price">$${Number(p.price).toFixed(2)}</div>
+              <div class="product-card__price">${AerosolWebapp.formatMoney(p.price)}</div>
             </div>
           </div>
         </div>

@@ -68,8 +68,8 @@
           <input type="search" id="filter-search" class="input" placeholder="e.g. ceramic, dielectric..." oninput="applyFilters()" style="font-size: 13px;">
         </div>
         <div style="min-width: 180px;">
-          <label id="filter-price-label" class="label">Max Price: $70</label>
-          <input type="range" id="filter-price" min="15" max="70" step="5" value="70" oninput="applyFilters()" style="width: 100%; accent-color: var(--color-text); cursor: pointer;">
+          <label id="filter-price-label" class="label">Max Price: ₹5,000</label>
+          <input type="range" id="filter-price" min="500" max="5000" step="100" value="5000" oninput="applyFilters()" style="width: 100%; accent-color: var(--color-text); cursor: pointer;">
         </div>
         <div>
           <label class="label">Min Rating</label>
@@ -160,15 +160,14 @@
       }
 
       try {
-        const res = await fetch('/api/v1/products');
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          allProducts = data.data;
-          renderCategoryBar();
-          applyFilters();
-        }
+        allProducts = await AerosolWebapp.getProducts();
+        renderCategoryBar();
+        applyFilters();
       } catch (err) {
         console.error('Error loading products:', err);
+        allProducts = AerosolWebapp.fallbackProducts || [];
+        renderCategoryBar();
+        applyFilters();
       }
     }
 
@@ -235,11 +234,11 @@
 
     function applyFilters() {
       const search = (document.getElementById('filter-search')?.value || '').toLowerCase().trim();
-      const maxPrice = Number(document.getElementById('filter-price')?.value || 70);
+      const maxPrice = Number(document.getElementById('filter-price')?.value || 5000);
       const inStockOnly = document.getElementById('filter-instock')?.checked || false;
 
       const priceLabel = document.getElementById('filter-price-label');
-      if (priceLabel) priceLabel.textContent = `Max Price: $${maxPrice}`;
+      if (priceLabel) priceLabel.textContent = `Max Price: ${AerosolWebapp.formatMoney(maxPrice)}`;
 
       const selCatNorm = selectedCategory.toLowerCase().trim();
 
@@ -300,7 +299,7 @@
                   <span style="color: #f59e0b;">★</span>
                   <span>${p.rating} <span style="color: var(--color-text-placeholder);">(${p.reviewCount})</span></span>
                 </div>
-                <div class="product-card__price">$${Number(p.price).toFixed(2)}</div>
+                <div class="product-card__price">${AerosolWebapp.formatMoney(p.price)}</div>
               </div>
             </div>
           </div>
@@ -315,7 +314,7 @@
       const searchInput = document.getElementById('filter-search');
       if (searchInput) searchInput.value = '';
       const priceInput = document.getElementById('filter-price');
-      if (priceInput) priceInput.value = '70';
+      if (priceInput) priceInput.value = '5000';
       const inStockInput = document.getElementById('filter-instock');
       if (inStockInput) inStockInput.checked = false;
       renderCategoryBar();
