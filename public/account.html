@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Customer Account & Orders | Aerosol Webapp</title>
   <link rel="stylesheet" href="/css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111827'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-size='60' fill='white' font-family='system-ui, sans-serif' font-weight='700'>A</text></svg>">
 </head>
 <body>
 
@@ -55,7 +55,7 @@
   </footer>
 
   <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
-  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><span style="font-size: 16px;">🔍</span><input id="search-input" type="search" placeholder="Search aerosol formulations..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="search-input" type="search" placeholder="Search aerosol formulations..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
   <div id="toast-container"></div>
 
   <script src="/js/main.js"></script>
@@ -113,13 +113,13 @@
           <div class="container" style="padding-top: 36px; padding-bottom: 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <span class="section-label" style="margin-bottom: 0;">Customer Account</span>
-              ${isAdmin ? `<a href="/admin.html" class="btn btn-inverted btn-xs" style="gap: 6px;">🛡️ Switch to Admin Console ↗</a>` : ''}
+              ${isAdmin ? `<a href="/admin.html" class="btn btn-inverted btn-xs" style="gap: 6px;">Switch to Admin Console ↗</a>` : ''}
             </div>
             <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
               <div>
                 <h1 class="text-h2">${u.name}</h1>
                 <p style="font-size: 13px; color: var(--color-text-muted); margin-top: 4px;">
-                  ${u.email} ${u.company ? `· ${u.company}` : ''} ${u.tier ? `· <span style="font-weight: 600; color: var(--color-text);">${u.tier}</span>` : ''} · <span style="color: var(--color-success);">✓ Active & Verified</span>
+                  ${u.email} ${u.company ? `· ${u.company}` : ''} ${u.tier ? `· <span style="font-weight: 600; color: var(--color-text);">${u.tier}</span>` : ''} · <span style="color: var(--color-success);">Active & Verified</span>
                 </p>
               </div>
               <button class="btn btn-ghost btn-sm" onclick="AerosolWebapp.logout()">Sign out ⎋</button>
@@ -129,7 +129,7 @@
               ${['orders', 'wishlist', 'addresses', 'profile'].map(tab => `
                 <button onclick="currentTab = '${tab}'; renderAccount();"
                         style="padding: 12px 18px; font-size: 13px; font-weight: ${currentTab === tab ? '600' : '400'}; color: ${currentTab === tab ? 'var(--color-text)' : 'var(--color-text-muted)'}; border-bottom: ${currentTab === tab ? '2px solid var(--color-text)' : '2px solid transparent'}; margin-bottom: -1px; cursor: pointer; text-transform: capitalize; white-space: nowrap;">
-                  ${tab === 'orders' ? `📋 Orders & Tracking (${ordersList.length})` : tab === 'wishlist' ? `♡ Wishlist (${AerosolWebapp.wishlist.length})` : tab === 'addresses' ? `📍 Delivery Addresses (${u.addresses ? u.addresses.length : 0})` : '⚙️ Profile Details'}
+                  ${tab === 'orders' ? `Orders & Tracking (${ordersList.length})` : tab === 'wishlist' ? `Wishlist (${AerosolWebapp.wishlist.length})` : tab === 'addresses' ? `Delivery Addresses (${u.addresses ? u.addresses.length : 0})` : 'Profile Details'}
                 </button>
               `).join('')}
             </div>
@@ -141,7 +141,7 @@
             <div>
               ${ordersList.length === 0 ? `
                 <div style="text-align: center; padding: 56px 20px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-card-bg);">
-                  <div style="font-size: 36px; margin-bottom: 12px;">📦</div>
+                  <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--color-bg-muted); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; margin: 0 auto 12px; color: var(--color-text-muted);">0</div>
                   <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">No Orders Placed Yet</h3>
                   <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px; max-width: 360px; margin-left: auto; margin-right: auto;">
                     You have not placed any aerosol formulation orders yet. Your order history and telemetry tracking will appear here.
@@ -262,7 +262,7 @@
                         ${addr.company ? addr.company + '<br>' : ''}${addr.street}<br>${addr.city}, ${addr.state} ${addr.zip} · United States
                       </div>
                       <div style="margin-top: 10px; font-size: 11px; color: var(--color-text-muted);">
-                        📞 Phone: ${addr.phone || u.phone || 'N/A'}
+                        Phone: ${addr.phone || u.phone || 'N/A'}
                       </div>
                     </div>
                   `).join('')}
@@ -338,6 +338,23 @@
         if (data.success && data.data) {
           AerosolWebapp.user = data.data;
           AerosolWebapp.saveUser();
+
+          // Save login telemetry for admin visibility
+          try {
+            const loginAudit = {
+              id: 'audit-' + Date.now(),
+              name: data.data.name || 'Customer User',
+              email: data.data.email || email,
+              phone: data.data.phone || 'Not provided',
+              role: data.data.role || 'CUSTOMER',
+              authMethod: 'Email & Password',
+              timestamp: new Date().toISOString()
+            };
+            const savedAudits = JSON.parse(localStorage.getItem('aerosol_login_audits') || '[]');
+            savedAudits.unshift(loginAudit);
+            localStorage.setItem('aerosol_login_audits', JSON.stringify(savedAudits.slice(0, 100)));
+          } catch (e) {}
+
           AerosolWebapp.showToast(`Welcome back, ${data.data.name}!`);
           renderAccount();
         } else {
@@ -376,6 +393,23 @@
         if (data.success && data.data) {
           AerosolWebapp.user = data.data;
           AerosolWebapp.saveUser();
+
+          // Save registration login telemetry for admin visibility
+          try {
+            const loginAudit = {
+              id: 'audit-' + Date.now(),
+              name: data.data.name || name,
+              email: data.data.email || email,
+              phone: data.data.phone || 'Not provided',
+              role: data.data.role || 'CUSTOMER',
+              authMethod: 'Account Registration',
+              timestamp: new Date().toISOString()
+            };
+            const savedAudits = JSON.parse(localStorage.getItem('aerosol_login_audits') || '[]');
+            savedAudits.unshift(loginAudit);
+            localStorage.setItem('aerosol_login_audits', JSON.stringify(savedAudits.slice(0, 100)));
+          } catch (e) {}
+
           AerosolWebapp.showToast(`Account created for ${data.data.name}!`);
           renderAccount();
         } else {

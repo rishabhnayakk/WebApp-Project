@@ -193,9 +193,7 @@ export default function HomeView({ products = [], onNavigate, onSelectProduct, o
 
   return (
     <main>
-      {/* ================================================
-          01 — HERO
-          ================================================ */}
+      {/* Hero */}
       <section
         style={{
           borderBottom: '1px solid var(--color-border)',
@@ -289,9 +287,7 @@ export default function HomeView({ products = [], onNavigate, onSelectProduct, o
         </div>
       </section>
 
-      {/* ================================================
-          02 — CATEGORY NAVIGATION
-          ================================================ */}
+      {/* Categories */}
       <section
         style={{
           borderBottom: '1px solid var(--color-border)',
@@ -360,9 +356,7 @@ export default function HomeView({ products = [], onNavigate, onSelectProduct, o
         </div>
       </section>
 
-      {/* ================================================
-          03 — FEATURED PRODUCTS
-          ================================================ */}
+      {/* Featured */}
       <section
         style={{
           borderBottom: '1px solid var(--color-border)',
@@ -401,9 +395,7 @@ export default function HomeView({ products = [], onNavigate, onSelectProduct, o
         </div>
       </section>
 
-      {/* ================================================
-          04 — BRAND STATEMENT (editorial)
-          ================================================ */}
+      {/* Brand Statement */}
       <section
         style={{
           borderBottom: '1px solid var(--color-border)',
@@ -438,9 +430,7 @@ export default function HomeView({ products = [], onNavigate, onSelectProduct, o
         </div>
       </section>
 
-      {/* ================================================
-          05 — PRODUCT COLLECTION GRID
-          ================================================ */}
+      {/* Catalog */}
       <section
         style={{
           borderBottom: '1px solid var(--color-border)',
@@ -479,9 +469,7 @@ export default function HomeView({ products = [], onNavigate, onSelectProduct, o
         </div>
       </section>
 
-      {/* ================================================
-          06 — WHY CHOOSE US
-          ================================================ */}
+      {/* Features */}
       <section
         style={{
           borderBottom: '1px solid var(--color-border)',
@@ -540,9 +528,7 @@ export default function HomeView({ products = [], onNavigate, onSelectProduct, o
         </div>
       </section>
 
-      {/* ================================================
-          07 — SAFETY & COMPLIANCE
-          ================================================ */}
+      {/* Compliance */}
       <section
         style={{
           borderBottom: '1px solid var(--color-border)',
@@ -639,9 +625,7 @@ export default function HomeView({ products = [], onNavigate, onSelectProduct, o
         `}</style>
       </section>
 
-      {/* ================================================
-          08 — REVIEWS
-          ================================================ */}
+      {/* Reviews */}
       <section
         style={{
           borderBottom: '1px solid var(--color-border)',
@@ -723,9 +707,7 @@ export default function HomeView({ products = [], onNavigate, onSelectProduct, o
         `}</style>
       </section>
 
-      {/* ================================================
-          09 — FINAL CTA
-          ================================================ */}
+      {/* Call to Action */}
       <section
         style={{
           paddingTop: 'var(--section-spacing-lg)',

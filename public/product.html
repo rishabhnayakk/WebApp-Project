@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Details | E-Commerce Webapp</title>
   <link rel="stylesheet" href="/css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111827'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-size='60' fill='white' font-family='system-ui, sans-serif' font-weight='700'>A</text></svg>">
 </head>
 <body>
 
@@ -84,7 +84,7 @@
   </footer>
 
   <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
-  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><span style="font-size: 16px;">🔍</span><input id="search-input" type="search" placeholder="Search aerosol formulations, SKUs, categories..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="search-input" type="search" placeholder="Search aerosol formulations, SKUs, categories..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
   <div id="toast-container"></div>
 
   <script src="/js/main.js"></script>
@@ -93,6 +93,75 @@
     let currentProduct = null;
     let currentQty = 1;
     let activeTab = 'specs';
+    let selectedImageIndex = 0;
+
+    function selectPdpPhoto(idx) {
+      selectedImageIndex = idx;
+      const mainImg = document.getElementById('pdp-main-photo-el');
+      const canisterEl = document.getElementById('pdp-canister-el');
+      const counterEl = document.getElementById('pdp-photo-counter');
+      const p = currentProduct;
+      const allImages = (p && p.images && p.images.length > 0) ? p.images : (p && p.image ? [p.image] : []);
+
+      document.querySelectorAll('.pdp-thumb-btn').forEach((btn, i) => {
+        btn.style.borderColor = (idx === i || (idx === -1 && i === allImages.length)) ? 'var(--color-text)' : 'var(--color-border)';
+      });
+
+      if (idx === -1) {
+        if (mainImg) mainImg.style.display = 'none';
+        if (canisterEl) canisterEl.style.display = 'flex';
+        if (counterEl) counterEl.textContent = 'Canister Schematic';
+      } else {
+        if (canisterEl) canisterEl.style.display = 'none';
+        if (mainImg) {
+          mainImg.style.display = 'block';
+          mainImg.src = allImages[idx] || '';
+        }
+        if (counterEl) counterEl.textContent = `${idx + 1} / ${allImages.length}`;
+      }
+    }
+
+    function renderPdpGallery(p) {
+      const allImages = (p.images && p.images.length > 0) ? p.images : (p.image ? [p.image] : []);
+      const hasPhotos = allImages.length > 0;
+      const isCanister = selectedImageIndex === -1 || !hasPhotos;
+      const currentPhotoSrc = hasPhotos && !isCanister ? (allImages[selectedImageIndex] || allImages[0]) : '';
+
+      return `
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- MAIN VIEWPORT -->
+          <div style="width: 100%; aspect-ratio: 1/1; max-height: 440px; display: flex; align-items: center; justify-content: center; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; position: relative;">
+            <img id="pdp-main-photo-el" src="${currentPhotoSrc}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: contain; padding: 16px; display: ${isCanister ? 'none' : 'block'}; transition: opacity 0.2s ease;">
+            <div id="pdp-canister-el" style="display: ${isCanister ? 'flex' : 'none'}; width: 100%; height: 100%; align-items: center; justify-content: center;">
+              ${AerosolWebapp.renderCanister(p.color || '#1e3a5f', 280, p.sku ? p.sku.split('-')[1] : '')}
+            </div>
+
+            ${hasPhotos ? `
+              <div id="pdp-photo-counter" style="position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); backdrop-filter: blur(4px);">
+                ${isCanister ? 'Canister Schematic' : `${selectedImageIndex + 1} / ${allImages.length}`}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- THUMBNAIL GALLERY STRIP -->
+          ${hasPhotos ? `
+            <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; align-items: center;">
+              ${allImages.map((src, i) => `
+                <button type="button" class="pdp-thumb-btn" onclick="selectPdpPhoto(${i})" title="View photo ${i + 1}"
+                        style="width: 64px; height: 64px; flex-shrink: 0; border: 2px solid ${selectedImageIndex === i ? 'var(--color-text)' : 'var(--color-border)'}; border-radius: var(--radius-xs); overflow: hidden; padding: 2px; background: var(--color-bg); cursor: pointer; transition: all 0.15s ease;">
+                  <img src="${src}" alt="Thumb ${i + 1}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 2px;">
+                </button>
+              `).join('')}
+
+              <button type="button" class="pdp-thumb-btn" onclick="selectPdpPhoto(-1)" title="Canister 3D Schematic"
+                      style="width: 64px; height: 64px; flex-shrink: 0; border: 2px solid ${selectedImageIndex === -1 ? 'var(--color-text)' : 'var(--color-border)'}; border-radius: var(--radius-xs); overflow: hidden; padding: 2px; background: var(--color-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;">
+                ${AerosolWebapp.renderCanister(p.color || '#1e3a5f', 44, '')}
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
 
     async function loadProductDetail() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -133,7 +202,7 @@
         <div class="container">
           <div class="pdp-grid">
             <div class="pdp-image-col">
-              ${AerosolWebapp.renderCanister(p.color || '#1e3a5f', 280, p.sku ? p.sku.split('-')[1] : '')}
+              ${renderPdpGallery(p)}
             </div>
 
             <div class="pdp-info-col">
@@ -174,7 +243,7 @@
                 </div>
 
                 <button class="btn btn-inverted" style="flex: 1; height: 44px; font-size: 14px; font-weight: 500;" onclick="AerosolWebapp.addToCart(currentProduct, currentQty);">
-                  Add to cart — $<span id="btn-price">${(p.price * currentQty).toFixed(2)}</span>
+                  Add to cart — <span id="btn-price">${AerosolWebapp.formatMoney(p.price * currentQty)}</span>
                 </button>
 
                 <button class="btn btn-neutral" style="height: 44px; padding: 0 14px; color: ${isSaved ? 'var(--color-error)' : 'var(--color-text-muted)'};" onclick="AerosolWebapp.toggleWishlist(currentProduct); renderPdp();">
@@ -282,7 +351,7 @@
       const qtyBox = document.getElementById('qty-box');
       const btnPrice = document.getElementById('btn-price');
       if (qtyBox) qtyBox.textContent = currentQty;
-      if (btnPrice && currentProduct) btnPrice.textContent = (currentProduct.price * currentQty).toFixed(2);
+      if (btnPrice && currentProduct) btnPrice.textContent = AerosolWebapp.formatMoney(currentProduct.price * currentQty);
     }
 
     function setTab(tab) {

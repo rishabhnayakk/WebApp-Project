@@ -1,5 +1,23 @@
 [
   {
+    "id": "audit-1788794588452-l8vu",
+    "eventType": "USER_CREATED_GOOGLE",
+    "details": {
+      "userId": "usr-google-1788794588452",
+      "email": "user.google@gmail.com"
+    },
+    "timestamp": "2026-09-07T15:23:08.452Z"
+  },
+  {
+    "id": "audit-1788686107256-3dpx",
+    "eventType": "ADMIN_LOGIN_SUCCESS",
+    "details": {
+      "email": "admindinkal@aerosolwebapp.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-09-06T09:15:07.256Z"
+  },
+  {
     "id": "audit-1788640578220-8lfp",
     "eventType": "LOGIN_SUCCESS",
     "details": {

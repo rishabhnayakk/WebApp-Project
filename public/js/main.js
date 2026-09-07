@@ -329,15 +329,21 @@ const AerosolWebapp = {
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-          this._cachedProducts = data.data;
-          return data.data;
+          this._cachedProducts = data.data.map(p => ({
+            ...p,
+            images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : [])
+          }));
+          return this._cachedProducts;
         }
       }
     } catch (err) {
       console.warn('Live API unreachable, using robust offline catalog fallback:', err);
     }
-    this._cachedProducts = this.fallbackProducts;
-    return this.fallbackProducts;
+    this._cachedProducts = this.fallbackProducts.map(p => ({
+      ...p,
+      images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : [])
+    }));
+    return this._cachedProducts;
   },
 
   updateHeaderBadges() {
@@ -373,7 +379,7 @@ const AerosolWebapp = {
         btn.innerHTML = `
           <div style="display: inline-flex; align-items: center; gap: 7px;">
             <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-              ${isAdm ? '🛡️' : initial}
+              ${isAdm ? 'A' : initial}
             </div>
             <span style="font-size: 13px; font-weight: 600; color: var(--color-text); max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
               ${firstName}
@@ -533,7 +539,7 @@ const AerosolWebapp = {
         ` : `
           <div style="padding: 12px 20px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-subtle);">
             <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;">
-              <span>${isFreeShipping ? '✓ Free Shipping Applied' : `Free Shipping over ₹2,999 (${this.formatMoney(Math.max(0, 2999 - subtotal))} away)`}</span>
+              <span>${isFreeShipping ? 'Free Shipping Applied' : `Free Shipping over ₹2,999 (${this.formatMoney(Math.max(0, 2999 - subtotal))} away)`}</span>
             </div>
             <div style="height: 3px; background: var(--color-border); border-radius: 2px; overflow: hidden;">
               <div style="height: 100%; width: ${progress}%; background: var(--color-text); transition: width 0.3s ease;"></div>
@@ -750,12 +756,10 @@ const AerosolWebapp = {
 
     popover.innerHTML = `
       <div style="width: 320px; background: #ffffff; border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: 0 16px 36px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.06); overflow: hidden; font-family: var(--font-sans); text-align: left;">
-        
-        <!-- USER IDENTITY HEADER -->
         <div style="padding: 16px 18px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-subtle);">
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
             <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              ${isAdm ? '🛡️' : initial}
+              ${isAdm ? 'A' : initial}
             </div>
             <div style="min-width: 0; flex: 1;">
               <div style="font-size: 14px; font-weight: 700; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -769,20 +773,18 @@ const AerosolWebapp = {
 
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
             <span style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: var(--radius-full); background: ${isAdm ? '#059669' : 'var(--color-border)'}; color: ${isAdm ? '#ffffff' : 'var(--color-text)'};">
-              ${isAdm ? 'Operations Administrator' : (u.tier || 'Verified Customer')}
+              ${isAdm ? 'Administrator' : (u.tier || 'Member')}
             </span>
-            ${u.phone ? `<span style="font-size: 11px; color: var(--color-text-muted);">📱 ${u.phone}</span>` : ''}
+            ${u.phone ? `<span style="font-size: 11px; color: var(--color-text-muted);">${u.phone}</span>` : ''}
           </div>
         </div>
 
-        <!-- QUICK ACCESS MENU -->
         <div style="padding: 6px 0;">
           ${isAdm ? `
             <a href="/admin.html" onclick="AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 600; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
-              <span style="font-size: 16px;">🛡️</span>
               <div style="flex: 1;">
-                <div>Admin Operations Console</div>
-                <div style="font-size: 11px; color: var(--color-text-muted); font-weight: 400;">Telemetry, formulations & orders</div>
+                <div>Admin Console</div>
+                <div style="font-size: 11px; color: var(--color-text-muted); font-weight: 400;">Catalog, orders &amp; settings</div>
               </div>
               <span style="font-size: 12px; color: var(--color-text-muted);">↗</span>
             </a>
@@ -790,39 +792,34 @@ const AerosolWebapp = {
           ` : ''}
 
           <a href="/account.html" onclick="sessionStorage.setItem('aerosol_account_tab', 'orders'); AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
-            <span style="font-size: 16px;">📦</span>
             <div style="flex: 1;">
-              <div style="font-weight: 600;">Previous Orders &amp; History</div>
-              <div style="font-size: 11px; color: var(--color-text-muted);">Track shipments & invoices</div>
+              <div style="font-weight: 600;">Orders &amp; History</div>
+              <div style="font-size: 11px; color: var(--color-text-muted);">Track shipments &amp; invoices</div>
             </div>
           </a>
 
           <a href="/account.html" onclick="sessionStorage.setItem('aerosol_account_tab', 'addresses'); AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
-            <span style="font-size: 16px;">📍</span>
             <div style="flex: 1;">
-              <div style="font-weight: 600;">Saved Delivery Addresses</div>
-              <div style="font-size: 11px; color: var(--color-text-muted);">Delivery & billing destinations</div>
+              <div style="font-weight: 600;">Saved Addresses</div>
+              <div style="font-size: 11px; color: var(--color-text-muted);">Delivery and billing addresses</div>
             </div>
           </a>
 
           <a href="/wishlist.html" onclick="AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
-            <span style="font-size: 16px;">❤️</span>
             <div style="flex: 1;">
-              <div style="font-weight: 600;">Saved Formulations</div>
-              <div style="font-size: 11px; color: var(--color-text-muted);">Wishlist and laboratory saves</div>
+              <div style="font-weight: 600;">Saved Items</div>
+              <div style="font-size: 11px; color: var(--color-text-muted);">Wishlist items</div>
             </div>
           </a>
 
           <a href="/account.html" onclick="sessionStorage.setItem('aerosol_account_tab', 'profile'); AerosolWebapp.toggleUserPopover(false)" style="display: flex; align-items: center; gap: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--color-text); text-decoration: none;" onmouseover="this.style.background='var(--color-bg-subtle)'" onmouseout="this.style.background='none'">
-            <span style="font-size: 16px;">⚙️</span>
             <div style="flex: 1;">
-              <div style="font-weight: 600;">Account &amp; Profile Settings</div>
-              <div style="font-size: 11px; color: var(--color-text-muted);">Name, phone & organization</div>
+              <div style="font-weight: 600;">Profile Settings</div>
+              <div style="font-size: 11px; color: var(--color-text-muted);">Name, phone &amp; email</div>
             </div>
           </a>
         </div>
 
-        <!-- FOOTER: SIGN OUT -->
         <div style="padding: 10px 18px; border-top: 1px solid var(--color-border); background: var(--color-bg-subtle); display: flex; justify-content: space-between; align-items: center;">
           <button onclick="AerosolWebapp.logout(); AerosolWebapp.toggleUserPopover(false);" style="background: none; border: none; font-size: 12px; font-weight: 600; color: var(--color-error); cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 4px 0;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -832,7 +829,7 @@ const AerosolWebapp = {
             </svg>
             Sign Out
           </button>
-          <span style="font-size: 11px; color: var(--color-text-muted);">ISO 9001:2015</span>
+          <span style="font-size: 11px; color: var(--color-text-muted);">Secure</span>
         </div>
       </div>
     `;

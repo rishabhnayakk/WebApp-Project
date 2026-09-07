@@ -27,7 +27,6 @@ const saveProducts = (products) => {
   }
 };
 
-// GET /api/v1/inventory (Stock ledger and low-stock warnings)
 router.get('/', (req, res) => {
   const products = getProducts();
   const totalStock = products.reduce((sum, p) => sum + (p.stockCount || 0), 0);
@@ -42,16 +41,18 @@ router.get('/', (req, res) => {
     stockCount: p.stockCount || 0,
     lowStockThreshold: p.lowStockThreshold || 40,
     status: (p.stockCount || 0) === 0 ? 'Out of Stock' : (p.stockCount || 0) <= (p.lowStockThreshold || 40) ? 'Low Stock' : 'In Stock',
-    unitCost: (p.price * 0.42).toFixed(2),
+    unitCost: (p.price * 0.45).toFixed(2),
     retailPrice: p.price,
     totalValuation: ((p.stockCount || 0) * p.price).toFixed(2),
   }));
+
+  const totalValue = inventoryLedger.reduce((sum, item) => sum + parseFloat(item.totalValuation), 0);
 
   res.json({
     success: true,
     data: {
       totalUnits: totalStock,
-      totalValuation: `$${inventoryLedger.reduce((sum, item) => sum + parseFloat(item.totalValuation), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      totalValuation: `₹${totalValue.toLocaleString('en-IN', { minimumFractionDigits: 0 })}`,
       skuCount: products.length,
       lowStockCount: lowStockItems.length,
       outOfStockCount: outOfStockItems.length,
@@ -60,7 +61,6 @@ router.get('/', (req, res) => {
   });
 });
 
-// PUT /api/v1/inventory/:id (Adjust stock / replenishment)
 router.put('/:id', (req, res) => {
   const { stockCount, addStock } = req.body;
   const products = getProducts();
@@ -81,7 +81,7 @@ router.put('/:id', (req, res) => {
 
   res.json({
     success: true,
-    message: `Inventory updated for ${product.name}. Current stock: ${product.stockCount} units.`,
+    message: `Stock updated for ${product.name} (${product.stockCount} in stock)`,
     data: product,
   });
 });

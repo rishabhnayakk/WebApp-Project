@@ -45,7 +45,7 @@ export const requireAdmin = (req, res, next) => {
     }
     return res.status(403).json({
       success: false,
-      message: 'Forbidden: Admin authorization required. Server-side RBAC check failed.'
+      message: 'Access denied. Administrator privileges required.'
     });
   });
 };

@@ -18,6 +18,8 @@ const productSchema = new mongoose.Schema({
   lowStockThreshold: { type: Number, default: 20 },
   badge: { type: String, default: 'New Formula' },
   color: { type: String, default: '#0284c7' },
+  image: { type: String },
+  images: [{ type: String }],
   propellant: { type: String },
   pressureBar: { type: Number },
   optimalDistance: { type: String },

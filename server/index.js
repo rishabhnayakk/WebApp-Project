@@ -38,27 +38,25 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/analytics', analyticsRouter);
 app.use('/api/v1/settings', settingsRouter);
 
-app.post('/api/v1/contact', (req, res) => {
-  const { name, email, subject } = req.body;
-  res.json({
-    success: true,
-    message: 'Thank you. Your message has been received by Engineering Support.',
-    timestamp: new Date().toISOString(),
-  });
-});
-
+// legacy v1 alias routes
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/settings', settingsRouter);
 
+app.post('/api/v1/contact', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Thanks for reaching out! We will get back to you shortly.',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
-    status: 'healthy',
-    system: 'E-Commerce Webapp Core v2.0',
-    cleanroomIoT: 'ONLINE',
-    pressureNormal: true,
-    timestamp: new Date().toISOString(),
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -66,9 +64,8 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/admin.html'));
 });
 
-// Return JSON 404 for any unhandled API calls instead of serving HTML
 app.all('/api/*', (req, res) => {
-  res.status(404).json({ success: false, message: `API endpoint ${req.originalUrl} not found.` });
+  res.status(404).json({ success: false, message: `Route not found: ${req.originalUrl}` });
 });
 
 app.use((req, res) => {
@@ -76,6 +73,6 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, async () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`Server listening at http://localhost:${PORT}`);
   await connectDB();
 });

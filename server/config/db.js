@@ -3,13 +3,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 let isConnected = false;
-let connectionMode = 'LOCAL_JSON_FALLBACK';
+let connectionMode = 'LOCAL_JSON';
 
 export const connectDB = async () => {
   const uri = process.env.MONGODB_URI;
 
   if (!uri || uri.includes('<username>') || uri.includes('<password>') || uri.includes('cluster0.mongodb.net')) {
-    console.log('ℹ️  MongoDB Atlas: Demo URI detected or not set. Running in Local JSON sync mode with Atlas support ready.');
+    console.log('MongoDB: No valid Atlas URI provided, using local JSON storage.');
     connectionMode = 'READY_FOR_ATLAS_URI';
     return;
   }
@@ -21,9 +21,9 @@ export const connectDB = async () => {
     });
     isConnected = true;
     connectionMode = 'MONGODB_ATLAS_CONNECTED';
-    console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host} | Database: ${conn.connection.name}`);
+    console.log(`Connected to MongoDB: ${conn.connection.host}/${conn.connection.name}`);
   } catch (error) {
-    console.warn(`⚠️ MongoDB Atlas Connection Notice: ${error.message}. Operating with local persistent JSON fallback.`);
+    console.warn(`MongoDB connection failed (${error.message}). Falling back to local storage.`);
     isConnected = false;
     connectionMode = 'DISCONNECTED_FALLBACK';
   }

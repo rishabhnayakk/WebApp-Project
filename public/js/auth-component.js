@@ -1,5 +1,5 @@
 const AerosolAuth = {
-  step: 'email', // 'email' | 'login' | 'register' | 'forgot' | 'profile'
+  step: 'email',
   email: '',
   name: '',
   showOptional: false,
@@ -49,7 +49,7 @@ const AerosolAuth = {
     const icon = document.getElementById('optional-toggle-icon');
     if (section && icon) {
       section.style.display = this.showOptional ? 'block' : 'none';
-      icon.textContent = this.showOptional ? '▲ Hide' : '▼ Add';
+      icon.textContent = this.showOptional ? 'Hide' : 'Add';
     }
   },
 
@@ -59,42 +59,54 @@ const AerosolAuth = {
     const content = isTerms ? `
       <div style="display: flex; flex-direction: column; gap: 14px; text-align: left;">
         <div>
-          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">1. Industrial Product & HazMat Policy</h4>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">1. Product Usage & Safety</h4>
           <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
-            All chemical formulations, precision aerosols, and propellant canisters are sold for commercial, laboratory, and authorized use in strict accordance with ISO 9001:2015 standards.
+            All aerosol canisters and chemical formulations must be stored, handled, and used strictly according to canister labels and safety datasheets.
           </p>
         </div>
         <div>
-          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">2. Payment & Shipping Transparency</h4>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">2. Orders & Payments</h4>
           <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
-            We do not collect credit cards, UPI IDs, or delivery addresses at account registration. All payment and shipping information is collected safely and encrypted only during checkout.
+            We do not collect credit cards, UPI IDs, or delivery addresses at account registration. All payment and shipping details are entered securely during checkout.
           </p>
         </div>
         <div>
-          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">3. Delivery & Damage Claims</h4>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">3. Shipping & Deliveries</h4>
           <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
-            Orders are dispatched in compliance with surface HazMat logistics. Damaged canisters reported within 48 hours receive immediate replacement or credit.
+            Orders are dispatched via certified ground transport. Any damaged goods reported within 48 hours of delivery are eligible for prompt replacement or credit.
+          </p>
+        </div>
+        <div>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">4. Account Access</h4>
+          <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
+            You are responsible for keeping your login credentials confidential. Access timestamps are recorded to monitor account security.
           </p>
         </div>
       </div>
     ` : `
       <div style="display: flex; flex-direction: column; gap: 14px; text-align: left;">
         <div>
-          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">1. Data Collection & Privacy</h4>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">1. Information We Collect</h4>
           <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
-            We collect your Full Name and Email Address exclusively to authenticate your account and securely record previous orders and formulations. We never sell your personal information.
+            We collect your name and email address to manage your account and process orders. We do not sell or rent your personal information to third parties.
           </p>
         </div>
         <div>
-          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">2. Zero Sensitive Financial Data at Signup</h4>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">2. Payment Security</h4>
           <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
-            We never request credit/debit card numbers, UPI PINs, bank details, or government IDs during signup. Payments are processed during checkout through secure 256-bit encrypted gateways.
+            We never request credit card numbers, UPI PINs, or bank details during signup. Payments are handled through encrypted, industry-standard gateways.
           </p>
         </div>
         <div>
-          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">3. Marketing Choice & Opt-In</h4>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">3. Communication Preferences</h4>
           <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
-            Marketing communications are 100% opt-in and never pre-checked. You may change your communication preferences anytime from your account dashboard.
+            Promotional updates are strictly opt-in. You can update your marketing preferences at any time in your account settings.
+          </p>
+        </div>
+        <div>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 4px 0;">4. Security & Audit Logs</h4>
+          <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
+            Login timestamps and IP addresses are recorded to protect accounts from unauthorized access and detect fraudulent activity.
           </p>
         </div>
       </div>
@@ -119,8 +131,8 @@ const AerosolAuth = {
             ${content}
           </div>
           <div style="padding: 14px 24px; border-top: 1px solid var(--color-border); display: flex; justify-content: flex-end; gap: 8px; background: var(--color-bg-subtle);">
-            <a href="/faq.html" target="_blank" class="btn btn-ghost btn-xs" style="text-decoration: underline;">Open Full Documentation ↗</a>
-            <button type="button" onclick="AerosolAuth.closePolicyModal()" class="btn btn-inverted btn-xs" style="padding: 6px 16px;">I Understand</button>
+            <a href="/faq.html" target="_blank" class="btn btn-ghost btn-xs" style="text-decoration: underline;">Full FAQs ↗</a>
+            <button type="button" onclick="AerosolAuth.closePolicyModal()" class="btn btn-inverted btn-xs" style="padding: 6px 16px;">Got It</button>
           </div>
         </div>
       </div>
@@ -149,18 +161,18 @@ const AerosolAuth = {
           <div style="text-align: center; margin-bottom: 24px;">
             <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-muted);">Aerosol Webapp</div>
             <h1 style="font-size: 20px; font-weight: 700; color: var(--color-text); margin-top: 4px;">Welcome back, ${u.name.split(' ')[0]}</h1>
-            <p style="font-size: 13px; color: var(--color-text-muted); margin-top: 4px;">${u.email} · <span style="color: var(--color-success); font-weight: 600;">✓ Signed In (${u.role || 'CUSTOMER'})</span></p>
+            <p style="font-size: 13px; color: var(--color-text-muted); margin-top: 4px;">${u.email} · <span style="color: var(--color-success); font-weight: 600;">Signed In (${u.role || 'CUSTOMER'})</span></p>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 12px;">
             ${u.role === 'ADMIN' || u.role === 'SUPER_ADMIN' ? `
-              <a href="/admin.html" class="btn btn-inverted btn-lg btn-full" style="text-align: center;">Go to Admin Operations Console ↗</a>
-              <a href="/index.html" class="btn btn-neutral btn-md btn-full" style="text-align: center;">Go to Home Page →</a>
+              <a href="/admin.html" class="btn btn-inverted btn-lg btn-full" style="text-align: center;">Go to Admin Console ↗</a>
+              <a href="/index.html" class="btn btn-neutral btn-md btn-full" style="text-align: center;">Home Page →</a>
             ` : `
-              <a href="/index.html" class="btn btn-inverted btn-lg btn-full" style="text-align: center;">Go to Home Page →</a>
-              <a href="/account.html" class="btn btn-neutral btn-md btn-full" style="text-align: center;">View Orders & Saved Addresses ↗</a>
+              <a href="/index.html" class="btn btn-inverted btn-lg btn-full" style="text-align: center;">Continue Shopping →</a>
+              <a href="/account.html" class="btn btn-neutral btn-md btn-full" style="text-align: center;">View Orders &amp; Addresses ↗</a>
             `}
-            <button onclick="AerosolAuth.switchAccount()" class="btn btn-ghost btn-sm btn-full">Sign in with a different account</button>
+            <button onclick="AerosolAuth.switchAccount()" class="btn btn-ghost btn-sm btn-full">Use a different account</button>
             <button onclick="AerosolWebapp.logout()" class="btn btn-ghost btn-sm btn-full" style="color: var(--color-error);">Sign Out</button>
           </div>
         </div>
@@ -173,14 +185,12 @@ const AerosolAuth = {
     container.innerHTML = `
       <div class="auth-card" style="max-width: 460px; margin: 0 auto; background: var(--color-card-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 32px 28px; box-shadow: var(--shadow-overlay);">
         
-        <!-- BRAND LOGO -->
         <div style="text-align: center; margin-bottom: 20px;">
           <a href="/index.html" style="font-size: 18px; font-weight: 700; color: var(--color-text); letter-spacing: -0.02em; text-decoration: none;">
             Aerosol Webapp
           </a>
         </div>
 
-        <!-- AUTH TABS: SIGN IN vs CREATE ACCOUNT -->
         <div style="display: flex; border-bottom: 1px solid var(--color-border); margin-bottom: 24px;">
           <button type="button" onclick="AerosolAuth.switchTab('login')" style="flex: 1; padding: 10px 14px; font-size: 13px; font-weight: ${!isRegister ? '600' : '500'}; color: ${!isRegister ? 'var(--color-text)' : 'var(--color-text-muted)'}; border-bottom: ${!isRegister ? '2px solid var(--color-text)' : '2px solid transparent'}; background: none; border-top: none; border-left: none; border-right: none; cursor: pointer; transition: all 0.15s ease;">
             Sign In
@@ -196,11 +206,10 @@ const AerosolAuth = {
           </div>
         ` : ''}
 
-        <!-- STEP 1: SIGN IN / EMAIL-FIRST -->
         ${this.step === 'email' ? `
           <div style="margin-bottom: 20px; text-align: left;">
             <h1 style="font-size: 20px; font-weight: 700; color: var(--color-text); margin: 0 0 4px 0;">Welcome back</h1>
-            <p style="font-size: 13px; color: var(--color-text-muted); margin: 0;">Sign in to your account with your email address.</p>
+            <p style="font-size: 13px; color: var(--color-text-muted); margin: 0;">Sign in with your email to continue.</p>
           </div>
 
           <form onsubmit="AerosolAuth.handleEmailSubmit(event)">
@@ -210,7 +219,7 @@ const AerosolAuth = {
             </div>
 
             <button type="submit" class="btn btn-inverted btn-lg btn-full" ${this.loading ? 'disabled' : ''} style="margin-bottom: 20px;">
-              ${this.loading ? 'Checking account...' : 'Continue →'}
+              ${this.loading ? 'Checking...' : 'Continue →'}
             </button>
           </form>
 
@@ -220,7 +229,6 @@ const AerosolAuth = {
             <div style="flex: 1; height: 1px; background: var(--color-border);"></div>
           </div>
 
-          <!-- GOOGLE OAUTH BUTTON -->
           <button type="button" onclick="AerosolAuth.handleGoogleAuth()" class="btn btn-neutral btn-lg btn-full" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 24px; font-weight: 500;">
             <svg width="18" height="18" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -236,151 +244,146 @@ const AerosolAuth = {
           </div>
         ` : ''}
 
-        <!-- STEP 2A: EXISTING USER PASSWORD STEP -->
         ${this.step === 'login' ? `
           <div style="margin-bottom: 20px; text-align: left;">
-            <h1 style="font-size: 20px; font-weight: 700; color: var(--color-text); margin: 0 0 6px 0;">Welcome back</h1>
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-full); font-size: 12px; color: var(--color-text-secondary);">
-              <span>${this.email}</span>
-              <button onclick="AerosolAuth.step='email'; AerosolAuth.render();" style="font-size: 11px; color: var(--color-text-muted); cursor: pointer; text-decoration: underline; background: none; border: none;">Change</button>
-            </div>
+            <h1 style="font-size: 20px; font-weight: 700; color: var(--color-text); margin: 0 0 4px 0;">Enter password</h1>
+            <p style="font-size: 13px; color: var(--color-text-muted); margin: 0;">
+              Signing in as <strong style="color: var(--color-text);">${this.email}</strong> 
+              <button type="button" onclick="AerosolAuth.step = 'email'; AerosolAuth.render();" style="font-size: 12px; color: var(--color-text-secondary); text-decoration: underline; background: none; border: none; cursor: pointer; margin-left: 4px;">Change</button>
+            </p>
           </div>
 
           <form onsubmit="AerosolAuth.handleLoginSubmit(event)">
-            <div style="margin-bottom: 18px; text-align: left;">
+            <div style="margin-bottom: 16px; text-align: left;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <label class="label" for="login-pass-input" style="font-weight: 600; margin-bottom: 0;">Password</label>
-                <button type="button" onclick="AerosolAuth.togglePasswordVisibility('login-pass-input')" style="font-size: 11px; color: var(--color-text-muted); background: none; border: none; cursor: pointer;">Show</button>
+                <label class="label" for="login-pass-input" style="font-weight: 600; margin: 0;">Password</label>
+                <button type="button" onclick="AerosolAuth.step = 'forgot'; AerosolAuth.render();" style="font-size: 12px; color: var(--color-text-muted); text-decoration: underline; background: none; border: none; cursor: pointer;">Forgot password?</button>
               </div>
-              <input type="password" id="login-pass-input" class="input input-lg" placeholder="Enter your password" required autocomplete="current-password">
+              <div style="position: relative;">
+                <input type="password" id="login-pass-input" class="input input-lg" placeholder="Enter your password" required autocomplete="current-password" autofocus style="padding-right: 54px;">
+                <button type="button" onclick="AerosolAuth.togglePasswordVisibility('login-pass-input', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-text-muted); font-size: 12px; font-weight: 500;">Show</button>
+              </div>
             </div>
 
             <button type="submit" class="btn btn-inverted btn-lg btn-full" ${this.loading ? 'disabled' : ''} style="margin-bottom: 16px;">
               ${this.loading ? 'Signing in...' : 'Sign In →'}
             </button>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-              <button type="button" onclick="AerosolAuth.step='forgot'; AerosolAuth.render();" style="color: var(--color-text-muted); text-decoration: underline; background: none; border: none; cursor: pointer;">Forgot password?</button>
-              <button type="button" onclick="AerosolAuth.switchTab('register')" style="color: var(--color-text); font-weight: 600; text-decoration: underline; background: none; border: none; cursor: pointer;">Create account instead</button>
-            </div>
           </form>
+
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; color: var(--color-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
+            <div style="flex: 1; height: 1px; background: var(--color-border);"></div>
+            <span>OR</span>
+            <div style="flex: 1; height: 1px; background: var(--color-border);"></div>
+          </div>
+
+          <button type="button" onclick="AerosolAuth.handleGoogleAuth()" class="btn btn-neutral btn-md btn-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 18px; font-weight: 500;">
+            <span>Continue with Google</span>
+          </button>
+
+          <div style="text-align: center; font-size: 13px; color: var(--color-text-muted);">
+            Don't have an account? <button type="button" onclick="AerosolAuth.switchTab('register')" style="color: var(--color-text); font-weight: 600; text-decoration: underline; background: none; border: none; cursor: pointer;">Create an account</button>
+          </div>
         ` : ''}
 
-        <!-- STEP 2B: SIGNUP / CREATE ACCOUNT SCREEN -->
         ${this.step === 'register' ? `
           <div style="margin-bottom: 20px; text-align: left;">
-            <h1 style="font-size: 22px; font-weight: 700; color: var(--color-text); margin: 0 0 6px 0;">Create your account</h1>
-            <p style="font-size: 13px; color: var(--color-text-secondary); margin: 0;">Sign up to place orders, track shipments, and access chemical formulations.</p>
+            <h1 style="font-size: 20px; font-weight: 700; color: var(--color-text); margin: 0 0 4px 0;">Create your account</h1>
+            <p style="font-size: 13px; color: var(--color-text-muted); margin: 0;">Get instant access to order history and faster checkout.</p>
           </div>
 
           <form onsubmit="AerosolAuth.handleRegisterSubmit(event)">
-            <!-- REQUIRED: Full name -->
             <div style="margin-bottom: 14px; text-align: left;">
-              <label class="label" for="reg-name-input" style="font-weight: 600; margin-bottom: 6px; display: block;">
-                Full Name <span style="color: var(--color-error);">*</span>
+              <label class="label" for="reg-name-input" style="font-weight: 600; margin-bottom: 4px; display: block;">
+                Full name <span style="color: var(--color-error);">*</span>
               </label>
-              <input type="text" id="reg-name-input" class="input input-lg" placeholder="Jane Smith" required autocomplete="name" value="${this.name || ''}">
+              <input type="text" id="reg-name-input" class="input" placeholder="e.g. Rahul Sharma" required value="${this.name}" autocomplete="name">
             </div>
 
-            <!-- REQUIRED: Email address -->
             <div style="margin-bottom: 14px; text-align: left;">
-              <label class="label" for="reg-email-input" style="font-weight: 600; margin-bottom: 6px; display: block;">
-                Email <span style="color: var(--color-error);">*</span>
+              <label class="label" for="reg-email-input" style="font-weight: 600; margin-bottom: 4px; display: block;">
+                Email address <span style="color: var(--color-error);">*</span>
               </label>
-              <input type="email" id="reg-email-input" class="input input-lg" placeholder="name@example.com" required autocomplete="email" value="${this.email || ''}">
+              <input type="email" id="reg-email-input" class="input" placeholder="name@company.com" required value="${this.email}" autocomplete="username">
             </div>
 
-            <!-- REQUIRED: Password -->
             <div style="margin-bottom: 14px; text-align: left;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <label class="label" for="reg-pass-input" style="font-weight: 600; margin-bottom: 0;">
-                  Password <span style="color: var(--color-error);">*</span>
-                </label>
-                <button type="button" onclick="AerosolAuth.togglePasswordVisibility('reg-pass-input')" style="font-size: 11px; color: var(--color-text-muted); background: none; border: none; cursor: pointer;">Show</button>
+              <label class="label" for="reg-pass-input" style="font-weight: 600; margin-bottom: 4px; display: block;">
+                Password <span style="color: var(--color-error);">*</span>
+              </label>
+              <div style="position: relative;">
+                <input type="password" id="reg-pass-input" class="input" placeholder="At least 6 characters" required autocomplete="new-password" style="padding-right: 50px;">
+                <button type="button" onclick="AerosolAuth.togglePasswordVisibility('reg-pass-input', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-text-muted); font-size: 12px; font-weight: 500;">Show</button>
               </div>
-              <input type="password" id="reg-pass-input" class="input input-lg" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password">
             </div>
 
-            <!-- REQUIRED: Confirm password -->
             <div style="margin-bottom: 16px; text-align: left;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <label class="label" for="reg-confirm-pass-input" style="font-weight: 600; margin-bottom: 0;">
-                  Confirm Password <span style="color: var(--color-error);">*</span>
-                </label>
-                <button type="button" onclick="AerosolAuth.togglePasswordVisibility('reg-confirm-pass-input')" style="font-size: 11px; color: var(--color-text-muted); background: none; border: none; cursor: pointer;">Show</button>
+              <label class="label" for="reg-confirm-pass-input" style="font-weight: 600; margin-bottom: 4px; display: block;">
+                Confirm password <span style="color: var(--color-error);">*</span>
+              </label>
+              <div style="position: relative;">
+                <input type="password" id="reg-confirm-pass-input" class="input" placeholder="Re-enter password" required autocomplete="new-password" style="padding-right: 50px;">
+                <button type="button" onclick="AerosolAuth.togglePasswordVisibility('reg-confirm-pass-input', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-text-muted); font-size: 12px; font-weight: 500;">Show</button>
               </div>
-              <input type="password" id="reg-confirm-pass-input" class="input input-lg" placeholder="Re-enter your password" required minlength="6" autocomplete="new-password">
             </div>
 
-            <!-- OPTIONAL DETAILS TOGGLE (Phone number & Date of birth) -->
-            <div style="margin-bottom: 16px; border: 1px dashed var(--color-border); border-radius: var(--radius-sm); padding: 10px 14px; background: var(--color-bg-subtle); text-align: left;">
+            <div style="margin-bottom: 16px; border: 1px dashed var(--color-border); border-radius: var(--radius-sm); padding: 10px 14px; text-align: left; background: var(--color-bg-subtle);">
               <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="AerosolAuth.toggleOptionalFields()">
-                <span style="font-size: 12px; font-weight: 600; color: var(--color-text);">Optional details (Phone, Date of birth)</span>
-                <span id="optional-toggle-icon" style="font-size: 11px; color: var(--color-text-muted); font-weight: 500;">
-                  ${this.showOptional ? '▲ Hide' : '▼ Add'}
+                <span style="font-size: 12px; font-weight: 600; color: var(--color-text-secondary);">
+                  Additional profile info <span style="color: var(--color-text-muted); font-weight: 400;">(optional)</span>
+                </span>
+                <span id="optional-toggle-icon" style="font-size: 11px; font-weight: 600; color: var(--color-text-muted);">
+                  ${this.showOptional ? 'Hide' : 'Add'}
                 </span>
               </div>
-              <div id="reg-optional-section" style="display: ${this.showOptional ? 'block' : 'none'}; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--color-border);">
+              <div id="reg-optional-section" style="display: ${this.showOptional ? 'block' : 'none'}; margin-top: 10px;">
                 <div style="margin-bottom: 10px;">
-                  <label class="label" for="reg-phone-input" style="font-size: 11px; margin-bottom: 4px; display: block;">
-                    Phone number <span style="color: var(--color-text-muted); font-weight: 400;">— useful for order updates/OTP</span>
-                  </label>
-                  <input type="tel" id="reg-phone-input" class="input" placeholder="+1 (555) 000-0000" autocomplete="tel">
+                  <label class="label" for="reg-phone-input" style="font-size: 11px; margin-bottom: 4px; display: block;">Contact phone</label>
+                  <input type="tel" id="reg-phone-input" class="input" placeholder="+91 98765 43210" autocomplete="tel">
                 </div>
                 <div>
-                  <label class="label" for="reg-dob-input" style="font-size: 11px; margin-bottom: 4px; display: block;">
-                    Date of birth <span style="color: var(--color-text-muted); font-weight: 400;">— optional age verification</span>
-                  </label>
+                  <label class="label" for="reg-dob-input" style="font-size: 11px; margin-bottom: 4px; display: block;">Date of birth</label>
                   <input type="date" id="reg-dob-input" class="input">
                 </div>
               </div>
             </div>
 
-            <!-- DON'T ASK AT SIGNUP REASSURANCE -->
             <div style="margin-bottom: 16px; padding: 9px 12px; background: var(--color-bg-subtle); border-radius: var(--radius-sm); font-size: 11px; color: var(--color-text-muted); text-align: left; line-height: 1.45;">
-              🔒 We never ask for payment details, UPI ID, delivery address, or bank information at signup. These are collected safely only when needed during checkout.
+              Payment details and delivery addresses are never requested at signup—only securely entered during checkout.
             </div>
 
-            <!-- T&C / PRIVACY / MARKETING CONSENTS -->
-            <div style="margin-bottom: 22px; display: flex; flex-direction: column; gap: 12px; text-align: left;">
-              <!-- Checkbox 1: Terms & Conditions -->
+            <div style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; text-align: left;">
               <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 12px; line-height: 1.45; color: var(--color-text-secondary);">
                 <input type="checkbox" id="reg-terms-check" style="margin-top: 2px; accent-color: var(--color-text); width: 16px; height: 16px; flex-shrink: 0;" required>
                 <span>
-                  I agree to the <a href="javascript:void(0)" onclick="AerosolAuth.openPolicyModal('terms')" style="text-decoration: underline; color: var(--color-text); font-weight: 600;">Terms &amp; Conditions</a> and understand the store's policies. <span style="color: var(--color-error);">*</span>
+                  I agree to the <a href="javascript:void(0)" onclick="AerosolAuth.openPolicyModal('terms')" style="text-decoration: underline; color: var(--color-text); font-weight: 600;">Terms &amp; Conditions</a>. <span style="color: var(--color-error);">*</span>
                 </span>
               </label>
 
-              <!-- Checkbox 2: Privacy Policy -->
               <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 12px; line-height: 1.45; color: var(--color-text-secondary);">
                 <input type="checkbox" id="reg-privacy-check" style="margin-top: 2px; accent-color: var(--color-text); width: 16px; height: 16px; flex-shrink: 0;" required>
                 <span>
-                  I have read and understand the <a href="javascript:void(0)" onclick="AerosolAuth.openPolicyModal('privacy')" style="text-decoration: underline; color: var(--color-text); font-weight: 600;">Privacy Policy</a>. <span style="color: var(--color-error);">*</span>
+                  I have read the <a href="javascript:void(0)" onclick="AerosolAuth.openPolicyModal('privacy')" style="text-decoration: underline; color: var(--color-text); font-weight: 600;">Privacy Policy</a>. <span style="color: var(--color-error);">*</span>
                 </span>
               </label>
 
-              <!-- Checkbox 3: Marketing (Optional, NEVER PRE-CHECKED) -->
               <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 12px; line-height: 1.45; color: var(--color-text-secondary);">
                 <input type="checkbox" id="reg-marketing-check" style="margin-top: 2px; accent-color: var(--color-text); width: 16px; height: 16px; flex-shrink: 0;">
                 <span>
-                  Send me offers, discounts, and promotional updates by email/SMS. <span style="color: var(--color-text-muted);">(Optional)</span>
+                  Receive product updates, formulation alerts, and discounts. <span style="color: var(--color-text-muted);">(Optional)</span>
                 </span>
               </label>
             </div>
 
-            <!-- SUBMIT: CREATE ACCOUNT -->
             <button type="submit" class="btn btn-inverted btn-lg btn-full" id="create-account-btn" ${this.loading ? 'disabled' : ''} style="margin-bottom: 16px;">
               ${this.loading ? 'Creating Account...' : 'Create Account'}
             </button>
 
-            <!-- SWITCH TO LOGIN -->
             <div style="text-align: center; font-size: 13px; color: var(--color-text-muted);">
-              Already have an account? <button type="button" onclick="AerosolAuth.switchTab('login')" style="color: var(--color-text); font-weight: 600; text-decoration: underline; background: none; border: none; cursor: pointer;">Log in</button>
+              Already have an account? <button type="button" onclick="AerosolAuth.switchTab('login')" style="color: var(--color-text); font-weight: 600; text-decoration: underline; background: none; border: none; cursor: pointer;">Sign in</button>
             </div>
           </form>
         ` : ''}
 
-        <!-- STEP 3: FORGOT PASSWORD -->
         ${this.step === 'forgot' ? `
           <div style="margin-bottom: 20px; text-align: left;">
             <h1 style="font-size: 20px; font-weight: 700; color: var(--color-text); margin: 0 0 6px 0;">Reset password</h1>
@@ -398,7 +401,7 @@ const AerosolAuth = {
             </button>
 
             <div style="text-align: center; font-size: 12px;">
-              <button type="button" onclick="AerosolAuth.switchTab('login')" style="color: var(--color-text-muted); text-decoration: underline; background: none; border: none; cursor: pointer;">← Return to sign in</button>
+              <button type="button" onclick="AerosolAuth.switchTab('login')" style="color: var(--color-text-muted); text-decoration: underline; background: none; border: none; cursor: pointer;">← Back to sign in</button>
             </div>
           </form>
         ` : ''}
@@ -429,11 +432,7 @@ const AerosolAuth = {
       this.loading = false;
 
       if (data.success) {
-        if (data.exists) {
-          this.step = 'login';
-        } else {
-          this.step = 'register';
-        }
+        this.step = data.exists ? 'login' : 'register';
       } else {
         this.errorMsg = data.message || 'Error checking account.';
       }
@@ -476,7 +475,6 @@ const AerosolAuth = {
           localStorage.setItem('aerosol_token', data.token);
         }
 
-        // If admin logged in through unified login, store admin session for admin console
         if (data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN') {
           const adminSession = {
             id: data.user.id,
@@ -493,6 +491,21 @@ const AerosolAuth = {
         AerosolWebapp.updateHeaderBadges();
         AerosolWebapp.showToast(data.message || `Welcome back, ${data.user.name}!`);
 
+        try {
+          const loginAudit = {
+            id: 'audit-' + Date.now(),
+            name: data.user.name || 'User',
+            email: data.user.email || this.email,
+            phone: data.user.phone || 'Not provided',
+            role: data.user.role || 'CUSTOMER',
+            authMethod: 'Email & Password',
+            timestamp: new Date().toISOString()
+          };
+          const savedAudits = JSON.parse(localStorage.getItem('aerosol_login_audits') || '[]');
+          savedAudits.unshift(loginAudit);
+          localStorage.setItem('aerosol_login_audits', JSON.stringify(savedAudits.slice(0, 100)));
+        } catch (e) {}
+
         if (this.onSuccess) {
           this.onSuccess(data);
         } else {
@@ -501,12 +514,12 @@ const AerosolAuth = {
           setTimeout(() => { window.location.href = target; }, 300);
         }
       } else {
-        this.errorMsg = data.message || 'The password you entered is incorrect.';
+        this.errorMsg = data.message || 'Incorrect password.';
         this.render();
       }
     } catch (err) {
       this.loading = false;
-      this.errorMsg = 'Authentication service offline. Please try again.';
+      this.errorMsg = 'Could not connect to server. Please try again.';
       this.render();
     }
   },
@@ -550,19 +563,19 @@ const AerosolAuth = {
     }
 
     if (password !== confirmPassword) {
-      this.errorMsg = 'Passwords do not match. Please re-enter your password.';
+      this.errorMsg = 'Passwords do not match.';
       this.render();
       return;
     }
 
     if (!termsCheck || !termsCheck.checked) {
-      this.errorMsg = "Please agree to the Terms & Conditions and understand the store's policies.";
+      this.errorMsg = 'Please accept the Terms & Conditions.';
       this.render();
       return;
     }
 
     if (!privacyCheck || !privacyCheck.checked) {
-      this.errorMsg = 'Please confirm that you have read and understand the Privacy Policy.';
+      this.errorMsg = 'Please accept the Privacy Policy.';
       this.render();
       return;
     }
@@ -602,7 +615,22 @@ const AerosolAuth = {
         }
 
         AerosolWebapp.updateHeaderBadges();
-        AerosolWebapp.showToast(`Account created for ${data.user.name}!`);
+        AerosolWebapp.showToast(`Account created successfully!`);
+
+        try {
+          const loginAudit = {
+            id: 'audit-' + Date.now(),
+            name: data.user.name || name,
+            email: data.user.email || email,
+            phone: data.user.phone || phone || 'Not provided',
+            role: data.user.role || 'CUSTOMER',
+            authMethod: 'Account Registration',
+            timestamp: new Date().toISOString()
+          };
+          const savedAudits = JSON.parse(localStorage.getItem('aerosol_login_audits') || '[]');
+          savedAudits.unshift(loginAudit);
+          localStorage.setItem('aerosol_login_audits', JSON.stringify(savedAudits.slice(0, 100)));
+        } catch (e) {}
 
         if (this.onSuccess) {
           this.onSuccess(data);
@@ -616,7 +644,7 @@ const AerosolAuth = {
       }
     } catch (err) {
       this.loading = false;
-      this.errorMsg = 'Registration service offline. Please try again.';
+      this.errorMsg = 'Registration failed. Please try again.';
       this.render();
     }
   },
@@ -624,7 +652,6 @@ const AerosolAuth = {
   async handleGoogleAuth() {
     this.loading = true;
     this.errorMsg = '';
-    AerosolWebapp.showToast('Connecting to Google OAuth identity provider...');
 
     try {
       const res = await fetch('/api/v1/auth/google', {
@@ -632,7 +659,7 @@ const AerosolAuth = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: this.email || 'user.google@gmail.com',
-          name: 'Google Verified User',
+          name: 'Google User',
           redirect: this.redirectUrl
         })
       });
@@ -648,7 +675,22 @@ const AerosolAuth = {
         }
 
         AerosolWebapp.updateHeaderBadges();
-        AerosolWebapp.showToast(`Authenticated via Google (${data.user.email})!`);
+        AerosolWebapp.showToast('Signed in with Google');
+
+        try {
+          const loginAudit = {
+            id: 'audit-' + Date.now(),
+            name: data.user.name || 'Google User',
+            email: data.user.email || this.email,
+            phone: data.user.phone || 'Google Account Phone',
+            role: data.user.role || 'CUSTOMER',
+            authMethod: 'Google OAuth',
+            timestamp: new Date().toISOString()
+          };
+          const savedAudits = JSON.parse(localStorage.getItem('aerosol_login_audits') || '[]');
+          savedAudits.unshift(loginAudit);
+          localStorage.setItem('aerosol_login_audits', JSON.stringify(savedAudits.slice(0, 100)));
+        } catch (e) {}
 
         if (this.onSuccess) {
           this.onSuccess(data);
@@ -693,10 +735,12 @@ const AerosolAuth = {
     }
   },
 
-  togglePasswordVisibility(inputId) {
+  togglePasswordVisibility(inputId, btn) {
     const input = document.getElementById(inputId);
     if (!input) return;
-    input.type = input.type === 'password' ? 'text' : 'password';
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    if (btn) btn.textContent = isPass ? 'Hide' : 'Show';
   },
 
   switchAccount() {

@@ -1,11 +1,4 @@
-/**
- * DINKAL Aerosol Technologies — Vanilla JavaScript Storefront Controller
- * Complete State, Router, API Client, and Component Renderers
- */
-
-// --------------------------------------------------------------------------
-// 1. STATE & PERSISTENCE
-// --------------------------------------------------------------------------
+// State and local storage
 const State = {
   currentView: 'home',
   viewParams: {},
@@ -108,9 +101,7 @@ function saveUser() {
   localStorage.setItem('dinkal_user', JSON.stringify(State.currentUser));
 }
 
-// --------------------------------------------------------------------------
-// 2. API CLIENT
-// --------------------------------------------------------------------------
+// API helpers
 const API_BASE = '/api/v1';
 
 const Api = {
@@ -193,9 +184,7 @@ const Api = {
   }
 };
 
-// --------------------------------------------------------------------------
-// 3. CANISTER GRAPHIC RENDERER (SVG/CSS Hybrid)
-// --------------------------------------------------------------------------
+// Canister preview graphic
 function renderCanisterHtml(color = '#1e3a5f', height = 140, label = '') {
   const w = Math.round(height * 0.38);
   const nozzleW = Math.round(w * 0.32);
@@ -219,9 +208,7 @@ function renderCanisterHtml(color = '#1e3a5f', height = 140, label = '') {
   `;
 }
 
-// --------------------------------------------------------------------------
-// 4. TOAST NOTIFICATIONS
-// --------------------------------------------------------------------------
+// Toast notifications
 function showToast(message) {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -232,9 +219,7 @@ function showToast(message) {
   }, 2800);
 }
 
-// --------------------------------------------------------------------------
-// 5. ROUTER & NAVIGATION
-// --------------------------------------------------------------------------
+// Routing
 function navigate(view, params = {}) {
   State.currentView = view;
   State.viewParams = params;
@@ -292,9 +277,7 @@ function renderCurrentView() {
   }
 }
 
-// --------------------------------------------------------------------------
-// 6. VIEW RENDERERS
-// --------------------------------------------------------------------------
+// View renderers
 
 // --- HOME VIEW ---
 function renderHomeView(container) {
@@ -653,7 +636,7 @@ function renderShopView(container) {
           <!-- Toggle Filters -->
           <button onclick="toggleShopFilters()"
                   style="display: flex; align-items: center; gap: 6px; padding: 12px 16px; font-size: 13px; color: ${f.showFilterPanel ? 'var(--color-text)' : 'var(--color-text-muted)'}; background: ${f.showFilterPanel ? 'var(--color-bg-subtle)' : 'transparent'}; border-left: 1px solid var(--color-border); white-space: nowrap;">
-            ⚙ Filters ${hasFilters ? '•' : ''}
+            Filters ${hasFilters ? '•' : ''}
           </button>
         </div>
       </div>
@@ -1050,7 +1033,7 @@ function renderCheckoutView(container) {
     const order = State.checkout.completedOrder;
     container.innerHTML = `
       <div class="container" style="padding: 80px 20px; max-width: 580px; text-align: center;">
-        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-success-bg); border: 1px solid #a7f3d0; color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 20px;">✓</div>
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-success-bg); border: 1px solid #a7f3d0; color: var(--color-success); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
         <span class="section-label">Order Confirmed</span>
         <h1 class="text-h2" style="margin-bottom: 12px;">${order?.orderNumber || 'DNKL-84920'}</h1>
         <p style="font-size: 15px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 32px;">
@@ -1184,7 +1167,7 @@ function renderCheckoutView(container) {
             </div>
           ` : `
             <h2 class="text-h4" style="margin-bottom: 12px;">Payment Details</h2>
-            <div style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">🔒 256-bit encrypted SSL checkout</div>
+            <div style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">256-bit encrypted SSL checkout</div>
             <div style="display: flex; flex-direction: column; gap: 16px;">
               <div>
                 <label class="label">Card Number</label>
@@ -1657,9 +1640,7 @@ function renderAdminView(container) {
   `;
 }
 
-// --------------------------------------------------------------------------
-// 7. CART DRAWER CONTROLLER
-// --------------------------------------------------------------------------
+// Cart drawer
 function toggleCart(open) {
   State.isCartOpen = (open !== undefined) ? open : !State.isCartOpen;
   const drawerEl = document.getElementById('cart-drawer-container');
@@ -1719,7 +1700,7 @@ function renderCartDrawer() {
         <!-- Free Shipping Meter -->
         <div style="padding: 14px 24px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-subtle);">
           <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
-            <span>${isFreeShipping ? '✓ Free HazMat Shipping Applied' : `Free Shipping over ₹2,999 (₹${(2999 - subtotal).toLocaleString('en-IN')} away)`}</span>
+            <span>${isFreeShipping ? 'Free HazMat Shipping Applied' : `Free Shipping over ₹2,999 (₹${(2999 - subtotal).toLocaleString('en-IN')} away)`}</span>
           </div>
           <div style="height: 3px; background: var(--color-border); border-radius: 2px; overflow: hidden;">
             <div style="height: 100%; width: ${progress}%; background: var(--color-text); transition: width 0.3s ease;"></div>
@@ -1877,9 +1858,7 @@ function toggleWishlistById(id) {
   renderCurrentView();
 }
 
-// --------------------------------------------------------------------------
-// 8. SEARCH MODAL CONTROLLER
-// --------------------------------------------------------------------------
+// Search modal
 function toggleSearch(open) {
   State.isSearchOpen = (open !== undefined) ? open : !State.isSearchOpen;
   const modalEl = document.getElementById('search-modal-container');
@@ -1911,7 +1890,7 @@ function renderSearchModal(query = '') {
   container.innerHTML = `
     <div class="search-drop-modal">
       <div class="container" style="display: flex; align-items: center; height: 64px; gap: 12px;">
-        <span style="color: var(--color-text-muted); font-size: 18px;">🔍</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         <input id="search-modal-input" type="text" placeholder="Search aerosol formulations, SKUs, categories..."
                value="${query}" oninput="renderSearchModal(this.value)"
                style="flex: 1; font-size: 16px; border: none; outline: none; background: none; font-family: var(--font-family);">
@@ -1954,9 +1933,7 @@ function renderSearchModal(query = '') {
   `;
 }
 
-// --------------------------------------------------------------------------
-// 9. AUTH MODAL CONTROLLER
-// --------------------------------------------------------------------------
+// Auth modal
 function openAuthModal(mode = 'signin') {
   State.authMode = mode;
   State.isAuthOpen = true;
@@ -2079,9 +2056,7 @@ function logoutUser() {
   navigate('home');
 }
 
-// --------------------------------------------------------------------------
-// 10. HEADER & APP INITIALIZATION
-// --------------------------------------------------------------------------
+// Header updates
 function updateHeaderCounts() {
   const cartBadge = document.getElementById('header-cart-count');
   const wishBadge = document.getElementById('header-wishlist-count');

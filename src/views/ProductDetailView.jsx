@@ -218,7 +218,7 @@ export default function ProductDetailView({
                 className="btn btn-inverted"
                 style={{ flex: 1, height: '44px', fontSize: '14px', fontWeight: 500 }}
               >
-                {addedFeedback ? '✓ Added' : `Add to cart — $${(product.price * quantity).toFixed(2)}`}
+                {addedFeedback ? 'Added' : `Add to cart — $${(product.price * quantity).toFixed(2)}`}
               </button>
 
               {/* Wishlist */}

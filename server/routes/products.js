@@ -27,7 +27,7 @@ const saveProducts = (products) => {
   }
 };
 
-// GET /api/v1/products (Advanced filtering, search, sorting, pagination)
+// List products with optional search and filtering
 router.get('/', (req, res) => {
   const { 
     category, 
@@ -45,14 +45,12 @@ router.get('/', (req, res) => {
 
   let products = getProducts();
 
-  // Category filter
   if (category && category !== 'All') {
     products = products.filter((p) =>
       p.category.toLowerCase().includes(category.toLowerCase())
     );
   }
 
-  // Keyword Search
   if (search) {
     const q = search.toLowerCase().trim();
     products = products.filter(
@@ -66,7 +64,6 @@ router.get('/', (req, res) => {
     );
   }
 
-  // Price range
   if (minPrice) {
     products = products.filter((p) => p.price >= parseFloat(minPrice));
   }
@@ -74,14 +71,12 @@ router.get('/', (req, res) => {
     products = products.filter((p) => p.price <= parseFloat(maxPrice));
   }
 
-  // Propellant type filter
   if (propellant && propellant !== 'All') {
     products = products.filter((p) => 
       p.propellant.toLowerCase().includes(propellant.toLowerCase())
     );
   }
 
-  // Volume size filter
   if (volume && volume !== 'All') {
     products = products.filter((p) => 
       p.volume.toLowerCase().includes(volume.toLowerCase()) ||
@@ -89,17 +84,14 @@ router.get('/', (req, res) => {
     );
   }
 
-  // In stock only
   if (inStockOnly === 'true') {
     products = products.filter((p) => p.inStock && p.stockCount > 0);
   }
 
-  // Minimum Rating
   if (minRating) {
     products = products.filter((p) => p.rating >= parseFloat(minRating));
   }
 
-  // Sorting
   if (sort === 'price-low') {
     products.sort((a, b) => a.price - b.price);
   } else if (sort === 'price-high') {
@@ -127,7 +119,6 @@ router.get('/', (req, res) => {
   });
 });
 
-// GET /api/v1/products/categories
 router.get('/categories', (req, res) => {
   const products = getProducts();
   const categories = ['All', ...new Set(products.map((p) => p.category))];
@@ -137,7 +128,6 @@ router.get('/categories', (req, res) => {
   });
 });
 
-// GET /api/v1/products/:id or slug
 router.get('/:id', (req, res) => {
   const products = getProducts();
   const identifier = req.params.id.toLowerCase();
@@ -146,10 +136,9 @@ router.get('/:id', (req, res) => {
   );
 
   if (!product) {
-    return res.status(404).json({ success: false, message: 'Product SKU not found' });
+    return res.status(404).json({ success: false, message: 'Product not found' });
   }
 
-  // Find related products in same category
   const related = products
     .filter((p) => p.id !== product.id && p.category === product.category)
     .slice(0, 3);
@@ -157,7 +146,6 @@ router.get('/:id', (req, res) => {
   res.json({ success: true, data: product, related });
 });
 
-// POST /api/v1/products (Admin: Add new product SKU)
 router.post('/', (req, res) => {
   const newProduct = req.body;
   if (!newProduct.name || !newProduct.price || !newProduct.category) {
@@ -188,10 +176,9 @@ router.post('/', (req, res) => {
   products.unshift(created);
   saveProducts(products);
 
-  res.status(201).json({ success: true, message: 'Aerosol SKU created successfully', data: created });
+  res.status(201).json({ success: true, message: 'Product created successfully', data: created });
 });
 
-// PUT /api/v1/products/:id (Admin: Update product)
 router.put('/:id', (req, res) => {
   const products = getProducts();
   const index = products.findIndex((p) => p.id === req.params.id);
@@ -206,7 +193,6 @@ router.put('/:id', (req, res) => {
   res.json({ success: true, message: 'Product updated successfully', data: products[index] });
 });
 
-// DELETE /api/v1/products/:id (Admin: Delete product)
 router.delete('/:id', (req, res) => {
   let products = getProducts();
   const exists = products.some((p) => p.id === req.params.id);

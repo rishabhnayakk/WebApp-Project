@@ -6,7 +6,7 @@
   <title>All Products & Aerosol Catalog | E-Commerce Webapp</title>
   <meta name="description" content="Browse our complete catalog of industrial, automotive, electronics, and medical aerosol formulations.">
   <link rel="stylesheet" href="/css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111827'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-size='60' fill='white' font-family='system-ui, sans-serif' font-weight='700'>A</text></svg>">
 </head>
 <body>
 
@@ -131,7 +131,7 @@
   </footer>
 
   <div id="cart-drawer" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleCart(false)"></div><div class="drawer" id="cart-drawer-content"></div></div>
-  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><span style="font-size: 16px;">🔍</span><input id="search-input" type="search" placeholder="Search aerosol formulations, SKUs, categories..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
+  <div id="search-modal" style="display: none;"><div class="overlay" onclick="AerosolWebapp.toggleSearch(false)"></div><div class="search-drop-modal"><div class="container" style="display: flex; align-items: center; height: 60px; gap: 12px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="search-input" type="search" placeholder="Search aerosol formulations, SKUs, categories..." oninput="AerosolWebapp.renderSearchResults(this.value)" style="flex: 1; font-size: 15px; border: none; outline: none; background: none;"><button onclick="AerosolWebapp.toggleSearch(false)" class="btn btn-ghost btn-sm">✕</button></div><div class="section-border-t"></div><div id="search-results-content" class="container" style="padding-top: 14px; padding-bottom: 20px;"></div></div></div>
   <div id="toast-container"></div>
 
   <script src="/js/main.js"></script>
@@ -201,7 +201,7 @@
 
         <button onclick="toggleFilterPanel()"
                 style="display: flex; align-items: center; gap: 6px; padding: 11px 15px; font-size: 12px; color: var(--color-text-muted); border-left: 1px solid var(--color-border); white-space: nowrap; cursor: pointer;">
-          ⚙ Filters
+          Filters
         </button>
       `;
     }
@@ -281,8 +281,15 @@
         grid.innerHTML = filtered.map(p => `
           <div class="product-card" onclick="window.location.href='/product.html?id=${p.id}'">
             <div class="product-card__image-wrap">
-              <div class="product-card__canister" style="padding: 28px 0 20px;">
-                ${AerosolWebapp.renderCanister(p.color || '#1e3a5f', 135, p.sku ? p.sku.split('-')[1] : '')}
+              <div class="product-card__canister" style="padding: 20px 12px; display: flex; align-items: center; justify-content: center; height: 180px; position: relative;">
+                ${(p.images && p.images[0]) || p.image ? `
+                  <img src="${(p.images && p.images[0]) || p.image}" alt="${p.name}" style="max-height: 140px; max-width: 90%; object-fit: contain; border-radius: var(--radius-xs);" onerror="this.outerHTML=AerosolWebapp.renderCanister('${p.color || '#1e3a5f'}', 135, '${p.sku ? p.sku.split('-')[1] : ''}')">
+                  ${(p.images && p.images.length > 1) ? `
+                    <span style="position: absolute; bottom: 8px; right: 10px; background: rgba(0,0,0,0.65); color: #fff; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: var(--radius-full); backdrop-filter: blur(2px);">
+                      ${p.images.length} photos
+                    </span>
+                  ` : ''}
+                ` : AerosolWebapp.renderCanister(p.color || '#1e3a5f', 135, p.sku ? p.sku.split('-')[1] : '')}
               </div>
               <div class="product-card__quick-add">
                 <button class="btn btn-inverted btn-sm btn-full" onclick="event.stopPropagation(); AerosolWebapp.addToCart(${JSON.stringify(p).replace(/"/g, '&quot;')});">

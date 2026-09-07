@@ -2,12 +2,12 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { idempotencyLock } from '../middleware/securityMiddleware.js';
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const productsFilePath = path.join(__dirname, '../data/products.json');
 
-// In-memory orders ledger with rich initial history
 const orders = [
   {
     id: 'AERO-99420',
@@ -19,74 +19,73 @@ const orders = [
       address: '740 Aerospace Blvd, Hangar 4B, Seattle, WA 98108',
     },
     items: [
-      { id: 'aero-ceramax-pro', name: 'CERAMAX™ 9H Nano-Ceramic Clear Coat', quantity: 12, price: 44.99, volume: '500ml' },
-      { id: 'aero-syn-lube', name: 'TRIBO-SYNTH™ Graphene Micro-Film', quantity: 24, price: 22.50, volume: '500ml' },
+      { id: 'aero-ceramax-pro', name: 'CERAMAX™ 9H Nano-Ceramic Clear Coat', quantity: 12, price: 3999, volume: '500ml' },
+      { id: 'aero-dielectric-max', name: 'VOLTX™ Precision Contact Cleaner', quantity: 6, price: 2299, volume: '400ml' },
     ],
-    subtotal: 1079.88,
-    discount: 161.98,
+    subtotal: 61782,
+    discount: 6178,
     shipping: 0,
-    tax: 82.61,
-    total: 1000.51,
-    paymentMethod: 'Commercial Net-30 Invoice',
+    tax: 9999,
+    total: 65603,
+    paymentMethod: 'Net-30 Invoice',
     paymentStatus: 'Approved / Pending Net-30',
     status: 'In Transit',
     trackingNumber: 'TRK-AERO-8839201-US',
-    carrier: 'HazMat Freight Direct',
+    carrier: 'BlueDart Express Ground',
     placedAt: '2026-08-28T14:20:00Z',
     estimatedDelivery: '2026-09-02T16:00:00Z',
     timeline: [
       { status: 'Order Placed', time: 'Aug 28, 2:20 PM', completed: true },
-      { status: 'Cleanroom Pressurization & QA', time: 'Aug 28, 5:40 PM', completed: true },
-      { status: 'HazMat Freight Picked Up', time: 'Aug 29, 9:15 AM', completed: true },
-      { status: 'In Transit to Destination Hub', time: 'Aug 30, 11:30 AM', completed: true },
-      { status: 'Out for Final Delivery', time: 'Expected Sept 2', completed: false },
-      { status: 'Delivered & Signed', time: 'Pending', completed: false },
+      { status: 'Quality Inspection & Packing', time: 'Aug 28, 5:40 PM', completed: true },
+      { status: 'Picked Up by Courier', time: 'Aug 29, 9:15 AM', completed: true },
+      { status: 'In Transit', time: 'Aug 30, 11:30 AM', completed: true },
+      { status: 'Out for Delivery', time: 'Expected Sept 2', completed: false },
+      { status: 'Delivered', time: 'Pending', completed: false },
     ],
   },
   {
     id: 'AERO-99419',
     customer: {
       name: 'Elena Rostova',
-      email: 'elena.rostova@hypersonicdetailing.com',
+      email: 'elena.rostova@hypersonic.com',
       company: 'HyperSonic Detailing Studio',
       tier: 'Pro Specialist',
       address: '1240 Bayview Industrial Way, Los Angeles, CA 90021',
     },
     items: [
-      { id: 'aero-chroma-shift', name: 'SPECTRUM-X™ Prism-Shift Coating', quantity: 4, price: 42.00, volume: '400ml' },
-      { id: 'aero-corrosion-guard', name: 'MARINEX™ Cavity Wax & Salt-Shield', quantity: 2, price: 32.50, volume: '500ml' },
+      { id: 'aero-chroma-shift', name: 'SPECTRUM-X™ Prism-Shift Coating', quantity: 4, price: 3399, volume: '400ml' },
+      { id: 'aero-corrosion-guard', name: 'MARINEX™ Cavity Wax & Salt-Shield', quantity: 2, price: 2599, volume: '500ml' },
     ],
-    subtotal: 233.00,
-    discount: 23.30,
+    subtotal: 18794,
+    discount: 1879,
     shipping: 0,
-    tax: 18.87,
-    total: 228.57,
+    tax: 3044,
+    total: 19959,
     paymentMethod: 'Credit Card (•••• 4242)',
     paymentStatus: 'Paid',
     status: 'Delivered',
     trackingNumber: 'TRK-AERO-7719283-US',
-    carrier: 'Priority HazMat Ground',
+    carrier: 'Express Logistics',
     placedAt: '2026-08-25T10:00:00Z',
     estimatedDelivery: '2026-08-28T14:30:00Z',
     timeline: [
       { status: 'Order Placed', time: 'Aug 25, 10:00 AM', completed: true },
-      { status: 'Cleanroom Pressurization & QA', time: 'Aug 25, 1:15 PM', completed: true },
-      { status: 'HazMat Freight Picked Up', time: 'Aug 26, 8:45 AM', completed: true },
+      { status: 'Quality Inspection & Packing', time: 'Aug 25, 1:15 PM', completed: true },
+      { status: 'Picked Up by Courier', time: 'Aug 26, 8:45 AM', completed: true },
       { status: 'In Transit', time: 'Aug 27, 2:00 PM', completed: true },
-      { status: 'Out for Final Delivery', time: 'Aug 28, 9:00 AM', completed: true },
-      { status: 'Delivered & Signed', time: 'Aug 28, 2:18 PM (Signed: E. Rostova)', completed: true },
+      { status: 'Out for Delivery', time: 'Aug 28, 9:00 AM', completed: true },
+      { status: 'Delivered', time: 'Aug 28, 2:18 PM', completed: true },
     ],
   }
 ];
 
 const PROMO_CODES = {
   'AEROVOX10': { discountPercent: 10, minSpend: 0, desc: '10% Launch Discount' },
-  'BULK20': { discountPercent: 20, minSpend: 200, desc: '20% Volume Tier ($200+ min)' },
-  'HAZMATFREE': { discountPercent: 0, freeShipping: true, desc: 'Free HazMat Certified Ground Shipping' },
-  'VIPAERO': { discountPercent: 25, minSpend: 300, desc: '25% VIP Industrial Access' },
+  'BULK20': { discountPercent: 20, minSpend: 15000, desc: '20% Volume Tier (₹15,000+ min)' },
+  'HAZMATFREE': { discountPercent: 0, freeShipping: true, desc: 'Free Shipping' },
+  'VIPAERO': { discountPercent: 25, minSpend: 25000, desc: '25% VIP Industrial Access' },
 };
 
-// POST /api/v1/orders/validate-coupon
 router.post('/validate-coupon', (req, res) => {
   const { code, subtotal = 0 } = req.body;
   if (!code) {
@@ -101,7 +100,7 @@ router.post('/validate-coupon', (req, res) => {
   if (promo.minSpend && subtotal < promo.minSpend) {
     return res.status(400).json({
       success: false,
-      message: `Minimum spend of $${promo.minSpend} required for promo code ${code.toUpperCase()}.`,
+      message: `Minimum spend of ₹${promo.minSpend} required for promo code ${code.toUpperCase()}.`,
     });
   }
 
@@ -114,9 +113,6 @@ router.post('/validate-coupon', (req, res) => {
   });
 });
 
-import { idempotencyLock } from '../middleware/securityMiddleware.js';
-
-// POST /api/v1/orders (Create order + Deduct inventory stock with Idempotency Concurrency Lock)
 router.post('/', idempotencyLock, (req, res) => {
   const { customer, items, subtotal, discount = 0, shipping = 0, tax = 0, paymentMethod, couponCode } = req.body;
 
@@ -127,7 +123,6 @@ router.post('/', idempotencyLock, (req, res) => {
     });
   }
 
-  // Deduct inventory from products.json
   try {
     const productsData = fs.readFileSync(productsFilePath, 'utf8');
     const products = JSON.parse(productsData);
@@ -141,11 +136,11 @@ router.post('/', idempotencyLock, (req, res) => {
     }
     fs.writeFileSync(productsFilePath, JSON.stringify(products, null, 2), 'utf8');
   } catch (err) {
-    console.error('Error updating product inventory:', err);
+    console.error('Error updating inventory for order:', err);
   }
 
   const newOrderId = `AERO-${Math.floor(10000 + Math.random() * 90000)}`;
-  const trackingNumber = `TRK-AERO-${Math.floor(1000000 + Math.random() * 9000000)}-US`;
+  const trackingNumber = `TRK-AERO-${Math.floor(1000000 + Math.random() * 9000000)}-IN`;
   const grandTotal = Math.max(0, Number(subtotal) - Number(discount) + Number(shipping) + Number(tax));
 
   const newOrder = {
@@ -157,21 +152,21 @@ router.post('/', idempotencyLock, (req, res) => {
     shipping: Number(shipping),
     tax: Number(tax),
     total: Number(grandTotal.toFixed(2)),
-    paymentMethod: paymentMethod || 'Credit Card (Encrypted)',
-    paymentStatus: paymentMethod === 'invoice' ? 'Net-30 Authorized' : 'Paid / Confirmed',
+    paymentMethod: paymentMethod || 'Online Payment',
+    paymentStatus: paymentMethod === 'invoice' ? 'Net-30 Authorized' : 'Paid',
     couponCode: couponCode || null,
     status: 'Processing',
     trackingNumber,
-    carrier: 'AeroVox HazMat Global Freight',
+    carrier: 'Express Air Freight',
     placedAt: new Date().toISOString(),
     estimatedDelivery: new Date(Date.now() + 86400000 * 3).toISOString(),
     timeline: [
-      { status: 'Order Placed & Payment Authorized', time: 'Just now', completed: true },
-      { status: 'Cleanroom Pressurization & QA Scan', time: 'Scheduled in 2 hours', completed: false },
-      { status: 'HazMat Freight Picked Up', time: 'Scheduled Tomorrow, 9:00 AM', completed: false },
+      { status: 'Order Placed', time: 'Just now', completed: true },
+      { status: 'Quality Inspection & Packing', time: 'Scheduled today', completed: false },
+      { status: 'Picked Up by Courier', time: 'Scheduled tomorrow', completed: false },
       { status: 'In Transit', time: 'Pending', completed: false },
-      { status: 'Out for Final Delivery', time: 'Pending', completed: false },
-      { status: 'Delivered & Signed', time: 'Pending', completed: false },
+      { status: 'Out for Delivery', time: 'Pending', completed: false },
+      { status: 'Delivered', time: 'Pending', completed: false },
     ],
   };
 
@@ -179,12 +174,11 @@ router.post('/', idempotencyLock, (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: 'Order created and scheduled for pressurized cleanroom packaging',
+    message: 'Order placed successfully.',
     data: newOrder,
   });
 });
 
-// GET /api/v1/orders (List all orders)
 router.get('/', (req, res) => {
   const { email } = req.query;
   let result = orders;
@@ -198,7 +192,6 @@ router.get('/', (req, res) => {
   });
 });
 
-// GET /api/v1/orders/:id (Lookup order or tracking)
 router.get('/:id', (req, res) => {
   const q = req.params.id.toLowerCase().trim();
   const order = orders.find(
@@ -206,13 +199,12 @@ router.get('/:id', (req, res) => {
   );
 
   if (!order) {
-    return res.status(404).json({ success: false, message: 'Order or tracking ID not found' });
+    return res.status(404).json({ success: false, message: 'Order not found' });
   }
 
   res.json({ success: true, data: order });
 });
 
-// PUT /api/v1/orders/:id/status (Admin: Update status)
 router.put('/:id/status', (req, res) => {
   const { status } = req.body;
   const order = orders.find((o) => o.id.toLowerCase() === req.params.id.toLowerCase());

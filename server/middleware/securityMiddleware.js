@@ -1,22 +1,20 @@
 import fs from 'fs';
 import path from 'path';
 
-// In-memory rate limiter tracking IP attempts
-const attemptStore = new Map();
-// In-memory concurrency / idempotency lock store
+const attempts = new Map();
 const idempotencyStore = new Map();
+const logFile = path.join(process.cwd(), 'server', 'data', 'audit_logs.json');
 
-// 1. RATE LIMITING MIDDLEWARE (Brute-Force & Denial of Service Protection)
 export const rateLimiter = (maxAttempts = 10, windowMs = 60 * 1000) => {
   return (req, res, next) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const key = `${ip}:${req.path}`;
     const now = Date.now();
 
-    let record = attemptStore.get(key);
+    let record = attempts.get(key);
     if (!record || now - record.startTime > windowMs) {
       record = { count: 1, startTime: now };
-      attemptStore.set(key, record);
+      attempts.set(key, record);
       return next();
     }
 
@@ -25,7 +23,7 @@ export const rateLimiter = (maxAttempts = 10, windowMs = 60 * 1000) => {
       logAudit('RATE_LIMIT_EXCEEDED', { ip, path: req.path, count: record.count });
       return res.status(429).json({
         success: false,
-        message: 'Too many authentication requests. Rate limit exceeded. Please wait a minute before trying again.'
+        message: 'Too many requests. Please wait a moment before trying again.'
       });
     }
 
@@ -33,28 +31,26 @@ export const rateLimiter = (maxAttempts = 10, windowMs = 60 * 1000) => {
   };
 };
 
-// 2. SAFE INTERNAL REDIRECT SANITIZER (Prevents Open Redirect Vulnerabilities)
 export const sanitizeRedirectUrl = (targetUrl, fallback = '/account.html') => {
   if (!targetUrl || typeof targetUrl !== 'string') return fallback;
   const trimmed = targetUrl.trim();
-  // Must start with '/' and NOT with '//' or contain '://' (blocks external domains)
+  // Prevent open redirect to external domains
   if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.includes('://')) {
     return trimmed;
   }
   return fallback;
 };
 
-// 3. IDEMPOTENCY / CONCURRENCY LOCK MIDDLEWARE (Prevents Duplicate Order Charges)
 export const idempotencyLock = (req, res, next) => {
-  const idempotencyKey = req.headers['x-idempotency-key'] || req.body?.idempotencyKey;
-  if (!idempotencyKey) return next();
+  const key = req.headers['x-idempotency-key'] || req.body?.idempotencyKey;
+  if (!key) return next();
 
-  const existing = idempotencyStore.get(idempotencyKey);
+  const existing = idempotencyStore.get(key);
   if (existing) {
     if (existing.status === 'processing') {
       return res.status(409).json({
         success: false,
-        message: 'A transaction request with this idempotency key is currently processing. Please do not re-submit.'
+        message: 'Request is already processing. Please wait.'
       });
     }
     if (existing.status === 'completed') {
@@ -62,19 +58,16 @@ export const idempotencyLock = (req, res, next) => {
     }
   }
 
-  idempotencyStore.set(idempotencyKey, { status: 'processing', timestamp: Date.now() });
+  idempotencyStore.set(key, { status: 'processing', timestamp: Date.now() });
 
   const originalJson = res.json.bind(res);
   res.json = (data) => {
-    idempotencyStore.set(idempotencyKey, { status: 'completed', response: data, timestamp: Date.now() });
+    idempotencyStore.set(key, { status: 'completed', response: data, timestamp: Date.now() });
     return originalJson(data);
   };
 
   next();
 };
-
-// 4. SECURITY AUDIT LOGGER (Logs Security Events to disk & console)
-const logFile = path.join(process.cwd(), 'server', 'data', 'audit_logs.json');
 
 export const logAudit = (eventType, details = {}) => {
   const logEntry = {
@@ -84,18 +77,18 @@ export const logAudit = (eventType, details = {}) => {
     timestamp: new Date().toISOString()
   };
 
-  console.log(`[AUDIT LOG] ${logEntry.timestamp} | ${eventType}:`, details);
+  console.log(`[audit] ${logEntry.timestamp} | ${eventType}:`, details);
 
   try {
     const dir = path.dirname(logFile);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    
+
     let logs = [];
     if (fs.existsSync(logFile)) {
       logs = JSON.parse(fs.readFileSync(logFile, 'utf8') || '[]');
     }
     logs.unshift(logEntry);
-    if (logs.length > 500) logs = logs.slice(0, 500); // keep last 500 events
+    if (logs.length > 500) logs = logs.slice(0, 500);
     fs.writeFileSync(logFile, JSON.stringify(logs, null, 2));
   } catch (err) {
     console.error('Failed to write audit log:', err);

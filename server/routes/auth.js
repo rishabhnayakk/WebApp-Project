@@ -3,12 +3,11 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
+import { requireAuth } from '../middleware/authMiddleware.js';
 import { rateLimiter, sanitizeRedirectUrl, logAudit } from '../middleware/securityMiddleware.js';
 
 dotenv.config();
 
-// Helper to dynamically read admin credentials strictly from .env
 export const getAdminConfig = () => {
   try {
     const envPath = path.resolve(process.cwd(), '.env');
@@ -17,7 +16,7 @@ export const getAdminConfig = () => {
       Object.assign(process.env, parsed);
     }
   } catch (err) {
-    // fallback to current process.env
+    // fallback to existing env
   }
 
   return {
@@ -38,7 +37,6 @@ export const isAdminIdentifier = (identifier) => {
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'aerosol_secret_jwt_key_2026_super_secure';
 
-// In-memory user registry with RBAC roles & audit preservation
 const usersDB = [
   {
     id: 'usr-101',
@@ -116,12 +114,12 @@ const generateToken = (user) => {
   return token;
 };
 
-// ADMIN DIRECT LOGIN (Used by admin.html - strictly checks .env credentials)
+// Admin login handler for admin portal
 router.post('/admin-login', rateLimiter(30, 60000), (req, res) => {
   const { adminId, password, email } = req.body;
   const inputId = (adminId || email || '').trim().toLowerCase();
   if (!inputId || !password) {
-    return res.status(400).json({ success: false, message: 'Admin ID or email and password are required.' });
+    return res.status(400).json({ success: false, message: 'Please enter both admin ID/email and password.' });
   }
 
   const cfg = getAdminConfig();
@@ -136,7 +134,15 @@ router.post('/admin-login', rateLimiter(30, 60000), (req, res) => {
       tier: 'Super Administrator'
     };
     const token = generateToken(adminUser);
-    logAudit('ADMIN_DIRECT_LOGIN_SUCCESS', { adminId: inputId, ip: req.ip });
+    logAudit('ADMIN_DIRECT_LOGIN_SUCCESS', {
+      adminId: inputId,
+      name: adminUser.name,
+      email: adminUser.email,
+      role: 'ADMIN',
+      authMethod: 'Admin Direct Console',
+      loginTime: new Date().toISOString(),
+      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1'
+    });
 
     return res.json({
       success: true,
@@ -152,11 +158,11 @@ router.post('/admin-login', rateLimiter(30, 60000), (req, res) => {
   logAudit('ADMIN_DIRECT_LOGIN_FAILED', { adminId: inputId, ip: req.ip });
   return res.status(401).json({
     success: false,
-    message: 'Invalid Admin ID, Email, or Password.'
+    message: 'Invalid admin credentials.'
   });
 });
 
-// 1. EMAIL-FIRST LOOKUP (Rate Limited)
+// Check if user/admin email exists
 router.post('/email-lookup', rateLimiter(30, 60000), (req, res) => {
   const { email, identifier } = req.body;
   const input = (email || identifier || '').trim();
@@ -203,7 +209,7 @@ router.post('/email-lookup', rateLimiter(30, 60000), (req, res) => {
   });
 });
 
-// 2. UNIFIED LOGIN (Rate-Limited, Safe Error Messages)
+// Standard user & admin login
 router.post('/login', rateLimiter(30, 60000), (req, res) => {
   const { email, password, redirect } = req.body;
 
@@ -215,7 +221,6 @@ router.post('/login', rateLimiter(30, 60000), (req, res) => {
   const safeRedirect = sanitizeRedirectUrl(redirect, '/admin.html');
   const cfg = getAdminConfig();
 
-  // Admin authentication - strictly checks .env and recognized admin credentials
   if (isAdminIdentifier(q) && password.trim() === cfg.adminPassword) {
     const adminUser = {
       id: cfg.adminId,
@@ -225,30 +230,57 @@ router.post('/login', rateLimiter(30, 60000), (req, res) => {
       tier: 'Super Administrator'
     };
     const token = generateToken(adminUser);
-    logAudit('ADMIN_LOGIN_SUCCESS', { email: q, ip: req.ip });
+    logAudit('ADMIN_LOGIN_SUCCESS', {
+      adminId: cfg.adminId,
+      name: adminUser.name,
+      email: adminUser.email,
+      role: 'ADMIN',
+      authMethod: 'Unified Admin Login',
+      loginTime: new Date().toISOString(),
+      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1'
+    });
 
     return res.json({
       success: true,
-      message: 'Welcome Administrator! Access granted.',
+      message: 'Signed in successfully as Admin.',
       token,
       redirectUrl: '/admin.html',
-      user: adminUser
+      user: {
+        id: cfg.adminId,
+        name: 'Operations Administrator',
+        email: q.includes('@') ? q : cfg.adminEmail,
+        role: 'ADMIN',
+        tier: 'Super Administrator',
+        company: 'Aerosol Webapp HQ',
+        phone: '+1 (800) 555-AERO',
+        addresses: [],
+        isEmailVerified: true,
+        authProviders: ['email']
+      }
     });
   }
 
-  // Customer authentication check
   const user = usersDB.find((u) => u.email.toLowerCase() === q && u.status !== 'DEACTIVATED');
 
-  if (!user || (user.password && user.password !== password)) {
+  if (!user || user.password !== password) {
     logAudit('LOGIN_FAILED', { email: q, ip: req.ip });
     return res.status(401).json({
       success: false,
-      message: 'The email or password you entered is incorrect. Try again or click Forgot Password.'
+      message: 'Invalid email or password. Please try again.'
     });
   }
 
   const token = generateToken(user);
-  logAudit('LOGIN_SUCCESS', { userId: user.id, email: user.email });
+  logAudit('LOGIN_SUCCESS', {
+    userId: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone || 'Not provided',
+    role: user.role || 'CUSTOMER',
+    authMethod: 'Email & Password',
+    loginTime: new Date().toISOString(),
+    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1'
+  });
 
   res.json({
     success: true,
@@ -270,7 +302,7 @@ router.post('/login', rateLimiter(30, 60000), (req, res) => {
   });
 });
 
-// 3. REGISTRATION (Customer Signup with Required & Optional fields, Dual Legal Consent, and Opt-in Marketing)
+// Register new account
 router.post('/register', rateLimiter(10, 60000), (req, res) => {
   const {
     email,
@@ -298,20 +330,20 @@ router.post('/register', rateLimiter(10, 60000), (req, res) => {
   }
 
   if (confirmPassword && password !== confirmPassword) {
-    return res.status(400).json({ success: false, message: 'Passwords do not match. Please re-enter your password.' });
+    return res.status(400).json({ success: false, message: 'Passwords do not match.' });
   }
 
   if (!termsAccepted) {
     return res.status(400).json({
       success: false,
-      message: 'You must agree to the Terms & Conditions and understand the store policies.'
+      message: 'Please agree to the Terms & Conditions.'
     });
   }
 
   if (!privacyAccepted) {
     return res.status(400).json({
       success: false,
-      message: 'You must confirm that you have read and understand the Privacy Policy.'
+      message: 'Please accept the Privacy Policy.'
     });
   }
 
@@ -322,12 +354,10 @@ router.post('/register', rateLimiter(10, 60000), (req, res) => {
   if (existing) {
     return res.status(409).json({
       success: false,
-      message: `An account already exists for ${cleanEmail}. Please log in instead.`
+      message: `An account already exists for ${cleanEmail}. Please sign in.`
     });
   }
 
-  // FORCE role: 'CUSTOMER' regardless of any client input
-  // No payment details, UPI ID, delivery addresses, government IDs, or bank details collected at signup.
   const newUser = {
     id: `usr-${Date.now()}`,
     name: name.trim(),
@@ -362,7 +392,7 @@ router.post('/register', rateLimiter(10, 60000), (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: `Account created successfully! Welcome to Aerosol Webapp, ${newUser.name}.`,
+    message: 'Account created successfully!',
     token,
     redirectUrl: safeRedirect,
     user: {
@@ -381,7 +411,7 @@ router.post('/register', rateLimiter(10, 60000), (req, res) => {
   });
 });
 
-// 4. GOOGLE OAUTH & SAFE ACCOUNT LINKING (No Duplicates)
+// Google sign-in
 router.post('/google', rateLimiter(15, 60000), (req, res) => {
   const { email, name, googleId, redirect } = req.body;
   const userEmail = (email || 'user.google@gmail.com').trim().toLowerCase();
@@ -423,7 +453,7 @@ router.post('/google', rateLimiter(15, 60000), (req, res) => {
 
   res.json({
     success: true,
-    message: `Authenticated via Google (${user.email}). Account linked securely!`,
+    message: 'Signed in with Google successfully.',
     token,
     redirectUrl: isTargetAdmin ? '/admin.html' : safeRedirect,
     user: {
@@ -438,7 +468,7 @@ router.post('/google', rateLimiter(15, 60000), (req, res) => {
   });
 });
 
-// 5. SINGLE-USE SHORT-LIVED PASSWORD RESET (15 min expiration)
+// Request password reset code
 router.post('/forgot-password', rateLimiter(5, 60000), (req, res) => {
   const { email } = req.body;
   if (!email || !email.includes('@')) {
@@ -451,13 +481,13 @@ router.post('/forgot-password', rateLimiter(5, 60000), (req, res) => {
 
   logAudit('PASSWORD_RESET_REQUESTED', { email: cleanEmail });
 
-  // Uniform response to prevent email enumeration
   res.json({
     success: true,
-    message: `If an account exists for ${cleanEmail}, a single-use 15-minute reset code has been generated. Demo Code: ${token}`
+    message: `A reset code has been sent to ${cleanEmail}. (Demo code: ${token})`
   });
 });
 
+// Reset password with code
 router.post('/reset-password', rateLimiter(5, 60000), (req, res) => {
   const { email, token, newPassword } = req.body;
 
@@ -466,7 +496,7 @@ router.post('/reset-password', rateLimiter(5, 60000), (req, res) => {
   }
 
   if (newPassword.length < 6) {
-    return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
+    return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
   }
 
   const cleanEmail = email.trim().toLowerCase();
@@ -474,10 +504,10 @@ router.post('/reset-password', rateLimiter(5, 60000), (req, res) => {
 
   if (!record || record.used || record.token !== token || record.expiresAt < Date.now()) {
     logAudit('PASSWORD_RESET_FAILED', { email: cleanEmail });
-    return res.status(400).json({ success: false, message: 'Invalid, used, or expired password reset token. Please request a new code.' });
+    return res.status(400).json({ success: false, message: 'Invalid or expired reset code.' });
   }
 
-  record.used = true; // SINGLE-USE EXPIRATION
+  record.used = true;
   resetTokens.delete(cleanEmail);
 
   const user = usersDB.find((u) => u.email.toLowerCase() === cleanEmail);
@@ -488,21 +518,20 @@ router.post('/reset-password', rateLimiter(5, 60000), (req, res) => {
 
   res.json({
     success: true,
-    message: 'Password updated successfully! Token invalidated. You may now sign in with your new password.'
+    message: 'Password updated successfully. You can now log in.'
   });
 });
 
-// 6. LOGOUT & COMPLETE SESSION INVALIDATION
+// Logout
 router.post('/logout', requireAuth, (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (token) activeSessions.delete(token);
 
   logAudit('LOGOUT_SUCCESS', { userId: req.user.id });
-
-  res.json({ success: true, message: 'Logged out successfully. Session invalidated completely.' });
+  res.json({ success: true, message: 'Logged out successfully.' });
 });
 
-// 7. ACCOUNT DELETION / DEACTIVATION WITH TRANSACTION AUDIT PRESERVATION
+// Deactivate account
 router.delete('/account', requireAuth, (req, res) => {
   const userId = req.user.id;
   const user = usersDB.find((u) => u.id === userId);
@@ -515,15 +544,14 @@ router.delete('/account', requireAuth, (req, res) => {
   user.password = null;
   user.phone = '[REDACTED]';
 
-  logAudit('ACCOUNT_DEACTIVATED', { userId, email: user.email, note: 'Order transaction audit history preserved for compliance' });
-
+  logAudit('ACCOUNT_DEACTIVATED', { userId, email: user.email });
   res.json({
     success: true,
-    message: 'Your account has been deactivated. Your legally required order transaction records remain safely archived for regulatory compliance.'
+    message: 'Your account has been deactivated.'
   });
 });
 
-// 8. SESSION VERIFICATION ENDPOINT
+// Current user profile
 router.get('/me', requireAuth, (req, res) => {
   const user = usersDB.find((u) => u.id === req.user.id && u.status !== 'DEACTIVATED') || req.user;
   res.json({
@@ -543,7 +571,7 @@ router.get('/me', requireAuth, (req, res) => {
   });
 });
 
-// 9. UPDATE PROFILE DETAILS
+// Update profile
 router.put('/profile', (req, res) => {
   const { email, name, phone, company } = req.body;
   if (!email) return res.status(400).json({ success: false, message: 'User email is required.' });
@@ -557,11 +585,11 @@ router.put('/profile', (req, res) => {
   res.json({
     success: true,
     message: 'Profile updated successfully!',
-    user: user || { email, name, phone, company }
+    user
   });
 });
 
-// 10. UPDATE SAVED ADDRESSES
+// Update saved shipping addresses
 router.put('/addresses', (req, res) => {
   const { email, addresses } = req.body;
   if (!email) return res.status(400).json({ success: false, message: 'User email is required.' });
@@ -575,6 +603,57 @@ router.put('/addresses', (req, res) => {
     message: 'Addresses saved successfully!',
     addresses: user ? user.addresses : addresses
   });
+});
+
+// Admin view of recent user logins
+router.get('/admin/logins', (req, res) => {
+  try {
+    const logFile = path.join(process.cwd(), 'server', 'data', 'audit_logs.json');
+    let logs = [];
+    if (fs.existsSync(logFile)) {
+      logs = JSON.parse(fs.readFileSync(logFile, 'utf8') || '[]');
+    }
+
+    const loginTypes = new Set([
+      'LOGIN_SUCCESS',
+      'USER_REGISTERED',
+      'ADMIN_LOGIN_SUCCESS',
+      'ADMIN_DIRECT_LOGIN_SUCCESS',
+      'ACCOUNT_LINKED_GOOGLE',
+      'USER_CREATED_GOOGLE'
+    ]);
+
+    const logins = logs
+      .filter(l => loginTypes.has(l.eventType))
+      .map(l => {
+        const d = l.details || {};
+        const matchedUser = usersDB.find(u => 
+          (d.userId && u.id === d.userId) || 
+          (d.email && u.email.toLowerCase() === d.email.toLowerCase()) ||
+          (d.adminId && (u.id === d.adminId || u.email.toLowerCase() === d.adminId.toLowerCase()))
+        );
+
+        return {
+          id: l.id,
+          name: d.name || (matchedUser ? matchedUser.name : (d.adminId ? 'Operations Administrator' : 'Customer User')),
+          phone: d.phone || (matchedUser && matchedUser.phone ? matchedUser.phone : 'Not provided'),
+          email: d.email || (matchedUser ? matchedUser.email : (d.adminId || 'N/A')),
+          role: d.role || (matchedUser ? matchedUser.role : (l.eventType.includes('ADMIN') ? 'ADMIN' : 'CUSTOMER')),
+          authMethod: d.authMethod || (l.eventType.includes('ADMIN') ? 'Admin Login' : l.eventType.includes('GOOGLE') ? 'Google OAuth' : 'Email & Password'),
+          timestamp: d.loginTime || l.timestamp,
+          ip: d.ip || '127.0.0.1'
+        };
+      });
+
+    res.json({
+      success: true,
+      total: logins.length,
+      data: logins
+    });
+  } catch (err) {
+    console.error('Failed to read login audits:', err);
+    res.status(500).json({ success: false, message: 'Could not load login history' });
+  }
 });
 
 export default router;

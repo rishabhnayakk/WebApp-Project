@@ -1,14 +1,6 @@
-/* =========================================================
-   DINKAL — Design System
-   Inspired by Medusa.js visual language
-   Inter typeface · Restrained palette · Editorial spacing
-   ========================================================= */
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ---------------------------------------------------------
-   DESIGN TOKENS
-   --------------------------------------------------------- */
+/* Theme variables */
 :root {
   /* Container */
   --container-width: 1280px;
@@ -75,9 +67,7 @@
   --transition-slow: 300ms ease;
 }
 
-/* ---------------------------------------------------------
-   RESET & BASE
-   --------------------------------------------------------- */
+/* Reset & base */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -116,17 +106,13 @@ button {
   cursor: pointer;
 }
 
-/* ---------------------------------------------------------
-   SCROLLBAR
-   --------------------------------------------------------- */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-bg-subtle); }
 ::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-border-strong); }
 
-/* ---------------------------------------------------------
-   LAYOUT
-   --------------------------------------------------------- */
+/* Layout */
 .container {
   width: 100%;
   max-width: var(--container-width);
@@ -148,9 +134,7 @@ button {
   border-top: 1px solid var(--color-border);
 }
 
-/* ---------------------------------------------------------
-   TYPOGRAPHY SCALE
-   --------------------------------------------------------- */
+/* Typography */
 .text-display {
   font-size: clamp(48px, 6vw, 80px);
   font-weight: 600;
@@ -223,9 +207,7 @@ button {
   color: var(--color-text-muted);
 }
 
-/* ---------------------------------------------------------
-   SECTION HEADING PATTERN (Medusa style)
-   --------------------------------------------------------- */
+/* Section labels */
 .section-label {
   font-size: 11px;
   font-weight: 600;
@@ -235,9 +217,7 @@ button {
   margin-bottom: 16px;
 }
 
-/* ---------------------------------------------------------
-   BUTTONS — Two variants only
-   --------------------------------------------------------- */
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -323,9 +303,7 @@ button {
 /* Full width */
 .btn-full { width: 100%; }
 
-/* ---------------------------------------------------------
-   FORM ELEMENTS
-   --------------------------------------------------------- */
+/* Forms */
 .input {
   width: 100%;
   font-family: var(--font-family);
@@ -371,9 +349,7 @@ button {
   padding-right: 36px;
 }
 
-/* ---------------------------------------------------------
-   PRODUCT CARD — The critical component
-   --------------------------------------------------------- */
+/* Product Card */
 .product-card {
   display: flex;
   flex-direction: column;
@@ -481,9 +457,7 @@ button {
   transform: translateY(0);
 }
 
-/* ---------------------------------------------------------
-   PRODUCT GRID
-   --------------------------------------------------------- */
+/* Product Grid */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -509,9 +483,7 @@ button {
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* ---------------------------------------------------------
-   CATEGORY GRID (text-based, Medusa style)
-   --------------------------------------------------------- */
+/* Categories */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -538,18 +510,14 @@ button {
   .category-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ---------------------------------------------------------
-   DIVIDERS
-   --------------------------------------------------------- */
+/* Dividers */
 .divider {
   width: 100%;
   height: 1px;
   background-color: var(--color-border);
 }
 
-/* ---------------------------------------------------------
-   MODALS & OVERLAYS
-   --------------------------------------------------------- */
+/* Modals */
 .overlay {
   position: fixed;
   inset: 0;
@@ -567,9 +535,7 @@ button {
   animation: slideUp var(--transition-base) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ---------------------------------------------------------
-   DRAWER (Cart, Filters)
-   --------------------------------------------------------- */
+/* Drawers */
 .drawer {
   position: fixed;
   top: 0;
@@ -607,9 +573,7 @@ button {
   background: var(--color-bg);
 }
 
-/* ---------------------------------------------------------
-   STATUS INDICATORS — Minimal
-   --------------------------------------------------------- */
+/* Badges */
 .tag {
   display: inline-flex;
   align-items: center;
@@ -646,18 +610,14 @@ button {
   border-color: #fecaca;
 }
 
-/* ---------------------------------------------------------
-   RATING STARS
-   --------------------------------------------------------- */
+/* Ratings */
 .stars {
   display: inline-flex;
   gap: 2px;
   color: #f59e0b;
 }
 
-/* ---------------------------------------------------------
-   ANIMATIONS
-   --------------------------------------------------------- */
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -685,9 +645,7 @@ button {
 
 .animate-spin { animation: spin 1s linear infinite; }
 
-/* ---------------------------------------------------------
-   ACCESSIBILITY
-   --------------------------------------------------------- */
+/* Accessibility */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -705,9 +663,7 @@ button {
   outline-offset: 2px;
 }
 
-/* ---------------------------------------------------------
-   UTILITY CLASSES
-   --------------------------------------------------------- */
+/* Utilities */
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
@@ -724,9 +680,7 @@ button {
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .text-center { text-align: center; }
 
-/* ---------------------------------------------------------
-   TOAST NOTIFICATION
-   --------------------------------------------------------- */
+/* Toast notification */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -744,9 +698,7 @@ button {
   white-space: nowrap;
 }
 
-/* ---------------------------------------------------------
-   RESPONSIVE UTILITIES
-   --------------------------------------------------------- */
+/* Responsive */
 @media (max-width: 768px) {
   .hidden-mobile { display: none !important; }
   .btn-xl { padding: 12px 24px; font-size: 15px; }

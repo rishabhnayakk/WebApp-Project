@@ -178,7 +178,7 @@ export default function CartDrawer({
                     fontWeight: 500,
                   }}
                 >
-                  ✓ Free HazMat ground shipping applied
+                  Free HazMat ground shipping applied
                 </div>
               )}
 
