@@ -538,23 +538,26 @@
     ];
 
     function checkAdminAuth() {
-      const auth = sessionStorage.getItem('aerosol_admin_auth') || localStorage.getItem('aerosol_admin_auth');
+      const auth = sessionStorage.getItem('aerosol_admin_auth') || localStorage.getItem('aerosol_admin_auth') || localStorage.getItem('aerosol_user');
       const loginScreen = document.getElementById('admin-login-screen');
       const dashboard = document.getElementById('admin-dashboard-app');
 
       if (auth) {
         try {
           const user = JSON.parse(auth);
-          document.getElementById('admin-user-display').textContent = user.id || 'admin';
-          loginScreen.style.display = 'none';
-          dashboard.style.display = 'flex';
-          initAdminDashboard();
+          if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.id === 'admin') {
+            document.getElementById('admin-user-display').textContent = user.name || user.id || 'admin';
+            loginScreen.style.display = 'none';
+            dashboard.style.display = 'flex';
+            initAdminDashboard();
+            return;
+          }
         } catch (e) {
           showLoginScreen();
+          return;
         }
-      } else {
-        showLoginScreen();
       }
+      showLoginScreen();
     }
 
     function showLoginScreen() {
@@ -591,6 +594,15 @@
         if (result.success && result.data) {
           sessionStorage.setItem('aerosol_admin_auth', JSON.stringify(result.data));
           localStorage.setItem('aerosol_admin_auth', JSON.stringify(result.data));
+          localStorage.setItem('aerosol_user', JSON.stringify(result.data));
+          if (result.data.token || result.token) {
+            localStorage.setItem('aerosol_token', result.data.token || result.token);
+          }
+          if (window.AerosolWebapp) {
+            AerosolWebapp.user = result.data;
+            AerosolWebapp.saveUser();
+            AerosolWebapp.updateHeaderBadges();
+          }
           AerosolWebapp.showToast('Signed in successfully as Administrator.');
           checkAdminAuth();
         } else {
@@ -610,8 +622,13 @@
     function handleAdminLogout() {
       sessionStorage.removeItem('aerosol_admin_auth');
       localStorage.removeItem('aerosol_admin_auth');
-      AerosolWebapp.showToast('Signed out of Admin Console.');
-      checkAdminAuth();
+      if (window.AerosolWebapp && typeof AerosolWebapp.logout === 'function') {
+        AerosolWebapp.logout();
+      } else {
+        localStorage.removeItem('aerosol_user');
+        localStorage.removeItem('aerosol_token');
+        checkAdminAuth();
+      }
     }
 
     async function initAdminDashboard() {

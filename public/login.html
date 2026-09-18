@@ -6,6 +6,8 @@
   <title>Sign In & Account Authentication | Aerosol Webapp</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111827'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-size='60' fill='white' font-family='system-ui, sans-serif' font-weight='700'>A</text></svg>">
+  <!-- Google Identity Services (Sign in with Google) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body style="background: var(--color-bg); display: flex; flex-direction: column; min-height: 100vh;">
 
@@ -48,6 +50,23 @@
   <script src="/js/auth-component.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      const u = AerosolWebapp.getUser();
+      const urlParams = new URLSearchParams(window.location.search);
+      const isSwitch = urlParams.get('switch') === '1' || urlParams.get('mode') === 'switch';
+
+      if (u && u.id && !isSwitch) {
+        const isAdm = u.role === 'ADMIN' || u.role === 'SUPER_ADMIN';
+        const redirect = urlParams.get('redirect');
+        if (redirect) {
+          window.location.href = redirect;
+        } else if (isAdm) {
+          window.location.href = '/admin.html';
+        } else {
+          window.location.href = '/account.html';
+        }
+        return;
+      }
+
       AerosolAuth.init('unified-auth-container');
     });
   </script>

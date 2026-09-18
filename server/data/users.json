@@ -1,0 +1,68 @@
+[
+  {
+    "id": "usr-101",
+    "name": "Dr. Marcus Sterling",
+    "email": "m.sterling@novaaero.com",
+    "password": "sterling123",
+    "phone": "+1 (206) 555-0182",
+    "role": "CUSTOMER",
+    "company": "NovaAero Dynamics LLC",
+    "tier": "B2B Enterprise Gold",
+    "discountTier": 15,
+    "termsAccepted": true,
+    "isEmailVerified": true,
+    "mfaEnabled": false,
+    "authProviders": [
+      "email"
+    ],
+    "status": "ACTIVE",
+    "picture": "",
+    "createdAt": "2026-01-15T08:00:00.000Z",
+    "addresses": []
+  },
+  {
+    "id": "usr-102",
+    "name": "Elena Rostova",
+    "email": "elena.rostova@hypersonic.com",
+    "password": "elena123",
+    "phone": "+1 (415) 555-0199",
+    "role": "CUSTOMER",
+    "company": "HyperSonic Detailing",
+    "tier": "Commercial Member",
+    "discountTier": 10,
+    "termsAccepted": true,
+    "isEmailVerified": true,
+    "mfaEnabled": false,
+    "authProviders": [
+      "email",
+      "google"
+    ],
+    "status": "ACTIVE",
+    "picture": "",
+    "createdAt": "2026-02-10T11:20:00.000Z",
+    "addresses": []
+  },
+  {
+    "id": "usr-goog-1788859626289",
+    "name": "Rahul Sharma (Google)",
+    "email": "rahul.google@gmail.com",
+    "password": null,
+    "picture": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
+    "googleId": "goog-1788859626267",
+    "phone": "",
+    "role": "CUSTOMER",
+    "tier": "Google Verified Member",
+    "discountTier": 5,
+    "termsAccepted": true,
+    "privacyAccepted": true,
+    "marketingAccepted": false,
+    "isEmailVerified": true,
+    "mfaEnabled": false,
+    "authProviders": [
+      "google"
+    ],
+    "status": "ACTIVE",
+    "createdAt": "2026-09-08T09:27:06.289Z",
+    "addresses": []
+  }
+]

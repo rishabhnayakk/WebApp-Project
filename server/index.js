@@ -1,10 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { connectDB } from './config/db.js';
+import passport from 'passport';
+import { configurePassport } from './config/passport.js';
 import productsRouter from './routes/products.js';
 import ordersRouter from './routes/orders.js';
 import analyticsRouter from './routes/analytics.js';
@@ -16,11 +19,19 @@ import settingsRouter from './routes/settings.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Initialize Passport Google Strategy
+configurePassport();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+app.use(cookieParser());
 app.use(express.json());
+app.use(passport.initialize());
 
 app.use(express.static(path.join(__dirname, '../public'), {
   extensions: ['html']
@@ -38,7 +49,9 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/analytics', analyticsRouter);
 app.use('/api/v1/settings', settingsRouter);
 
-// legacy v1 alias routes
+// legacy v1 alias routes & Google OAuth aliases
+app.use('/api/auth', authRouter);
+app.use('/auth', authRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/analytics', analyticsRouter);

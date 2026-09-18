@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import passport from 'passport';
+import mongoose from 'mongoose';
+import { OAuth2Client } from 'google-auth-library';
+import User from '../models/User.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 import { rateLimiter, sanitizeRedirectUrl, logAudit } from '../middleware/securityMiddleware.js';
 
@@ -37,7 +41,23 @@ export const isAdminIdentifier = (identifier) => {
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'aerosol_secret_jwt_key_2026_super_secure';
 
-const usersDB = [
+const usersFilePath = path.join(process.cwd(), 'server', 'data', 'users.json');
+
+const loadUsersFromFile = () => {
+  try {
+    if (fs.existsSync(usersFilePath)) {
+      const data = JSON.parse(fs.readFileSync(usersFilePath, 'utf8') || '[]');
+      if (Array.isArray(data) && data.length > 0) return data;
+    }
+  } catch (e) {
+    console.warn('Could not load users.json:', e.message);
+  }
+  return null;
+};
+
+const initialUsersFromFile = loadUsersFromFile();
+
+export const usersDB = initialUsersFromFile || [
   {
     id: 'usr-101',
     name: 'Dr. Marcus Sterling',
@@ -97,7 +117,14 @@ const usersDB = [
 const resetTokens = new Map();
 const activeSessions = new Set();
 
-const generateToken = (user) => {
+export const AUTH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: 100 * 365 * 24 * 60 * 60 * 1000 // 100 years - session persists indefinitely until logout
+};
+
+export const generateToken = (user) => {
   const token = jwt.sign(
     {
       id: user.id,
@@ -108,11 +135,201 @@ const generateToken = (user) => {
       tier: user.tier || 'Customer'
     },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '36500d' } // 100 years - never automatically logged out
   );
   activeSessions.add(token);
   return token;
 };
+
+export const saveUsersToFile = () => {
+  try {
+    const dir = path.dirname(usersFilePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    // Filter out temporary admin from saving into users.json if admin is in env
+    const persistable = usersDB.filter(u => u.id !== 'usr-admin');
+    fs.writeFileSync(usersFilePath, JSON.stringify(persistable, null, 2));
+  } catch (e) {
+    console.error('Failed to save users to disk:', e);
+  }
+};
+
+/**
+ * Finds an existing user by googleId or email, or registers a brand new user.
+ * Supports Passport.js Google OAuth 2.0 strategy and GIS token verification.
+ */
+export const findOrCreateGoogleUser = async ({ googleId, email, name, picture }) => {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  let user = usersDB.find((u) => 
+    (googleId && u.googleId === googleId) ||
+    (u.email && u.email.toLowerCase() === cleanEmail && u.status !== 'DEACTIVATED')
+  );
+
+  if (user) {
+    // Existing user: Link Google account
+    if (!user.authProviders) user.authProviders = ['email'];
+    if (!user.authProviders.includes('google')) {
+      user.authProviders.push('google');
+    }
+    if (googleId) user.googleId = googleId;
+    if (picture && (!user.picture || user.picture.includes('default') || user.picture.includes('unsplash'))) {
+      user.picture = picture;
+    }
+    user.isEmailVerified = true;
+    saveUsersToFile();
+    logAudit('ACCOUNT_LINKED_GOOGLE', {
+      userId: user.id,
+      email: user.email,
+      googleId: user.googleId,
+      name: user.name,
+      authMethod: 'Passport.js Google OAuth'
+    });
+  } else {
+    // Brand new user: Automatically register new account
+    user = {
+      id: `usr-goog-${Date.now()}`,
+      name: (name || 'Google User').trim(),
+      email: cleanEmail,
+      password: null, // Never store passwords for OAuth-authenticated users
+      picture: picture || '',
+      googleId: googleId || null,
+      phone: '',
+      company: '',
+      dob: '',
+      role: 'CUSTOMER',
+      tier: 'Google Verified Member',
+      discountTier: 5,
+      termsAccepted: true,
+      privacyAccepted: true,
+      marketingAccepted: false,
+      isEmailVerified: true,
+      mfaEnabled: false,
+      authProviders: ['google'],
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+      addresses: []
+    };
+    usersDB.push(user);
+    saveUsersToFile();
+    logAudit('USER_CREATED_GOOGLE', {
+      userId: user.id,
+      email: user.email,
+      googleId: user.googleId,
+      name: user.name,
+      authMethod: 'Passport.js Google OAuth'
+    });
+  }
+
+  // Synchronize to MongoDB User document if connected
+  if (mongoose.connection.readyState === 1) {
+    try {
+      await User.findOneAndUpdate(
+        { email: user.email },
+        {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          picture: user.picture,
+          googleId: user.googleId,
+          authProviders: user.authProviders,
+          isEmailVerified: true,
+          role: user.role,
+          tier: user.tier,
+          status: user.status
+        },
+        { upsert: true, returnDocument: 'after' }
+      );
+    } catch (dbErr) {
+      // Graceful fallback to in-memory / JSON persistence
+    }
+  }
+
+  return user;
+};
+
+// Public auth configuration
+router.get('/config', (req, res) => {
+  const googleClientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
+  const googleClientSecret = (process.env.GOOGLE_CLIENT_SECRET || '').trim();
+  const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const isConfigured = Boolean(
+    googleClientId &&
+    googleClientSecret &&
+    !googleClientId.includes('YOUR_GOOGLE_CLIENT_ID')
+  );
+
+  res.json({
+    success: true,
+    googleClientId,
+    isConfigured,
+    isPassportConfigured: isConfigured,
+    authStrategy: 'passport-google-oauth20',
+    callbackUrl: `${appUrl}/api/v1/auth/google/callback`,
+    appUrl
+  });
+});
+
+// Passport.js Google OAuth 2.0 - Initiate Sign-In / Registration
+router.get('/google', (req, res, next) => {
+  const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
+  const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || '').trim();
+
+  const redirectTarget = sanitizeRedirectUrl(req.query.redirect, '/account.html');
+
+  if (!clientId || !clientSecret || clientId.includes('YOUR_GOOGLE_CLIENT_ID')) {
+    return res.redirect(
+      `/login.html?error=${encodeURIComponent('Google OAuth is not configured in .env. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.')}&show_guide=1`
+    );
+  }
+
+  const state = Buffer.from(JSON.stringify({ returnTo: redirectTarget })).toString('base64');
+
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    session: false,
+    state
+  })(req, res, next);
+});
+
+// Passport.js Google OAuth 2.0 - Callback Endpoint
+router.get('/google/callback', (req, res, next) => {
+  passport.authenticate('google', { session: false }, async (err, user, info) => {
+    if (err || !user) {
+      const errorMsg = err?.message || info?.message || 'Google authentication failed.';
+      console.warn('Passport Google OAuth callback failure:', errorMsg);
+      return res.redirect(`/login.html?error=${encodeURIComponent(errorMsg)}`);
+    }
+
+    try {
+      let returnTo = '/account.html';
+      if (req.query.state) {
+        try {
+          const parsed = JSON.parse(Buffer.from(req.query.state, 'base64').toString('utf8'));
+          if (parsed?.returnTo) {
+            returnTo = sanitizeRedirectUrl(parsed.returnTo, '/account.html');
+          }
+        } catch (e) {
+          // ignore malformed state
+        }
+      }
+
+      const token = generateToken(user);
+
+      // Set HTTP-only persistent session cookie (100 years - never expires automatically)
+      res.cookie('aerosol_token', token, AUTH_COOKIE_OPTIONS);
+
+      const isTargetAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+      const destination = isTargetAdmin ? '/admin.html' : returnTo;
+      const separator = destination.includes('?') ? '&' : '?';
+
+      return res.redirect(
+        `${destination}${separator}token=${encodeURIComponent(token)}&google_auth=success&name=${encodeURIComponent(user.name)}`
+      );
+    } catch (tokenErr) {
+      console.error('Error generating token in Google callback:', tokenErr);
+      return res.redirect(`/login.html?error=${encodeURIComponent('Failed to generate authentication session.')}`);
+    }
+  })(req, res, next);
+});
 
 // Admin login handler for admin portal
 router.post('/admin-login', rateLimiter(30, 60000), (req, res) => {
@@ -134,6 +351,7 @@ router.post('/admin-login', rateLimiter(30, 60000), (req, res) => {
       tier: 'Super Administrator'
     };
     const token = generateToken(adminUser);
+    res.cookie('aerosol_token', token, AUTH_COOKIE_OPTIONS);
     logAudit('ADMIN_DIRECT_LOGIN_SUCCESS', {
       adminId: inputId,
       name: adminUser.name,
@@ -230,6 +448,7 @@ router.post('/login', rateLimiter(30, 60000), (req, res) => {
       tier: 'Super Administrator'
     };
     const token = generateToken(adminUser);
+    res.cookie('aerosol_token', token, AUTH_COOKIE_OPTIONS);
     logAudit('ADMIN_LOGIN_SUCCESS', {
       adminId: cfg.adminId,
       name: adminUser.name,
@@ -271,6 +490,7 @@ router.post('/login', rateLimiter(30, 60000), (req, res) => {
   }
 
   const token = generateToken(user);
+  res.cookie('aerosol_token', token, AUTH_COOKIE_OPTIONS);
   logAudit('LOGIN_SUCCESS', {
     userId: user.id,
     name: user.name,
@@ -382,6 +602,7 @@ router.post('/register', rateLimiter(10, 60000), (req, res) => {
 
   usersDB.push(newUser);
   const token = generateToken(newUser);
+  res.cookie('aerosol_token', token, AUTH_COOKIE_OPTIONS);
 
   logAudit('USER_REGISTERED', {
     userId: newUser.id,
@@ -411,55 +632,99 @@ router.post('/register', rateLimiter(10, 60000), (req, res) => {
   });
 });
 
-// Google sign-in
-router.post('/google', rateLimiter(15, 60000), (req, res) => {
-  const { email, name, googleId, redirect } = req.body;
-  const userEmail = (email || 'user.google@gmail.com').trim().toLowerCase();
-  const userName = name || 'Google Verified User';
+// Google sign-in (Secure Google Identity Services / OAuth 2.0)
+router.post('/google', rateLimiter(20, 60000), async (req, res) => {
+  const { credential, redirect, isDevMock, devUser } = req.body;
   const safeRedirect = sanitizeRedirectUrl(redirect, '/account.html');
 
-  let user = usersDB.find((u) => u.email.toLowerCase() === userEmail && u.status !== 'DEACTIVATED');
+  let verifiedGoogleData = null;
 
-  if (user) {
-    if (!user.authProviders.includes('google')) {
-      user.authProviders.push('google');
+  // 1. Production Google ID Token Verification
+  if (credential) {
+    const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
+    if (!clientId) {
+      logAudit('GOOGLE_LOGIN_ERROR_NOCLIENTID', { ip: req.ip });
+      return res.status(500).json({
+        success: false,
+        message: 'Google Client ID is not configured on the server. Please set GOOGLE_CLIENT_ID in your .env file.'
+      });
     }
-    user.googleId = googleId || `goog-${Date.now()}`;
-    logAudit('ACCOUNT_LINKED_GOOGLE', { userId: user.id, email: user.email });
-  } else {
-    user = {
-      id: `usr-google-${Date.now()}`,
-      name: userName,
-      email: userEmail,
-      password: null,
-      role: 'CUSTOMER',
-      tier: 'Google Verified Member',
-      discountTier: 5,
-      termsAccepted: true,
-      isEmailVerified: true,
-      mfaEnabled: false,
-      googleId: googleId || `goog-${Date.now()}`,
-      authProviders: ['google'],
-      status: 'ACTIVE',
-      createdAt: new Date().toISOString(),
-      addresses: []
+
+    try {
+      const client = new OAuth2Client(clientId);
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: clientId
+      });
+      const payload = ticket.getPayload();
+
+      if (!payload || !payload.sub || !payload.email) {
+        logAudit('GOOGLE_TOKEN_INVALID_PAYLOAD', { ip: req.ip });
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid Google credential token payload.'
+        });
+      }
+
+      verifiedGoogleData = {
+        googleId: payload.sub,
+        email: payload.email.trim().toLowerCase(),
+        name: payload.name || payload.given_name || 'Google Verified User',
+        picture: payload.picture || '',
+        emailVerified: Boolean(payload.email_verified)
+      };
+    } catch (verifyError) {
+      logAudit('GOOGLE_TOKEN_VERIFY_FAILED', {
+        error: verifyError.message,
+        ip: req.ip
+      });
+      return res.status(401).json({
+        success: false,
+        message: `Google token verification failed: ${verifyError.message}`
+      });
+    }
+  } else if (isDevMock && process.env.NODE_ENV !== 'production') {
+    // Non-production local development simulation helper
+    verifiedGoogleData = {
+      googleId: devUser?.googleId || `goog-mock-${Date.now()}`,
+      email: (devUser?.email || 'user.google@gmail.com').trim().toLowerCase(),
+      name: devUser?.name || 'Google Verified User',
+      picture: devUser?.picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+      emailVerified: true
     };
-    usersDB.push(user);
-    logAudit('USER_CREATED_GOOGLE', { userId: user.id, email: user.email });
+    logAudit('GOOGLE_DEV_MOCK_LOGIN', { email: verifiedGoogleData.email, ip: req.ip });
+  } else {
+    return res.status(400).json({
+      success: false,
+      message: 'Google credential token is required for authentication.'
+    });
   }
 
+  // 2. Database Lookup & Account Linking / Creation via Unified Helper
+  const user = await findOrCreateGoogleUser({
+    googleId: verifiedGoogleData.googleId,
+    email: verifiedGoogleData.email,
+    name: verifiedGoogleData.name,
+    picture: verifiedGoogleData.picture
+  });
+
+  // 3. Issue JWT Token & Set Secure HTTP-only Cookie
   const token = generateToken(user);
+  res.cookie('aerosol_token', token, AUTH_COOKIE_OPTIONS);
+
   const isTargetAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
 
-  res.json({
+  return res.json({
     success: true,
-    message: 'Signed in with Google successfully.',
+    message: `Welcome back, ${user.name}! Signed in with Google.`,
     token,
     redirectUrl: isTargetAdmin ? '/admin.html' : safeRedirect,
     user: {
       id: user.id,
       name: user.name,
       email: user.email,
+      picture: user.picture || '',
+      googleId: user.googleId || '',
       role: user.role,
       tier: user.tier,
       isEmailVerified: true,
@@ -524,8 +789,14 @@ router.post('/reset-password', rateLimiter(5, 60000), (req, res) => {
 
 // Logout
 router.post('/logout', requireAuth, (req, res) => {
-  const token = req.headers.authorization?.replace('Bearer ', '');
+  const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.aerosol_token;
   if (token) activeSessions.delete(token);
+
+  res.clearCookie('aerosol_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  });
 
   logAudit('LOGOUT_SUCCESS', { userId: req.user.id });
   res.json({ success: true, message: 'Logged out successfully.' });
@@ -544,6 +815,12 @@ router.delete('/account', requireAuth, (req, res) => {
   user.password = null;
   user.phone = '[REDACTED]';
 
+  res.clearCookie('aerosol_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  });
+
   logAudit('ACCOUNT_DEACTIVATED', { userId, email: user.email });
   res.json({
     success: true,
@@ -560,6 +837,8 @@ router.get('/me', requireAuth, (req, res) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      picture: user.picture || '',
+      googleId: user.googleId || '',
       role: user.role || 'CUSTOMER',
       company: user.company || '',
       phone: user.phone || '',

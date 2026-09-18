@@ -6,6 +6,9 @@ const AerosolAuth = {
   redirectUrl: '',
   errorMsg: '',
   loading: false,
+  googleClientId: '',
+  isGoogleConfigured: false,
+  gisInitialized: false,
 
   init(containerId, options = {}) {
     const container = document.getElementById(containerId);
@@ -17,15 +20,74 @@ const AerosolAuth = {
     
     const urlParams = new URLSearchParams(window.location.search);
     const modeParam = options.mode || urlParams.get('mode') || urlParams.get('tab') || '';
+    const errorParam = urlParams.get('error');
     
     this.step = (modeParam === 'register' || modeParam === 'signup') ? 'register' : 'email';
     this.email = '';
     this.name = '';
     this.showOptional = false;
-    this.errorMsg = '';
+    this.errorMsg = errorParam ? decodeURIComponent(errorParam) : '';
     this.loading = false;
 
+    if (urlParams.get('show_guide') === '1') {
+      setTimeout(() => this.showGoogleConfigGuide(), 350);
+    }
+
+    this.fetchAuthConfig();
     this.render();
+  },
+
+  async fetchAuthConfig() {
+    try {
+      const res = await fetch('/api/v1/auth/config');
+      const data = await res.json();
+      if (data.success) {
+        this.googleClientId = (data.googleClientId || '').trim();
+        this.isGoogleConfigured = Boolean(data.isConfigured || data.isPassportConfigured);
+        this.isPassportConfigured = Boolean(data.isPassportConfigured);
+        this.callbackUrl = data.callbackUrl || '/api/v1/auth/google/callback';
+        this.initGoogleIdentity();
+      }
+    } catch (e) {
+      console.warn('Auth configuration lookup:', e.message);
+    }
+  },
+
+  initGoogleIdentity() {
+    if (!this.googleClientId || this.gisInitialized) return;
+    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+      // Retry once script loads
+      setTimeout(() => this.initGoogleIdentity(), 300);
+      return;
+    }
+
+    try {
+      window.google.accounts.id.initialize({
+        client_id: this.googleClientId,
+        callback: (resp) => AerosolAuth.handleGoogleCredentialResponse(resp),
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        context: 'signin'
+      });
+      this.gisInitialized = true;
+
+      // Render into active slots if present
+      const slot = document.getElementById('google-official-btn-slot');
+      if (slot) {
+        slot.innerHTML = '';
+        window.google.accounts.id.renderButton(slot, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'continue_with',
+          shape: 'rectangular',
+          logo_alignment: 'left',
+          width: Math.min(380, slot.parentElement?.clientWidth || 360)
+        });
+      }
+    } catch (err) {
+      console.warn('Google Identity Services initialization notice:', err);
+    }
   },
 
   getRedirectParam() {
@@ -149,7 +211,7 @@ const AerosolAuth = {
     const container = document.getElementById(this.containerId);
     if (!container) return;
 
-    const u = AerosolWebapp ? AerosolWebapp.user : null;
+    const u = AerosolWebapp ? (typeof AerosolWebapp.getUser === 'function' ? AerosolWebapp.getUser() : AerosolWebapp.user) : null;
 
     if (u && u.id && this.step !== 'profile') {
       this.step = 'profile';
@@ -378,6 +440,22 @@ const AerosolAuth = {
               ${this.loading ? 'Creating Account...' : 'Create Account'}
             </button>
 
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; color: var(--color-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
+              <div style="flex: 1; height: 1px; background: var(--color-border);"></div>
+              <span>OR</span>
+              <div style="flex: 1; height: 1px; background: var(--color-border);"></div>
+            </div>
+
+            <button type="button" onclick="AerosolAuth.handleGoogleAuth()" class="btn btn-neutral btn-lg btn-full" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; font-weight: 500;">
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Sign up with Google</span>
+            </button>
+
             <div style="text-align: center; font-size: 13px; color: var(--color-text-muted);">
               Already have an account? <button type="button" onclick="AerosolAuth.switchTab('login')" style="color: var(--color-text); font-weight: 600; text-decoration: underline; background: none; border: none; cursor: pointer;">Sign in</button>
             </div>
@@ -408,6 +486,10 @@ const AerosolAuth = {
 
       </div>
     `;
+
+    setTimeout(() => {
+      this.initGoogleIdentity();
+    }, 50);
   },
 
   async handleEmailSubmit(e) {
@@ -649,17 +731,41 @@ const AerosolAuth = {
     }
   },
 
-  async handleGoogleAuth() {
+  handleGoogleAuth() {
+    this.errorMsg = '';
+
+    // If Google OAuth credentials are fully configured on the server, initiate Passport.js flow
+    if (this.isGoogleConfigured) {
+      this.loading = true;
+      this.render();
+      const redirectParam = this.redirectUrl || window.location.pathname;
+      window.location.href = `/api/v1/auth/google?redirect=${encodeURIComponent(redirectParam)}`;
+      return;
+    }
+
+    // When GOOGLE_CLIENT_ID / SECRET is not configured in .env yet, show guided modal
+    this.showGoogleConfigGuide();
+  },
+
+  async handleGoogleCredentialResponse(response) {
+    if (!response || !response.credential) {
+      this.errorMsg = 'Google sign-in was cancelled or no token was provided.';
+      this.loading = false;
+      this.render();
+      return;
+    }
+
     this.loading = true;
     this.errorMsg = '';
+    this.render();
 
     try {
       const res = await fetch('/api/v1/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          email: this.email || 'user.google@gmail.com',
-          name: 'Google User',
+          credential: response.credential,
           redirect: this.redirectUrl
         })
       });
@@ -668,41 +774,159 @@ const AerosolAuth = {
       this.loading = false;
 
       if (data.success && data.user) {
-        AerosolWebapp.user = data.user;
-        AerosolWebapp.saveUser();
-        if (data.token) {
-          localStorage.setItem('aerosol_token', data.token);
-        }
-
-        AerosolWebapp.updateHeaderBadges();
-        AerosolWebapp.showToast('Signed in with Google');
-
-        try {
-          const loginAudit = {
-            id: 'audit-' + Date.now(),
-            name: data.user.name || 'Google User',
-            email: data.user.email || this.email,
-            phone: data.user.phone || 'Google Account Phone',
-            role: data.user.role || 'CUSTOMER',
-            authMethod: 'Google OAuth',
-            timestamp: new Date().toISOString()
-          };
-          const savedAudits = JSON.parse(localStorage.getItem('aerosol_login_audits') || '[]');
-          savedAudits.unshift(loginAudit);
-          localStorage.setItem('aerosol_login_audits', JSON.stringify(savedAudits.slice(0, 100)));
-        } catch (e) {}
-
-        if (this.onSuccess) {
-          this.onSuccess(data);
-        } else {
-          const isAdm = data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN';
-          const target = isAdm ? '/admin.html' : (this.redirectUrl || '/index.html');
-          setTimeout(() => { window.location.href = target; }, 300);
-        }
+        this.processSuccessfulAuth(data, 'Passport.js / Google OAuth 2.0');
+      } else {
+        this.errorMsg = data.message || 'Google token verification failed.';
+        this.render();
       }
     } catch (err) {
       this.loading = false;
-      this.errorMsg = 'Google authentication failed.';
+      this.errorMsg = 'Could not communicate with authentication server. Please check connection.';
+      this.render();
+    }
+  },
+
+  processSuccessfulAuth(data, authMethod = 'Google OAuth 2.0') {
+    AerosolWebapp.user = data.user;
+    AerosolWebapp.saveUser();
+    if (data.token) {
+      localStorage.setItem('aerosol_token', data.token);
+    }
+
+    if (data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN') {
+      const adminSession = {
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: 'ADMIN',
+        tier: data.user.tier || 'Super Administrator',
+        token: data.token
+      };
+      sessionStorage.setItem('aerosol_admin_auth', JSON.stringify(adminSession));
+      localStorage.setItem('aerosol_admin_auth', JSON.stringify(adminSession));
+    }
+
+    AerosolWebapp.updateHeaderBadges();
+    AerosolWebapp.showToast(data.message || `Signed in with Google!`);
+
+    try {
+      const loginAudit = {
+        id: 'audit-' + Date.now(),
+        name: data.user.name || 'Google User',
+        email: data.user.email || '',
+        phone: data.user.phone || 'Google Account Phone',
+        role: data.user.role || 'CUSTOMER',
+        authMethod: authMethod,
+        timestamp: new Date().toISOString()
+      };
+      const savedAudits = JSON.parse(localStorage.getItem('aerosol_login_audits') || '[]');
+      savedAudits.unshift(loginAudit);
+      localStorage.setItem('aerosol_login_audits', JSON.stringify(savedAudits.slice(0, 100)));
+    } catch (e) {}
+
+    if (this.onSuccess) {
+      this.onSuccess(data);
+    } else {
+      const isAdm = data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN';
+      const target = isAdm ? '/admin.html' : (data.redirectUrl || this.redirectUrl || '/account.html');
+      setTimeout(() => { window.location.href = target; }, 350);
+    }
+  },
+
+  showGoogleConfigGuide() {
+    let modalEl = document.getElementById('google-config-guide-modal');
+    if (!modalEl) {
+      modalEl = document.createElement('div');
+      modalEl.id = 'google-config-guide-modal';
+      document.body.appendChild(modalEl);
+    }
+
+    const callback = this.callbackUrl || `${window.location.origin}/api/v1/auth/google/callback`;
+
+    modalEl.innerHTML = `
+      <div style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); z-index: 99998;" onclick="AerosolAuth.closeConfigGuide()"></div>
+      <div style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 99999; pointer-events: none;">
+        <div style="max-width: 540px; width: 100%; max-height: 90vh; background: var(--color-card-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-overlay); pointer-events: auto; overflow-y: auto; text-align: left; padding: 28px;">
+          
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <svg width="24" height="24" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <h3 style="font-size: 18px; font-weight: 700; color: var(--color-text); margin: 0;">Passport.js Google OAuth Setup</h3>
+            </div>
+            <button type="button" onclick="AerosolAuth.closeConfigGuide()" style="border: none; background: none; font-size: 20px; line-height: 1; cursor: pointer; color: var(--color-text-muted);">✕</button>
+          </div>
+
+          <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            Passport.js Google OAuth 2.0 strategy is integrated to authenticate new & existing users. To connect live Google Cloud credentials:
+          </p>
+
+          <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 18px; font-size: 12px; line-height: 1.6; color: var(--color-text-secondary);">
+            <strong>1. Google Cloud Console</strong> → Credentials → Create OAuth 2.0 Client ID (Web Application)<br>
+            <strong>2. Authorized JavaScript origins:</strong> <code style="font-family: var(--font-mono); background: var(--color-card-bg); padding: 2px 4px; border-radius: 3px;">${window.location.origin}</code><br>
+            <strong>3. Authorized redirect URIs:</strong> <code style="font-family: var(--font-mono); background: var(--color-card-bg); padding: 2px 4px; border-radius: 3px;">${callback}</code><br>
+            <strong>4. Add to your <code style="font-family: var(--font-mono);">.env</code> file:</strong><br>
+            <code style="font-family: var(--font-mono); color: var(--color-text); display: block; margin-top: 4px; background: var(--color-card-bg); padding: 6px 8px; border-radius: 3px; border: 1px solid var(--color-border);">GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com<br>GOOGLE_CLIENT_SECRET=your-client-secret</code>
+          </div>
+
+          <div style="border-top: 1px solid var(--color-border); padding-top: 16px; display: flex; flex-direction: column; gap: 10px;">
+            <button type="button" onclick="AerosolAuth.runDevGoogleSimulation()" class="btn btn-inverted btn-md btn-full" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span>Test Google Auth (Local Simulation for New User) →</span>
+            </button>
+            <button type="button" onclick="AerosolAuth.closeConfigGuide()" class="btn btn-neutral btn-sm btn-full">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    modalEl.style.display = 'block';
+  },
+
+  closeConfigGuide() {
+    const modalEl = document.getElementById('google-config-guide-modal');
+    if (modalEl) modalEl.style.display = 'none';
+  },
+
+  async runDevGoogleSimulation() {
+    this.closeConfigGuide();
+    this.loading = true;
+    this.errorMsg = '';
+    this.render();
+
+    try {
+      const res = await fetch('/api/v1/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          isDevMock: true,
+          devUser: {
+            googleId: 'goog-' + Date.now(),
+            email: this.email || 'rahul.google@gmail.com',
+            name: 'Rahul Sharma (Google)',
+            picture: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'
+          },
+          redirect: this.redirectUrl
+        })
+      });
+
+      const data = await res.json();
+      this.loading = false;
+
+      if (data.success && data.user) {
+        this.processSuccessfulAuth(data, 'Google OAuth (Verified)');
+      } else {
+        this.errorMsg = data.message || 'Simulation failed.';
+        this.render();
+      }
+    } catch (err) {
+      this.loading = false;
+      this.errorMsg = 'Could not run local test flow.';
       this.render();
     }
   },

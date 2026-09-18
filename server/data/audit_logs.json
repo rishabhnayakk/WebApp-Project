@@ -1,5 +1,160 @@
 [
   {
+    "id": "audit-1789326792806-443t",
+    "eventType": "USER_CREATED_GOOGLE",
+    "details": {
+      "userId": "usr-goog-1789326792806",
+      "email": "passport.newuser.1789326792794@gmail.com",
+      "googleId": "goog-mock-1789326792794",
+      "name": "Passport New Member",
+      "authMethod": "Passport.js Google OAuth"
+    },
+    "timestamp": "2026-09-13T19:13:12.806Z"
+  },
+  {
+    "id": "audit-1789326792804-l0ow",
+    "eventType": "GOOGLE_DEV_MOCK_LOGIN",
+    "details": {
+      "email": "passport.newuser.1789326792794@gmail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-09-13T19:13:12.804Z"
+  },
+  {
+    "id": "audit-1789326552136-srua",
+    "eventType": "USER_CREATED_GOOGLE",
+    "details": {
+      "userId": "usr-goog-1789326552131",
+      "email": "test1789326552131@google.com",
+      "googleId": "test-1789326552131",
+      "name": "Quick Test User",
+      "authMethod": "Passport.js Google OAuth"
+    },
+    "timestamp": "2026-09-13T19:09:12.136Z"
+  },
+  {
+    "id": "audit-1789326126944-ie6v",
+    "eventType": "ACCOUNT_LINKED_GOOGLE",
+    "details": {
+      "userId": "usr-goog-1789326116919",
+      "email": "newuser.1789326116919@example.com",
+      "googleId": "goog-test-1789326116918",
+      "name": "Test New User",
+      "authMethod": "Passport.js Google OAuth"
+    },
+    "timestamp": "2026-09-13T19:02:06.945Z"
+  },
+  {
+    "id": "audit-1789326116924-5lph",
+    "eventType": "USER_CREATED_GOOGLE",
+    "details": {
+      "userId": "usr-goog-1789326116919",
+      "email": "newuser.1789326116919@example.com",
+      "googleId": "goog-test-1789326116918",
+      "name": "Test New User",
+      "authMethod": "Passport.js Google OAuth"
+    },
+    "timestamp": "2026-09-13T19:01:56.924Z"
+  },
+  {
+    "id": "audit-1788860393774-x2re",
+    "eventType": "LOGOUT_SUCCESS",
+    "details": {
+      "userId": "adminDinkal"
+    },
+    "timestamp": "2026-09-08T09:39:53.774Z"
+  },
+  {
+    "id": "audit-1788860355933-42i6",
+    "eventType": "LOGOUT_SUCCESS",
+    "details": {
+      "userId": "adminDinkal"
+    },
+    "timestamp": "2026-09-08T09:39:15.933Z"
+  },
+  {
+    "id": "audit-1788860257243-ld66",
+    "eventType": "ADMIN_LOGIN_SUCCESS",
+    "details": {
+      "adminId": "adminDinkal",
+      "name": "Operations Administrator",
+      "email": "admindinkal@aerosolwebapp.com",
+      "role": "ADMIN",
+      "authMethod": "Unified Admin Login",
+      "loginTime": "2026-09-08T09:37:37.243Z",
+      "ip": "::1"
+    },
+    "timestamp": "2026-09-08T09:37:37.243Z"
+  },
+  {
+    "id": "audit-1788860236416-u72g",
+    "eventType": "LOGOUT_SUCCESS",
+    "details": {
+      "userId": "usr-1788860231477"
+    },
+    "timestamp": "2026-09-08T09:37:16.416Z"
+  },
+  {
+    "id": "audit-1788860231478-v0au",
+    "eventType": "USER_REGISTERED",
+    "details": {
+      "userId": "usr-1788860231477",
+      "email": "rishabh@123",
+      "marketingAccepted": false,
+      "role": "CUSTOMER"
+    },
+    "timestamp": "2026-09-08T09:37:11.478Z"
+  },
+  {
+    "id": "audit-1788860201157-8euy",
+    "eventType": "LOGOUT_SUCCESS",
+    "details": {
+      "userId": "adminDinkal"
+    },
+    "timestamp": "2026-09-08T09:36:41.157Z"
+  },
+  {
+    "id": "audit-1788859672154-eoyf",
+    "eventType": "ADMIN_LOGIN_SUCCESS",
+    "details": {
+      "adminId": "adminDinkal",
+      "name": "Operations Administrator",
+      "email": "admindinkal@aerosolwebapp.com",
+      "role": "ADMIN",
+      "authMethod": "Unified Admin Login",
+      "loginTime": "2026-09-08T09:27:52.154Z",
+      "ip": "::1"
+    },
+    "timestamp": "2026-09-08T09:27:52.154Z"
+  },
+  {
+    "id": "audit-1788859637091-pyws",
+    "eventType": "LOGOUT_SUCCESS",
+    "details": {
+      "userId": "usr-goog-1788859626289"
+    },
+    "timestamp": "2026-09-08T09:27:17.091Z"
+  },
+  {
+    "id": "audit-1788859626290-jnzb",
+    "eventType": "USER_CREATED_GOOGLE",
+    "details": {
+      "userId": "usr-goog-1788859626289",
+      "email": "rahul.google@gmail.com",
+      "googleId": "goog-1788859626267"
+    },
+    "timestamp": "2026-09-08T09:27:06.290Z"
+  },
+  {
+    "id": "audit-1788859626286-306y",
+    "eventType": "GOOGLE_DEV_MOCK_LOGIN",
+    "details": {
+      "email": "rahul.google@gmail.com",
+      "ip": "::1"
+    },
+    "timestamp": "2026-09-08T09:27:06.286Z"
+  },
+  {
     "id": "audit-1788794588452-l8vu",
     "eventType": "USER_CREATED_GOOGLE",
     "details": {

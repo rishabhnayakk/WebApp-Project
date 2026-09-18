@@ -4,9 +4,30 @@ const AerosolWebapp = {
   user: JSON.parse(localStorage.getItem('aerosol_user') || localStorage.getItem('dinkal_user') || 'null'),
   appliedCoupon: null,
 
+  getUser() {
+    if (this.user && this.user.id) return this.user;
+    try {
+      const stored = localStorage.getItem('aerosol_user') || localStorage.getItem('dinkal_user') || localStorage.getItem('aerosol_admin_auth');
+      if (stored) {
+        this.user = JSON.parse(stored);
+        return this.user;
+      }
+    } catch (e) {}
+    return null;
+  },
+
   init() {
-    // Default to null user if not logged in
-    this.user = JSON.parse(localStorage.getItem('aerosol_user') || 'null');
+    // 1. Ensure user is loaded from permanent storage
+    this.user = this.getUser();
+
+    // 2. Process Google OAuth callback token if present
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('token') && urlParams.get('google_auth') === 'success') {
+      this.syncUserFromToken();
+    } else if (!this.user && localStorage.getItem('aerosol_token')) {
+      // Re-hydrate session silently in background if token exists
+      this.syncUserFromToken();
+    }
 
     // Clean up any previously stored demo cart items so cart is initially 0
     if (localStorage.getItem('aerosol_demo_cart_cleared') !== 'v1') {
@@ -19,6 +40,42 @@ const AerosolWebapp = {
 
     this.updateHeaderBadges();
     this.setupGlobalEvents();
+  },
+
+  async syncUserFromToken() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token') || localStorage.getItem('aerosol_token');
+    const isGoogleAuth = params.get('google_auth') === 'success';
+
+    if (token) {
+      localStorage.setItem('aerosol_token', token);
+      try {
+        const res = await fetch('/api/v1/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        if (data.success && data.user) {
+          this.user = data.user;
+          this.saveUser();
+          this.updateHeaderBadges();
+
+          if (isGoogleAuth) {
+            this.showToast(`Welcome, ${data.user.name || 'User'}! Successfully authenticated with Google.`);
+            const url = new URL(window.location.href);
+            url.searchParams.delete('token');
+            url.searchParams.delete('google_auth');
+            url.searchParams.delete('name');
+            window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : '') + url.hash);
+          }
+          return data.user;
+        }
+      } catch (err) {
+        console.warn('OAuth user sync error:', err);
+      }
+    }
+    return null;
   },
 
   saveCart() {
@@ -35,8 +92,13 @@ const AerosolWebapp = {
   },
 
   saveUser() {
-    localStorage.setItem('aerosol_user', JSON.stringify(this.user));
-    localStorage.setItem('dinkal_user', JSON.stringify(this.user));
+    if (this.user) {
+      localStorage.setItem('aerosol_user', JSON.stringify(this.user));
+      localStorage.setItem('dinkal_user', JSON.stringify(this.user));
+      if (this.user.role === 'ADMIN' || this.user.role === 'SUPER_ADMIN') {
+        localStorage.setItem('aerosol_admin_auth', JSON.stringify(this.user));
+      }
+    }
   },
 
   formatMoney(amount) {
@@ -361,7 +423,7 @@ const AerosolWebapp = {
     });
 
     // Dynamic Login / Account status in header
-    const u = this.user || JSON.parse(localStorage.getItem('aerosol_user') || 'null');
+    const u = this.getUser();
     const authNavLinks = document.querySelectorAll('#header-auth-nav-link, .header-auth-nav-link');
     const userBtns = document.querySelectorAll('#header-user-btn, .header-user-btn');
 
@@ -378,8 +440,8 @@ const AerosolWebapp = {
       userBtns.forEach(btn => {
         btn.innerHTML = `
           <div style="display: inline-flex; align-items: center; gap: 7px;">
-            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-              ${isAdm ? 'A' : initial}
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.15); overflow: hidden;">
+              ${u.picture ? `<img src="${u.picture}" alt="${u.name}" style="width: 100%; height: 100%; object-fit: cover;">` : (isAdm ? 'A' : initial)}
             </div>
             <span style="font-size: 13px; font-weight: 600; color: var(--color-text); max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
               ${firstName}
@@ -705,7 +767,7 @@ const AerosolWebapp = {
 
   handleUserIconClick(e) {
     if (e && e.stopPropagation) e.stopPropagation();
-    const u = this.user || JSON.parse(localStorage.getItem('aerosol_user') || 'null');
+    const u = this.getUser();
     if (u && u.id) {
       this.toggleUserPopover();
     } else {
@@ -724,7 +786,7 @@ const AerosolWebapp = {
       return;
     }
 
-    const u = this.user || JSON.parse(localStorage.getItem('aerosol_user') || 'null');
+    const u = this.getUser();
     if (!u || !u.id) {
       window.location.href = '/login.html';
       return;
@@ -758,12 +820,19 @@ const AerosolWebapp = {
       <div style="width: 320px; background: #ffffff; border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: 0 16px 36px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.06); overflow: hidden; font-family: var(--font-sans); text-align: left;">
         <div style="padding: 16px 18px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-subtle);">
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-            <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              ${isAdm ? 'A' : initial}
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; border: 1.5px solid var(--color-border);">
+              ${u.picture ? `<img src="${u.picture}" alt="${u.name}" style="width: 100%; height: 100%; object-fit: cover;">` : (isAdm ? 'A' : initial)}
             </div>
             <div style="min-width: 0; flex: 1;">
-              <div style="font-size: 14px; font-weight: 700; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                ${u.name || 'User'}
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <div style="font-size: 14px; font-weight: 700; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${u.name || 'User'}
+                </div>
+                ${(u.authProviders && u.authProviders.includes('google')) || u.googleId ? `
+                  <span title="Connected with Google" style="display: inline-flex; align-items: center; flex-shrink: 0;">
+                    <svg width="12" height="12" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                  </span>
+                ` : ''}
               </div>
               <div style="font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 ${u.email || ''}
@@ -916,7 +985,26 @@ const AerosolWebapp = {
     window.location.reload();
   },
 
-  logout() {
+  async logout() {
+    try {
+      await fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('aerosol_token') || ''}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+    } catch (e) {
+      console.warn('Logout sync notice:', e);
+    }
+
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      try {
+        window.google.accounts.id.disableAutoSelect();
+      } catch (e) {}
+    }
+
     this.user = null;
     localStorage.removeItem('aerosol_user');
     localStorage.removeItem('dinkal_user');
@@ -924,8 +1012,11 @@ const AerosolWebapp = {
     localStorage.removeItem('aerosol_admin_auth');
     sessionStorage.removeItem('aerosol_admin_auth');
     this.toggleUserPopover(false);
+    this.updateHeaderBadges();
     this.showToast('Signed out successfully.');
-    window.location.href = '/index.html';
+    setTimeout(() => {
+      window.location.href = '/index.html';
+    }, 250);
   },
 
   setupGlobalEvents() {
