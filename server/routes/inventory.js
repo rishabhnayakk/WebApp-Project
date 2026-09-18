@@ -7,6 +7,8 @@ const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const productsFilePath = path.join(__dirname, '../data/products.json');
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 const getProducts = () => {
   try {
     const data = fs.readFileSync(productsFilePath, 'utf8');
@@ -27,24 +29,36 @@ const saveProducts = (products) => {
   }
 };
 
+const getStockStatus = (count, threshold) => {
+  if (count === 0) return 'Out of Stock';
+  if (count <= threshold) return 'Low Stock';
+  return 'In Stock';
+};
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
 router.get('/', (req, res) => {
   const products = getProducts();
   const totalStock = products.reduce((sum, p) => sum + (p.stockCount || 0), 0);
   const lowStockItems = products.filter((p) => (p.stockCount || 0) <= (p.lowStockThreshold || 40));
   const outOfStockItems = products.filter((p) => (p.stockCount || 0) === 0);
 
-  const inventoryLedger = products.map((p) => ({
-    id: p.id,
-    sku: p.sku,
-    name: p.name,
-    category: p.category,
-    stockCount: p.stockCount || 0,
-    lowStockThreshold: p.lowStockThreshold || 40,
-    status: (p.stockCount || 0) === 0 ? 'Out of Stock' : (p.stockCount || 0) <= (p.lowStockThreshold || 40) ? 'Low Stock' : 'In Stock',
-    unitCost: (p.price * 0.45).toFixed(2),
-    retailPrice: p.price,
-    totalValuation: ((p.stockCount || 0) * p.price).toFixed(2),
-  }));
+  const inventoryLedger = products.map((p) => {
+    const stock = p.stockCount || 0;
+    const threshold = p.lowStockThreshold || 40;
+    return {
+      id: p.id,
+      sku: p.sku,
+      name: p.name,
+      category: p.category,
+      stockCount: stock,
+      lowStockThreshold: threshold,
+      status: getStockStatus(stock, threshold),
+      unitCost: (p.price * 0.45).toFixed(2),
+      retailPrice: p.price,
+      totalValuation: (stock * p.price).toFixed(2),
+    };
+  });
 
   const totalValue = inventoryLedger.reduce((sum, item) => sum + parseFloat(item.totalValuation), 0);
 

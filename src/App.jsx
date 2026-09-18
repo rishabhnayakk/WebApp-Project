@@ -17,7 +17,58 @@ import FAQView from './views/FAQView';
 import AdminView from './views/AdminView';
 
 import { api } from './utils/api';
-import { CheckCircle2, Heart } from 'lucide-react';
+
+// ─── Hook: localStorage-backed state ─────────────────────────────────────────
+
+function usePersistedState(key, fallback) {
+  return useState(() => {
+    try {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : fallback;
+    } catch {
+      return typeof fallback === 'function' ? fallback() : fallback;
+    }
+  });
+}
+
+// ─── Default user for demo/testing ───────────────────────────────────────────
+
+const DEMO_USER = {
+  id: 'usr-101',
+  name: 'Dr. Marcus Sterling',
+  email: 'm.sterling@novaaero.com',
+  role: 'customer_b2b',
+  company: 'NovaAero Dynamics LLC',
+  tier: 'B2B Enterprise Gold',
+  phone: '+1 (206) 555-0182',
+  addresses: [
+    {
+      id: 'addr-1',
+      isDefault: true,
+      type: 'Commercial Hangar',
+      name: 'Dr. Marcus Sterling',
+      company: 'NovaAero Dynamics',
+      street: '740 Aerospace Blvd, Hangar 4B',
+      city: 'Seattle',
+      state: 'WA',
+      zip: '98108',
+    },
+  ],
+};
+
+const DEMO_CART = [
+  {
+    id: 'aero-ceramax-pro',
+    name: 'CERAMAX™ 9H Nano-Ceramic Aerosol Clear Coat',
+    sku: 'AERO-CRM-500',
+    price: 49.99,
+    quantity: 2,
+    volume: '500ml (16.9 fl oz)',
+    color: '#0284c7',
+  },
+];
+
+// ─── App ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -26,101 +77,26 @@ export default function App() {
   const [categories, setCategories] = useState(['All']);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Cart State (synced with localStorage)
-  const [cart, setCart] = useState(() => {
-    try {
-      const saved = localStorage.getItem('aerovox_cart');
-      return saved ? JSON.parse(saved) : [
-        {
-          id: 'aero-ceramax-pro',
-          name: 'CERAMAX™ 9H Nano-Ceramic Aerosol Clear Coat',
-          sku: 'AERO-CRM-500',
-          price: 49.99,
-          quantity: 2,
-          volume: '500ml (16.9 fl oz)',
-          color: '#0284c7'
-        }
-      ];
-    } catch (e) {
-      return [];
-    }
-  });
+  const [cart, setCart] = usePersistedState('aerovox_cart', DEMO_CART);
+  const [wishlist, setWishlist] = usePersistedState('aerovox_wishlist', []);
+  const [currentUser, setCurrentUser] = usePersistedState('aerovox_user', DEMO_USER);
 
-  // Wishlist State (synced with localStorage)
-  const [wishlist, setWishlist] = useState(() => {
-    try {
-      const saved = localStorage.getItem('aerovox_wishlist');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
-  });
-
-  // Auth User State (Defaults to demo B2B customer session)
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('aerovox_user');
-      return saved ? JSON.parse(saved) : {
-        id: 'usr-101',
-        name: 'Dr. Marcus Sterling',
-        email: 'm.sterling@novaaero.com',
-        role: 'customer_b2b',
-        company: 'NovaAero Dynamics LLC',
-        tier: 'B2B Enterprise Gold',
-        phone: '+1 (206) 555-0182',
-        addresses: [
-          {
-            id: 'addr-1',
-            isDefault: true,
-            type: 'Commercial Hangar',
-            name: 'Dr. Marcus Sterling',
-            company: 'NovaAero Dynamics',
-            street: '740 Aerospace Blvd, Hangar 4B',
-            city: 'Seattle',
-            state: 'WA',
-            zip: '98108',
-          }
-        ]
-      };
-    } catch (e) {
-      return null;
-    }
-  });
-
-  // UI Modal & Toast States
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Sync states to storage
-  useEffect(() => {
-    try {
-      localStorage.setItem('aerovox_cart', JSON.stringify(cart));
-    } catch (e) {}
-  }, [cart]);
+  // Sync state changes to localStorage
+  useEffect(() => { try { localStorage.setItem('aerovox_cart', JSON.stringify(cart)); } catch {} }, [cart]);
+  useEffect(() => { try { localStorage.setItem('aerovox_wishlist', JSON.stringify(wishlist)); } catch {} }, [wishlist]);
+  useEffect(() => { try { localStorage.setItem('aerovox_user', JSON.stringify(currentUser)); } catch {} }, [currentUser]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('aerovox_wishlist', JSON.stringify(wishlist));
-    } catch (e) {}
-  }, [wishlist]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('aerovox_user', JSON.stringify(currentUser));
-    } catch (e) {}
-  }, [currentUser]);
-
-  // Load products on mount
+  // Load product catalog on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [prodRes, catRes] = await Promise.all([
-          api.getProducts(),
-          api.getCategories()
-        ]);
+        const [prodRes, catRes] = await Promise.all([api.getProducts(), api.getCategories()]);
         if (prodRes.success) setProducts(prodRes.data);
         if (catRes.success) setCategories(catRes.data);
       } catch (err) {
@@ -130,7 +106,7 @@ export default function App() {
     loadData();
   }, []);
 
-  // Global Keyboard Shortcuts (e.g. Cmd+K / Ctrl+K for search)
+  // Global keyboard shortcut: Cmd/Ctrl+K → open search
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -141,6 +117,8 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // ─── Helpers ────────────────────────────────────────────────────────────────
 
   const showToast = (message) => {
     setToastMessage(message);
@@ -159,32 +137,51 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // ─── Cart Handlers ──────────────────────────────────────────────────────────
+
   const handleAddToCart = (product, quantity = 1) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
+          item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
         );
-      } else {
-        return [
-          ...prev,
-          {
-            id: product.id,
-            name: product.name,
-            sku: product.sku || 'AERO-SKU',
-            price: product.price,
-            quantity: quantity,
-            volume: product.volume,
-            color: product.color || '#0284c7',
-          },
-        ];
       }
+      return [
+        ...prev,
+        {
+          id: product.id,
+          name: product.name,
+          sku: product.sku || 'AERO-SKU',
+          price: product.price,
+          quantity,
+          volume: product.volume,
+          color: product.color || '#0284c7',
+        },
+      ];
     });
     showToast(`Added ${quantity}x "${product.name}" to cart!`);
   };
+
+  const handleUpdateCartQuantity = (id, newQty) => {
+    if (newQty <= 0) {
+      setCart((prev) => prev.filter((item) => item.id !== id));
+      return;
+    }
+    setCart((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: newQty } : item)));
+  };
+
+  const handleRemoveCartItem = (id) => {
+    setCart((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleReorder = (items = []) => {
+    setCart(items.map((item) => ({ ...item, quantity: item.quantity || 1 })));
+    setIsCartOpen(true);
+    showToast('Items loaded into cart for reorder.');
+  };
+
+  // ─── Wishlist Handlers ──────────────────────────────────────────────────────
 
   const handleAddToWishlist = (product) => {
     const exists = wishlist.some((item) => item.id === product.id);
@@ -201,25 +198,7 @@ export default function App() {
     setWishlist(wishlist.filter((item) => item.id !== productId));
   };
 
-  const handleUpdateCartQuantity = (id, newQty) => {
-    if (newQty <= 0) {
-      handleRemoveCartItem(id);
-      return;
-    }
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: newQty } : item))
-    );
-  };
-
-  const handleRemoveCartItem = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const handleReorder = (items = []) => {
-    setCart(items.map(item => ({ ...item, quantity: item.quantity || 1 })));
-    setIsCartOpen(true);
-    showToast('Items loaded into cart for reorder.');
-  };
+  // ─── Auth Handlers ──────────────────────────────────────────────────────────
 
   const handleAuthSuccess = (user) => {
     setCurrentUser(user);
@@ -229,25 +208,23 @@ export default function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     showToast('Signed out successfully.');
-    if (currentView === 'account' || currentView === 'admin') {
-      setCurrentView('home');
-    }
+    if (currentView === 'account' || currentView === 'admin') setCurrentView('home');
   };
+
+  // ─── Derived values ─────────────────────────────────────────────────────────
 
   const wishlistMap = wishlist.reduce((acc, p) => ({ ...acc, [p.id]: true }), {});
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  // ─── Render ─────────────────────────────────────────────────────────────────
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="toast">
-          {toastMessage}
-        </div>
-      )}
 
-      {/* Global Header */}
+      {/* Toast notification */}
+      {toastMessage && <div className="toast">{toastMessage}</div>}
+
+      {/* Header */}
       <Header
         currentView={currentView}
         onNavigate={handleNavigate}
@@ -261,7 +238,7 @@ export default function App() {
         categories={categories}
       />
 
-      {/* Main View Router */}
+      {/* Main view router */}
       <main style={{ flex: 1 }}>
         {currentView === 'home' && (
           <HomeView
@@ -324,16 +301,13 @@ export default function App() {
         )}
 
         {currentView === 'track' && (
-          <OrderTrackingView
-            currentUser={currentUser}
-            onNavigate={handleNavigate}
-          />
+          <OrderTrackingView currentUser={currentUser} onNavigate={handleNavigate} />
         )}
 
         {currentView === 'account' && (
           <AccountView
             currentUser={currentUser}
-            orders={[]}  
+            orders={[]}
             wishlist={wishlist}
             onNavigate={handleNavigate}
             onSelectProduct={handleSelectProduct}
@@ -341,31 +315,16 @@ export default function App() {
           />
         )}
 
-        {currentView === 'about' && (
-          <AboutView
-            onNavigate={handleNavigate}
-          />
-        )}
-
-        {currentView === 'contact' && (
-          <ContactView />
-        )}
-
-        {currentView === 'faq' && (
-          <FAQView />
-        )}
-
-        {currentView === 'admin' && (
-          <AdminView
-            onBackToStorefront={() => handleNavigate('home')}
-          />
-        )}
+        {currentView === 'about' && <AboutView onNavigate={handleNavigate} />}
+        {currentView === 'contact' && <ContactView />}
+        {currentView === 'faq' && <FAQView />}
+        {currentView === 'admin' && <AdminView onBackToStorefront={() => handleNavigate('home')} />}
       </main>
 
       {/* Global Footer */}
       <Footer onNavigate={handleNavigate} />
 
-      {/* Slide-out Cart Drawer */}
+      {/* Cart drawer */}
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -377,7 +336,7 @@ export default function App() {
         setAppliedCoupon={setAppliedCoupon}
       />
 
-      {/* Predictive Search Modal */}
+      {/* Search modal */}
       <SearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -386,13 +345,12 @@ export default function App() {
         onSearchAll={(term) => handleNavigate('shop', { search: term })}
       />
 
-      {/* Authentication Modal */}
+      {/* Auth modal */}
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
         onAuthSuccess={handleAuthSuccess}
       />
-
     </div>
   );
 }

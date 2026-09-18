@@ -1,231 +1,71 @@
 const API_BASE = '/api/v1';
 
+// ─── Generic fetch wrapper ────────────────────────────────────────────────────
+
+const request = async (path, options = {}) => {
+  const res = await fetch(`${API_BASE}${path}`, options);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Request failed: ${path}`);
+  }
+  return res.json();
+};
+
+const get = (path) => request(path);
+
+const post = (path, body) =>
+  request(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+const put = (path, body) =>
+  request(path, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+const del = (path) => request(path, { method: 'DELETE' });
+
+// ─── API Methods ──────────────────────────────────────────────────────────────
+
 export const api = {
   // Products
-  async getProducts(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_BASE}/products?${query}`);
-    if (!res.ok) throw new Error('Failed to fetch products');
-    return res.json();
-  },
-
-  async getCategories() {
-    const res = await fetch(`${API_BASE}/products/categories`);
-    if (!res.ok) throw new Error('Failed to fetch categories');
-    return res.json();
-  },
-
-  async getProductById(id) {
-    const res = await fetch(`${API_BASE}/products/${id}`);
-    if (!res.ok) throw new Error('Product not found');
-    return res.json();
-  },
-
-  async createProduct(productData) {
-    const res = await fetch(`${API_BASE}/products`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData),
-    });
-    if (!res.ok) throw new Error('Failed to create product SKU');
-    return res.json();
-  },
-
-  async updateProduct(id, productData) {
-    const res = await fetch(`${API_BASE}/products/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData),
-    });
-    if (!res.ok) throw new Error('Failed to update product');
-    return res.json();
-  },
-
-  async deleteProduct(id) {
-    const res = await fetch(`${API_BASE}/products/${id}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) throw new Error('Failed to delete product');
-    return res.json();
-  },
+  getProducts: (params = {}) => get(`/products?${new URLSearchParams(params)}`),
+  getCategories: () => get('/products/categories'),
+  getProductById: (id) => get(`/products/${id}`),
+  createProduct: (data) => post('/products', data),
+  updateProduct: (id, data) => put(`/products/${id}`, data),
+  deleteProduct: (id) => del(`/products/${id}`),
 
   // Orders
-  async createOrder(orderPayload) {
-    const res = await fetch(`${API_BASE}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderPayload),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Failed to place order');
-    }
-    return res.json();
-  },
+  createOrder: (payload) => post('/orders', payload),
+  getOrders: (email = '') => get(`/orders${email ? `?email=${encodeURIComponent(email)}` : ''}`),
+  trackOrder: (id) => get(`/orders/${encodeURIComponent(id)}`),
+  updateOrderStatus: (id, status) => put(`/orders/${encodeURIComponent(id)}/status`, { status }),
+  validateCoupon: (code, subtotal) => post('/orders/validate-coupon', { code, subtotal }),
 
-  async validateCoupon(code, subtotal) {
-    const res = await fetch(`${API_BASE}/orders/validate-coupon`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, subtotal }),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Invalid coupon code');
-    }
-    return res.json();
-  },
-
-  async getOrders(email = '') {
-    const query = email ? `?email=${encodeURIComponent(email)}` : '';
-    const res = await fetch(`${API_BASE}/orders${query}`);
-    if (!res.ok) throw new Error('Failed to fetch orders');
-    return res.json();
-  },
-
-  async trackOrder(orderOrTrackingId) {
-    const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(orderOrTrackingId)}`);
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Tracking ID or order not found');
-    }
-    return res.json();
-  },
-
-  async updateOrderStatus(orderId, status) {
-    const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(orderId)}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    });
-    if (!res.ok) throw new Error('Failed to update order status');
-    return res.json();
-  },
-
-  // Customer Reviews
-  async getReviews(productId = '') {
-    const query = productId ? `?productId=${encodeURIComponent(productId)}` : '';
-    const res = await fetch(`${API_BASE}/reviews${query}`);
-    if (!res.ok) throw new Error('Failed to fetch reviews');
-    return res.json();
-  },
-
-  async submitReview(reviewData) {
-    const res = await fetch(`${API_BASE}/reviews`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(reviewData),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Failed to submit review');
-    }
-    return res.json();
-  },
-
-  async voteReviewHelpful(reviewId) {
-    const res = await fetch(`${API_BASE}/reviews/${reviewId}/vote`, {
-      method: 'POST',
-    });
-    if (!res.ok) throw new Error('Failed to vote review');
-    return res.json();
-  },
-
-  async deleteReview(reviewId) {
-    const res = await fetch(`${API_BASE}/reviews/${reviewId}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) throw new Error('Failed to delete review');
-    return res.json();
-  },
+  // Reviews
+  getReviews: (productId = '') => get(`/reviews${productId ? `?productId=${encodeURIComponent(productId)}` : ''}`),
+  submitReview: (data) => post('/reviews', data),
+  voteReviewHelpful: (id) => post(`/reviews/${id}/vote`, {}),
+  deleteReview: (id) => del(`/reviews/${id}`),
 
   // Inventory
-  async getInventory() {
-    const res = await fetch(`${API_BASE}/inventory`);
-    if (!res.ok) throw new Error('Failed to fetch inventory');
-    return res.json();
-  },
-
-  async updateStock(productId, stockPayload) {
-    const res = await fetch(`${API_BASE}/inventory/${productId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(stockPayload),
-    });
-    if (!res.ok) throw new Error('Failed to update stock');
-    return res.json();
-  },
+  getInventory: () => get('/inventory'),
+  updateStock: (productId, payload) => put(`/inventory/${productId}`, payload),
 
   // Auth & Profile
-  async login(email, password) {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Login failed');
-    }
-    return res.json();
-  },
+  login: (email, password) => post('/auth/login', { email, password }),
+  register: (data) => post('/auth/register', data),
+  updateProfile: (data) => put('/auth/profile', data),
+  addAddress: (userId, address) => post('/auth/addresses', { userId, address }),
+  saveAddresses: (email, addresses) => put('/auth/addresses', { email, addresses }),
 
-  async register(userData) {
-    const res = await fetch(`${API_BASE}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Registration failed');
-    }
-    return res.json();
-  },
-
-  async updateProfile(profileData) {
-    const res = await fetch(`${API_BASE}/auth/profile`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profileData),
-    });
-    if (!res.ok) throw new Error('Failed to update profile');
-    return res.json();
-  },
-
-  async addAddress(userId, address) {
-    const res = await fetch(`${API_BASE}/auth/addresses`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, address }),
-    });
-    if (!res.ok) throw new Error('Failed to save address');
-    return res.json();
-  },
-
-  // Analytics & Custom Quotes
-  async getStats() {
-    const res = await fetch(`${API_BASE}/analytics/stats`);
-    if (!res.ok) throw new Error('Failed to fetch stats');
-    return res.json();
-  },
-
-  async submitCustomQuote(quoteData) {
-    const res = await fetch(`${API_BASE}/analytics/custom-quote`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(quoteData),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Failed to submit quote');
-    }
-    return res.json();
-  },
-
-  async getQuotes() {
-    const res = await fetch(`${API_BASE}/analytics/quotes`);
-    if (!res.ok) throw new Error('Failed to fetch quotes');
-    return res.json();
-  }
+  // Analytics & Quotes
+  getStats: () => get('/analytics/stats'),
+  getQuotes: () => get('/analytics/quotes'),
+  submitCustomQuote: (data) => post('/analytics/custom-quote', data),
 };

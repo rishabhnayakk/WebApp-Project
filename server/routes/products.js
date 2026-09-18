@@ -7,6 +7,8 @@ const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const productsFilePath = path.join(__dirname, '../data/products.json');
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 const getProducts = () => {
   try {
     const data = fs.readFileSync(productsFilePath, 'utf8');
@@ -27,28 +29,28 @@ const saveProducts = (products) => {
   }
 };
 
-// List products with optional search and filtering
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
+// List products with optional search, filtering, sorting & pagination
 router.get('/', (req, res) => {
-  const { 
-    category, 
-    search, 
-    minPrice, 
-    maxPrice, 
-    propellant, 
-    volume, 
-    inStockOnly, 
+  const {
+    category,
+    search,
+    minPrice,
+    maxPrice,
+    propellant,
+    volume,
+    inStockOnly,
     minRating,
-    sort, 
-    page = 1, 
-    limit = 20 
+    sort,
+    page = 1,
+    limit = 20,
   } = req.query;
 
   let products = getProducts();
 
   if (category && category !== 'All') {
-    products = products.filter((p) =>
-      p.category.toLowerCase().includes(category.toLowerCase())
-    );
+    products = products.filter((p) => p.category.toLowerCase().includes(category.toLowerCase()));
   }
 
   if (search) {
@@ -64,68 +66,48 @@ router.get('/', (req, res) => {
     );
   }
 
-  if (minPrice) {
-    products = products.filter((p) => p.price >= parseFloat(minPrice));
-  }
-  if (maxPrice) {
-    products = products.filter((p) => p.price <= parseFloat(maxPrice));
-  }
+  if (minPrice) products = products.filter((p) => p.price >= parseFloat(minPrice));
+  if (maxPrice) products = products.filter((p) => p.price <= parseFloat(maxPrice));
 
   if (propellant && propellant !== 'All') {
-    products = products.filter((p) => 
-      p.propellant.toLowerCase().includes(propellant.toLowerCase())
-    );
+    products = products.filter((p) => p.propellant.toLowerCase().includes(propellant.toLowerCase()));
   }
 
   if (volume && volume !== 'All') {
-    products = products.filter((p) => 
-      p.volume.toLowerCase().includes(volume.toLowerCase()) ||
-      p.availableSizes?.some((s) => s.toLowerCase().includes(volume.toLowerCase()))
+    products = products.filter(
+      (p) =>
+        p.volume.toLowerCase().includes(volume.toLowerCase()) ||
+        p.availableSizes?.some((s) => s.toLowerCase().includes(volume.toLowerCase()))
     );
   }
 
-  if (inStockOnly === 'true') {
-    products = products.filter((p) => p.inStock && p.stockCount > 0);
-  }
+  if (inStockOnly === 'true') products = products.filter((p) => p.inStock && p.stockCount > 0);
+  if (minRating) products = products.filter((p) => p.rating >= parseFloat(minRating));
 
-  if (minRating) {
-    products = products.filter((p) => p.rating >= parseFloat(minRating));
-  }
-
-  if (sort === 'price-low') {
-    products.sort((a, b) => a.price - b.price);
-  } else if (sort === 'price-high') {
-    products.sort((a, b) => b.price - a.price);
-  } else if (sort === 'rating') {
-    products.sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount);
-  } else if (sort === 'reviews') {
-    products.sort((a, b) => b.reviewCount - a.reviewCount);
-  } else if (sort === 'newest') {
-    products.sort((a, b) => b.id.localeCompare(a.id));
-  }
+  if (sort === 'price-low') products.sort((a, b) => a.price - b.price);
+  else if (sort === 'price-high') products.sort((a, b) => b.price - a.price);
+  else if (sort === 'rating') products.sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount);
+  else if (sort === 'reviews') products.sort((a, b) => b.reviewCount - a.reviewCount);
+  else if (sort === 'newest') products.sort((a, b) => b.id.localeCompare(a.id));
 
   const totalResults = products.length;
   const pageNum = parseInt(page, 10);
   const limitNum = parseInt(limit, 10);
   const startIndex = (pageNum - 1) * limitNum;
-  const paginatedProducts = products.slice(startIndex, startIndex + limitNum);
 
   res.json({
     success: true,
     count: totalResults,
     page: pageNum,
     totalPages: Math.ceil(totalResults / limitNum) || 1,
-    data: paginatedProducts,
+    data: products.slice(startIndex, startIndex + limitNum),
   });
 });
 
 router.get('/categories', (req, res) => {
   const products = getProducts();
   const categories = ['All', ...new Set(products.map((p) => p.category))];
-  res.json({
-    success: true,
-    data: categories,
-  });
+  res.json({ success: true, data: categories });
 });
 
 router.get('/:id', (req, res) => {
@@ -139,10 +121,7 @@ router.get('/:id', (req, res) => {
     return res.status(404).json({ success: false, message: 'Product not found' });
   }
 
-  const related = products
-    .filter((p) => p.id !== product.id && p.category === product.category)
-    .slice(0, 3);
-
+  const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 3);
   res.json({ success: true, data: product, related });
 });
 
@@ -175,7 +154,6 @@ router.post('/', (req, res) => {
 
   products.unshift(created);
   saveProducts(products);
-
   res.status(201).json({ success: true, message: 'Product created successfully', data: created });
 });
 
@@ -189,21 +167,17 @@ router.put('/:id', (req, res) => {
 
   products[index] = { ...products[index], ...req.body };
   saveProducts(products);
-
   res.json({ success: true, message: 'Product updated successfully', data: products[index] });
 });
 
 router.delete('/:id', (req, res) => {
   let products = getProducts();
-  const exists = products.some((p) => p.id === req.params.id);
-
-  if (!exists) {
+  if (!products.some((p) => p.id === req.params.id)) {
     return res.status(404).json({ success: false, message: 'Product not found' });
   }
 
   products = products.filter((p) => p.id !== req.params.id);
   saveProducts(products);
-
   res.json({ success: true, message: 'Product deleted successfully' });
 });
 

@@ -5,6 +5,8 @@ const attempts = new Map();
 const idempotencyStore = new Map();
 const logFile = path.join(process.cwd(), 'server', 'data', 'audit_logs.json');
 
+// ─── Rate Limiter ─────────────────────────────────────────────────────────────
+
 export const rateLimiter = (maxAttempts = 10, windowMs = 60 * 1000) => {
   return (req, res, next) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
@@ -13,8 +15,7 @@ export const rateLimiter = (maxAttempts = 10, windowMs = 60 * 1000) => {
 
     let record = attempts.get(key);
     if (!record || now - record.startTime > windowMs) {
-      record = { count: 1, startTime: now };
-      attempts.set(key, record);
+      attempts.set(key, { count: 1, startTime: now });
       return next();
     }
 
@@ -23,7 +24,7 @@ export const rateLimiter = (maxAttempts = 10, windowMs = 60 * 1000) => {
       logAudit('RATE_LIMIT_EXCEEDED', { ip, path: req.path, count: record.count });
       return res.status(429).json({
         success: false,
-        message: 'Too many requests. Please wait a moment before trying again.'
+        message: 'Too many requests. Please wait a moment before trying again.',
       });
     }
 
@@ -31,15 +32,19 @@ export const rateLimiter = (maxAttempts = 10, windowMs = 60 * 1000) => {
   };
 };
 
+// ─── URL Sanitization ─────────────────────────────────────────────────────────
+
+/** Validates that a redirect URL is internal (not an open redirect). */
 export const sanitizeRedirectUrl = (targetUrl, fallback = '/account.html') => {
   if (!targetUrl || typeof targetUrl !== 'string') return fallback;
   const trimmed = targetUrl.trim();
-  // Prevent open redirect to external domains
   if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.includes('://')) {
     return trimmed;
   }
   return fallback;
 };
+
+// ─── Idempotency Lock ─────────────────────────────────────────────────────────
 
 export const idempotencyLock = (req, res, next) => {
   const key = req.headers['x-idempotency-key'] || req.body?.idempotencyKey;
@@ -48,10 +53,7 @@ export const idempotencyLock = (req, res, next) => {
   const existing = idempotencyStore.get(key);
   if (existing) {
     if (existing.status === 'processing') {
-      return res.status(409).json({
-        success: false,
-        message: 'Request is already processing. Please wait.'
-      });
+      return res.status(409).json({ success: false, message: 'Request is already processing. Please wait.' });
     }
     if (existing.status === 'completed') {
       return res.json(existing.response);
@@ -69,12 +71,14 @@ export const idempotencyLock = (req, res, next) => {
   next();
 };
 
+// ─── Audit Logging ────────────────────────────────────────────────────────────
+
 export const logAudit = (eventType, details = {}) => {
   const logEntry = {
     id: `audit-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
     eventType,
     details,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   console.log(`[audit] ${logEntry.timestamp} | ${eventType}:`, details);

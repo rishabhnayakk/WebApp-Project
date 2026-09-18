@@ -1,8 +1,12 @@
+// ─── AerosolWebapp Global State ───────────────────────────────────────────────
+
 const AerosolWebapp = {
   cart: JSON.parse(localStorage.getItem('aerosol_cart') || localStorage.getItem('dinkal_cart') || '[]'),
   wishlist: JSON.parse(localStorage.getItem('aerosol_wishlist') || localStorage.getItem('dinkal_wishlist') || '[]'),
   user: JSON.parse(localStorage.getItem('aerosol_user') || localStorage.getItem('dinkal_user') || 'null'),
   appliedCoupon: null,
+
+  // ─── Auth ──────────────────────────────────────────────────────────────────
 
   getUser() {
     if (this.user && this.user.id) return this.user;
@@ -77,6 +81,8 @@ const AerosolWebapp = {
     }
     return null;
   },
+
+  // ─── Persistence ───────────────────────────────────────────────────────────
 
   saveCart() {
     localStorage.setItem('aerosol_cart', JSON.stringify(this.cart));
@@ -482,6 +488,8 @@ const AerosolWebapp = {
     }
   },
 
+  // ─── Cart Operations ───────────────────────────────────────────────────────
+
   addToCart(product, qty = 1, showToastMsg = true) {
     const existing = this.cart.find(item => item.id === product.id);
     if (existing) {
@@ -520,6 +528,8 @@ const AerosolWebapp = {
     }
   },
 
+  // ─── Wishlist Operations ──────────────────────────────────────────────────
+
   toggleWishlist(product) {
     const idx = this.wishlist.findIndex(w => w.id === product.id);
     if (idx >= 0) {
@@ -531,6 +541,8 @@ const AerosolWebapp = {
     }
     this.saveWishlist();
   },
+
+  // ─── UI: Toast & Overlays ─────────────────────────────────────────────────
 
   showToast(msg) {
     let container = document.getElementById('toast-container');
@@ -696,6 +708,8 @@ const AerosolWebapp = {
     this.renderCartDrawer();
   },
 
+  // ─── UI: Search ───────────────────────────────────────────────────────────
+
   toggleSearch(open) {
     const modal = document.getElementById('search-modal');
     if (!modal) return;
@@ -764,6 +778,8 @@ const AerosolWebapp = {
       `}
     `;
   },
+
+  // ─── UI: User Popover ─────────────────────────────────────────────────────
 
   handleUserIconClick(e) {
     if (e && e.stopPropagation) e.stopPropagation();
@@ -904,6 +920,8 @@ const AerosolWebapp = {
     `;
   },
 
+  // ─── Auth Modal ────────────────────────────────────────────────────────────
+
   openAuthModal(redirectUrl = '') {
     let modal = document.getElementById('auth-modal');
     if (!modal) {
@@ -955,6 +973,8 @@ const AerosolWebapp = {
     const modal = document.getElementById('auth-modal');
     if (modal) modal.style.display = 'none';
   },
+
+  // ─── Demo & Logout ─────────────────────────────────────────────────────────
 
   loginDemo(email, name, role, tier, comp) {
     this.user = {
@@ -1019,6 +1039,8 @@ const AerosolWebapp = {
     }, 250);
   },
 
+  // ─── Global Events ─────────────────────────────────────────────────────────
+
   setupGlobalEvents() {
     window.addEventListener('scroll', () => {
       const header = document.querySelector('.site-header');
@@ -1047,6 +1069,8 @@ const AerosolWebapp = {
       }
     });
   },
+
+  // ─── SVG / Visual Helpers ─────────────────────────────────────────────────
 
   renderCanister(color = '#1e3a5f', height = 140, label = '') {
     const w = Math.round(height * 0.38);

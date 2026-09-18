@@ -7,6 +7,8 @@ const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const productsFilePath = path.join(__dirname, '../data/products.json');
 
+// ─── Sample B2B Quotes (in-memory store) ─────────────────────────────────────
+
 const b2bQuotes = [
   {
     id: 'QUOTE-9041',
@@ -33,21 +35,35 @@ const b2bQuotes = [
     totalEstimate: '₹10,25,000',
     requestedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
     status: 'Quote Sent',
-  }
+  },
 ];
 
-router.get('/stats', (req, res) => {
-  let products = [];
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const getProducts = () => {
   try {
     const data = fs.readFileSync(productsFilePath, 'utf8');
-    products = JSON.parse(data);
+    return JSON.parse(data);
   } catch (err) {
     console.error('Error reading products:', err);
+    return [];
   }
+};
 
+/** Returns per-unit price based on order quantity tier. */
+const getUnitRate = (qty) => {
+  if (qty >= 10000) return 320;
+  if (qty >= 5000) return 380;
+  if (qty >= 2500) return 410;
+  return 450;
+};
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
+router.get('/stats', (req, res) => {
+  const products = getProducts();
   const totalInventory = products.reduce((acc, p) => acc + (p.stockCount || 0), 0);
   const avgRating = (products.reduce((acc, p) => acc + p.rating, 0) / (products.length || 1)).toFixed(2);
-  const totalSkus = products.length;
 
   res.json({
     success: true,
@@ -56,7 +72,7 @@ router.get('/stats', (req, res) => {
       monthlyGrowth: '+28.4%',
       canistersFilledMtd: '42,850 units',
       inventoryAvailable: totalInventory,
-      activeSkus: totalSkus,
+      activeSkus: products.length,
       avgCustomerSatisfaction: `${avgRating} / 5.0`,
       lowVocComplianceRate: '100% CARB & EU Compliant',
       activeB2BContracts: 38,
@@ -67,32 +83,14 @@ router.get('/stats', (req, res) => {
 });
 
 router.post('/custom-quote', (req, res) => {
-  const {
-    company,
-    contactName,
-    email,
-    phone,
-    canisterSize,
-    propellant,
-    valveType,
-    quantity,
-    specialRequirements,
-  } = req.body;
+  const { company, contactName, email, phone, canisterSize, propellant, valveType, quantity, specialRequirements } = req.body;
 
   if (!company || !email || !quantity) {
-    return res.status(400).json({
-      success: false,
-      message: 'Company, contact email, and quantity are required.',
-    });
+    return res.status(400).json({ success: false, message: 'Company, contact email, and quantity are required.' });
   }
 
   const qty = parseInt(quantity, 10) || 1000;
-  
-  let baseUnit = 450;
-  if (qty >= 10000) baseUnit = 320;
-  else if (qty >= 5000) baseUnit = 380;
-  else if (qty >= 2500) baseUnit = 410;
-
+  const baseUnit = getUnitRate(qty);
   const total = baseUnit * qty;
   const quoteId = `QUOTE-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -113,7 +111,6 @@ router.post('/custom-quote', (req, res) => {
   };
 
   b2bQuotes.unshift(newQuote);
-
   res.status(201).json({
     success: true,
     message: 'Quote request submitted successfully. Our team will review your specifications.',
@@ -122,11 +119,7 @@ router.post('/custom-quote', (req, res) => {
 });
 
 router.get('/quotes', (req, res) => {
-  res.json({
-    success: true,
-    count: b2bQuotes.length,
-    data: b2bQuotes,
-  });
+  res.json({ success: true, count: b2bQuotes.length, data: b2bQuotes });
 });
 
 export default router;

@@ -7,6 +7,8 @@ const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const reviewsFilePath = path.join(__dirname, '../data/reviews.json');
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 const getReviews = () => {
   try {
     const data = fs.readFileSync(reviewsFilePath, 'utf8');
@@ -27,20 +29,18 @@ const saveReviews = (reviews) => {
   }
 };
 
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
 router.get('/', (req, res) => {
   const { productId } = req.query;
   let reviews = getReviews();
 
-  if (productId) {
-    reviews = reviews.filter((r) => r.productId === productId);
-  }
+  if (productId) reviews = reviews.filter((r) => r.productId === productId);
 
   const total = reviews.length;
   const avgRating = total ? (reviews.reduce((sum, r) => sum + r.rating, 0) / total).toFixed(1) : 5.0;
   const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-  reviews.forEach((r) => {
-    if (counts[r.rating] !== undefined) counts[r.rating]++;
-  });
+  reviews.forEach((r) => { if (counts[r.rating] !== undefined) counts[r.rating]++; });
 
   res.json({
     success: true,
@@ -77,25 +77,17 @@ router.post('/', (req, res) => {
 
   reviews.unshift(newReview);
   saveReviews(reviews);
-
-  res.status(201).json({
-    success: true,
-    message: 'Thanks for submitting your review!',
-    data: newReview,
-  });
+  res.status(201).json({ success: true, message: 'Thanks for submitting your review!', data: newReview });
 });
 
 router.post('/:id/vote', (req, res) => {
   const reviews = getReviews();
   const review = reviews.find((r) => r.id === req.params.id);
 
-  if (!review) {
-    return res.status(404).json({ success: false, message: 'Review not found' });
-  }
+  if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
 
   review.helpfulCount = (review.helpfulCount || 0) + 1;
   saveReviews(reviews);
-
   res.json({ success: true, message: 'Helpful vote recorded', data: review });
 });
 

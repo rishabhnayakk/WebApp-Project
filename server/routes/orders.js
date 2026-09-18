@@ -8,6 +8,8 @@ const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const productsFilePath = path.join(__dirname, '../data/products.json');
 
+// ─── Sample Orders (in-memory store) ─────────────────────────────────────────
+
 const orders = [
   {
     id: 'AERO-99420',
@@ -76,7 +78,7 @@ const orders = [
       { status: 'Out for Delivery', time: 'Aug 28, 9:00 AM', completed: true },
       { status: 'Delivered', time: 'Aug 28, 2:18 PM', completed: true },
     ],
-  }
+  },
 ];
 
 const PROMO_CODES = {
@@ -86,8 +88,27 @@ const PROMO_CODES = {
   'VIPAERO': { discountPercent: 25, minSpend: 25000, desc: '25% VIP Industrial Access' },
 };
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const toNum = (v) => Number(v) || 0;
+
+const generateOrderId = () => `AERO-${Math.floor(10000 + Math.random() * 90000)}`;
+const generateTrackingNumber = () => `TRK-AERO-${Math.floor(1000000 + Math.random() * 9000000)}-IN`;
+
+const buildOrderTimeline = () => [
+  { status: 'Order Placed', time: 'Just now', completed: true },
+  { status: 'Quality Inspection & Packing', time: 'Scheduled today', completed: false },
+  { status: 'Picked Up by Courier', time: 'Scheduled tomorrow', completed: false },
+  { status: 'In Transit', time: 'Pending', completed: false },
+  { status: 'Out for Delivery', time: 'Pending', completed: false },
+  { status: 'Delivered', time: 'Pending', completed: false },
+];
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
 router.post('/validate-coupon', (req, res) => {
   const { code, subtotal = 0 } = req.body;
+
   if (!code) {
     return res.status(400).json({ success: false, message: 'Promo code required' });
   }
@@ -104,29 +125,20 @@ router.post('/validate-coupon', (req, res) => {
     });
   }
 
-  res.json({
-    success: true,
-    data: {
-      code: code.toUpperCase().trim(),
-      ...promo,
-    },
-  });
+  res.json({ success: true, data: { code: code.toUpperCase().trim(), ...promo } });
 });
 
 router.post('/', idempotencyLock, (req, res) => {
   const { customer, items, subtotal, discount = 0, shipping = 0, tax = 0, paymentMethod, couponCode } = req.body;
 
   if (!customer || !customer.email || !items || !items.length) {
-    return res.status(400).json({
-      success: false,
-      message: 'Customer details and cart items are required.',
-    });
+    return res.status(400).json({ success: false, message: 'Customer details and cart items are required.' });
   }
 
+  // Deduct inventory
   try {
     const productsData = fs.readFileSync(productsFilePath, 'utf8');
     const products = JSON.parse(productsData);
-
     for (const item of items) {
       const prod = products.find((p) => p.id === item.id);
       if (prod) {
@@ -139,57 +151,38 @@ router.post('/', idempotencyLock, (req, res) => {
     console.error('Error updating inventory for order:', err);
   }
 
-  const newOrderId = `AERO-${Math.floor(10000 + Math.random() * 90000)}`;
-  const trackingNumber = `TRK-AERO-${Math.floor(1000000 + Math.random() * 9000000)}-IN`;
-  const grandTotal = Math.max(0, Number(subtotal) - Number(discount) + Number(shipping) + Number(tax));
+  const grandTotal = Math.max(0, toNum(subtotal) - toNum(discount) + toNum(shipping) + toNum(tax));
 
   const newOrder = {
-    id: newOrderId,
+    id: generateOrderId(),
     customer,
     items,
-    subtotal: Number(subtotal),
-    discount: Number(discount),
-    shipping: Number(shipping),
-    tax: Number(tax),
+    subtotal: toNum(subtotal),
+    discount: toNum(discount),
+    shipping: toNum(shipping),
+    tax: toNum(tax),
     total: Number(grandTotal.toFixed(2)),
     paymentMethod: paymentMethod || 'Online Payment',
     paymentStatus: paymentMethod === 'invoice' ? 'Net-30 Authorized' : 'Paid',
     couponCode: couponCode || null,
     status: 'Processing',
-    trackingNumber,
+    trackingNumber: generateTrackingNumber(),
     carrier: 'Express Air Freight',
     placedAt: new Date().toISOString(),
     estimatedDelivery: new Date(Date.now() + 86400000 * 3).toISOString(),
-    timeline: [
-      { status: 'Order Placed', time: 'Just now', completed: true },
-      { status: 'Quality Inspection & Packing', time: 'Scheduled today', completed: false },
-      { status: 'Picked Up by Courier', time: 'Scheduled tomorrow', completed: false },
-      { status: 'In Transit', time: 'Pending', completed: false },
-      { status: 'Out for Delivery', time: 'Pending', completed: false },
-      { status: 'Delivered', time: 'Pending', completed: false },
-    ],
+    timeline: buildOrderTimeline(),
   };
 
   orders.unshift(newOrder);
-
-  res.status(201).json({
-    success: true,
-    message: 'Order placed successfully.',
-    data: newOrder,
-  });
+  res.status(201).json({ success: true, message: 'Order placed successfully.', data: newOrder });
 });
 
 router.get('/', (req, res) => {
   const { email } = req.query;
-  let result = orders;
-  if (email) {
-    result = orders.filter((o) => o.customer.email.toLowerCase() === email.toLowerCase());
-  }
-  res.json({
-    success: true,
-    count: result.length,
-    data: result,
-  });
+  const result = email
+    ? orders.filter((o) => o.customer.email.toLowerCase() === email.toLowerCase())
+    : orders;
+  res.json({ success: true, count: result.length, data: result });
 });
 
 router.get('/:id', (req, res) => {
@@ -198,10 +191,7 @@ router.get('/:id', (req, res) => {
     (o) => o.id.toLowerCase() === q || o.trackingNumber.toLowerCase() === q
   );
 
-  if (!order) {
-    return res.status(404).json({ success: false, message: 'Order not found' });
-  }
-
+  if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
   res.json({ success: true, data: order });
 });
 
@@ -209,9 +199,7 @@ router.put('/:id/status', (req, res) => {
   const { status } = req.body;
   const order = orders.find((o) => o.id.toLowerCase() === req.params.id.toLowerCase());
 
-  if (!order) {
-    return res.status(404).json({ success: false, message: 'Order not found' });
-  }
+  if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
   order.status = status;
   res.json({ success: true, message: `Order status updated to ${status}`, data: order });
